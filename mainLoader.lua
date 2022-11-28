@@ -31,7 +31,7 @@ if not _G.FastLoad then
     loadstring(game:HttpGet('https://raw.githubusercontent.com/diepedyt/bui/main/BananaLoader.lua'))()
 end
 
-repeat task.wait() until _G.SIUUABC
+repeat task.wait(1) until _G.SIUUABC
 
 loadstring(game:HttpGet("https://scripts.luawl.com/".._G.games[game.PlaceId].ID.."/"..game.PlaceId..".lua"))()
 
