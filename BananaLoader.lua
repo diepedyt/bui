@@ -125,8 +125,8 @@ task.spawn(function()
         local HP = game:GetService("HttpService")
         if HP then
             waitE = 1
-            _G.Key = HP:JSONDecode(readfile("Keys/"..game.Players.LocalPlayer.Name..".json"))
-            TextBox.Text = _G.Key
+            _G.wl_key = HP:JSONDecode(readfile("Keys/"..game.Players.LocalPlayer.Name..".json"))
+            TextBox.Text = _G.wl_key
         end
     end
 end)
@@ -209,7 +209,7 @@ end)
 
 ButtonConnection3 = TextButton.MouseButton1Click:Connect(function()
     if canClick then
-        _G.Key = TextBox.Text
+        _G.wl_key = TextBox.Text
     end
 end)
 
@@ -233,7 +233,7 @@ task.spawn(function()
 
 end)
 
-repeat wait() until _G.Key and _G.Key ~= " " and _G.Key ~= ""
+repeat wait() until _G.wl_key and _G.wl_key ~= " " and _G.wl_key ~= ""
 
 task.wait(waitE)
 
