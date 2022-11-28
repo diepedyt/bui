@@ -35,3 +35,15 @@ repeat task.wait(1) until _G.SIUUABC
 
 loadstring(game:HttpGet("https://scripts.luawl.com/".._G.games[game.PlaceId].ID.."/"..game.PlaceId..".lua"))()
 
+repeat task.wait(1) until _G.Settings
+
+if makefolder and isfolder and writefile and readfile and _G.wl_key then
+    if not isfolder("Keys") then
+        makefolder("Keys")
+    end
+    local HP = game:GetService("HttpService")
+    if HP then
+        writefile("Keys/"..game.Players.LocalPlayer.Name..".json",HP:JSONEncode(_G.wl_key))
+    end
+end
+
