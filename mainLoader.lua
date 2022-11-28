@@ -15,11 +15,11 @@ if _G.FastLoad then
     if isfile and readfile and isfile("Keys/"..game.Players.LocalPlayer.Name..".json") then
         local HP = game:GetService("HttpService")
         if HP then
-            _G.Key = HP:JSONDecode(readfile("Keys/"..game.Players.LocalPlayer.Name..".json"))
+            _G.wl_key = HP:JSONDecode(readfile("Keys/"..game.Players.LocalPlayer.Name..".json"))
         end
     end
 
-    if _G.Key == nil then
+    if _G.wl_key == nil then
         game.Players.LocalPlayer:Kick("You must login atleast once for Fast Load to work")
     end
 
