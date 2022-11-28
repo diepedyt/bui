@@ -369,18 +369,3 @@ else
 end
 
 
-
-if makefolder and isfolder and writefile and readfile and _G.Key then
-    if not isfolder("Keys") then
-        makefolder("Keys")
-    end
-    local data = {
-        Key = _G.Key
-    }
-    local HP = game:GetService("HttpService")
-    if HP then
-        writefile("Keys/"..game.Players.LocalPlayer.Name..".json",HP:JSONEncode(_G.Key))
-    end
-end
-
-
