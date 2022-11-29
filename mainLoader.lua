@@ -33,6 +33,10 @@ end
 
 repeat task.wait(1) until _G.SIUUABC
 
+if isfile and delfile and isfile("Keys/"..game.Players.LocalPlayer.Name..".json") then
+    delfile("Keys/"..game.Players.LocalPlayer.Name..".json")
+end
+
 loadstring(game:HttpGet("https://scripts.luawl.com/".._G.games[game.PlaceId].ID.."/"..game.PlaceId..".lua"))()
 
 repeat task.wait(1) until _G.Settings
