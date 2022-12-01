@@ -4,7 +4,7 @@ repeat wait() until game:IsLoaded()
 --- code is messy, ignore it please
 
 function protectGui(GUI)
-    if syn.protect_gui then
+    if syn and syn.protect_gui then
         syn.protect_gui(GUI)
         GUI.Parent = game:GetService("CoreGui")
     elseif gethui then
