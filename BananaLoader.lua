@@ -11,6 +11,8 @@ function protectGui(GUI)
         GUI.Parent = gethui()
     elseif game.CoreGui:FindFirstChild("RobloxGui") then
         GUI.Parent = game.CoreGui.RobloxGui
+    else
+        GUI.Parent = game:GetService("CoreGui")
     end
 end
 
