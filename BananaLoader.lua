@@ -3,13 +3,23 @@ repeat wait() until game:IsLoaded()
 
 --- code is messy, ignore it please
 
+function protectGui(GUI)
+    if syn.protect_gui then
+        syn.protect_gui(GUI)
+        GUI.Parent = game:GetService("CoreGui")
+    elseif gethui then
+        GUI.Parent = gethui()
+    elseif game.CoreGui:FindFirstChild("RobloxGui") then
+        GUI.Parent = game.CoreGui.RobloxGui
+    end
+end
+
 local Tween = game:GetService("TweenService")
 
 local abcDTWDestroyTweens = {}
 
 local UISCGUI = Instance.new("ScreenGui")
-syn.protect_gui(UISCGUI)
-UISCGUI.Parent = game:GetService("CoreGui")
+protectGui(UISCGUI)
 UISCGUI.Name = tostring(math.random(1,214))
 
 local Initilize = Instance.new("Frame")
@@ -278,8 +288,7 @@ local UITextSizeConstraint = Instance.new("UITextSizeConstraint")
 
 --Properties:
 
-syn.protect_gui(ScreenGui)
-ScreenGui.Parent = game:GetService("CoreGui")
+protectGui(ScreenGui)
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.ResetOnSpawn = false
 
