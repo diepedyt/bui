@@ -9,11 +9,18 @@ _G.games = {
         ID = "13694"
     },
     [11563572312] = {
-    GameName = "Ultimate Magnet Simulator",
-    BackColor = Color3.fromRGB(255, 0, 0),
-    MainColor = Color3.fromRGB(255,255,255),
-    TextColor = Color3.fromRGB(0, 0, 0),
-    ID = "13839"
+        GameName = "Ultimate Magnet Simulator",
+        BackColor = Color3.fromRGB(255, 0, 0),
+        MainColor = Color3.fromRGB(255,255,255),
+        TextColor = Color3.fromRGB(0, 0, 0),
+        ID = "13839"
+    },
+    [11445923563] = {
+            GameName = "Ultimate Magnet Simulator",
+        BackColor = Color3.fromRGB(131, 48, 141),
+        MainColor = Color3.fromRGB(255,255,255),
+        TextColor = Color3.fromRGB(0, 0, 0),
+        ID = "13911"
     }
 }
 
