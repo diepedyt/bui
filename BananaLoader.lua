@@ -225,6 +225,79 @@ ButtonConnection3 = TextButton.MouseButton1Click:Connect(function()
     end
 end)
 
+task.wait(.6)
+
+-- Gui to Lua
+-- Version: 3.2
+
+-- Instances:
+
+local TextLabel = Instance.new("TextLabel")
+local UITextSizeConstraint = Instance.new("UITextSizeConstraint")
+local UICorner = Instance.new("UICorner")
+local TextButtonA = Instance.new("TextButton")
+local UITextSizeConstraint_2 = Instance.new("UITextSizeConstraint")
+local UICorner_2 = Instance.new("UICorner")
+
+--Properties:
+
+TextLabel.Parent = UISCGUI
+TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel.BackgroundTransparency = 1
+TextLabel.Position = UDim2.new(0.657665312, 0, 0.708015323, 0)
+TextLabel.Size = UDim2.new(0.152946159, 0, 0.0503816865, 0)
+TextLabel.ZIndex = 25
+TextLabel.Font = Enum.Font.FredokaOne
+TextLabel.Text = "get key : \ndiscord.gg/SKnv5Ftwjb"
+TextLabel.TextColor3 = Color3.fromRGB(245, 255, 56)
+TextLabel.TextStrokeTransparency = 0
+TextLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+TextLabel.TextScaled = true
+TextLabel.TextSize = 14.000
+TextLabel.TextWrapped = true
+TextLabel.TextTransparency = 1
+
+local ab = Tween:Create(TextLabel, TweenInfo.new(.4,Enum.EasingStyle.Quint), {BackgroundTransparency = 0.9,TextTransparency = 0})
+ab:Play()
+local D2ab = Tween:Create(TextLabel	, TweenInfo.new(.15,Enum.EasingStyle.Quint), {BackgroundTransparency = 1,TextTransparency = 1, TextStrokeTransparency = 1})
+
+UITextSizeConstraint.Parent = TextLabel
+UITextSizeConstraint.MaxTextSize = 91
+
+UICorner.Parent = TextLabel
+
+TextButtonA.Parent = UISCGUI
+TextButtonA.AnchorPoint = Vector2.new(0.5, 0.5)
+TextButtonA.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TextButtonA.BackgroundTransparency = 0.300
+TextButtonA.Position = UDim2.new(0.658, 0,0.764, 0)
+TextButtonA.Size = UDim2.new(0.0861629173, 0, 0.044122193, 0)
+TextButtonA.ZIndex = 23
+TextButtonA.Font = Enum.Font.FredokaOne
+TextButtonA.Text = "Copy"
+TextButtonA.TextColor3 = Color3.fromRGB(72, 72, 72)
+TextButtonA.TextScaled = true
+TextButtonA.TextSize = 14.000
+TextButtonA.TextWrapped = true
+TextButtonA.TextTransparency = 1
+
+local ab = Tween:Create(TextButtonA, TweenInfo.new(.4,Enum.EasingStyle.Quint), {BackgroundTransparency = 0.4,TextTransparency = 0})
+ab:Play()
+local D1ab = Tween:Create(TextButtonA, TweenInfo.new(.15,Enum.EasingStyle.Quint), {BackgroundTransparency = 1,TextTransparency = 1})
+
+UITextSizeConstraint_2.Parent = TextButtonA
+UITextSizeConstraint_2.MaxTextSize = 50
+
+UICorner_2.CornerRadius = UDim.new(1, 15)
+UICorner_2.Parent = TextButtonA
+
+local a = TextButtonA.MouseButton1Click:Connect(function()
+    if setclipboard then
+        setclipboard("https://discord.gg/SKnv5Ftwjb")
+    end
+end)
+
 
 task.spawn(function()
     while task.wait(.01) do
@@ -255,7 +328,7 @@ ButtonConnection1:Disconnect() ButtonConnection2:Disconnect()
 destroyTween:Play() destroyTween.Completed:Wait()
 UISCGUI["TextButton"]:Destroy()
 
-destroyTween2:Play() destroyTween3:Play() destroyTween3.Completed:Wait()
+destroyTween2:Play() destroyTween3:Play() D1ab:Play() D2ab:Play() destroyTween3.Completed:Wait()
 
 for i,v in ipairs(abcDTWDestroyTweens) do
     v:Play()
@@ -274,6 +347,8 @@ end
 task.wait(1)
 
 UISCGUI:Destroy()
+
+a:Disconnect()
 
 -- Gui to Lua
 -- Version: 3.2
