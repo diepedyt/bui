@@ -16,11 +16,18 @@ _G.games = {
         ID = "13839"
     },
     [11445923563] = {
-            GameName = "One Fruit Simulator",
+        GameName = "One Fruit Simulator",
         BackColor = Color3.fromRGB(131, 48, 141),
         MainColor = Color3.fromRGB(255,255,255),
         TextColor = Color3.fromRGB(0, 0, 0),
         ID = "13911"
+    },
+    [11040063484] = {
+        GameName = "Sword Fighters Simulator",
+        BackColor = Color3.fromRGB(92, 160, 131),
+        MainColor = Color3.fromRGB(255,255,255),
+        TextColor = Color3.fromRGB(0, 0, 0),
+        ID = "14042"
     }
 }
 
