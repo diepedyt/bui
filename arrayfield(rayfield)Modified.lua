@@ -111,10 +111,10 @@ local RayfieldLibrary = {
 			NotificationActionsBackground = Color3.fromRGB(9, 9, 9),
 
 			TabBackground = Color3.fromRGB(108, 101, 87),
-			TabStroke = Color3.fromRGB(85, 85, 85),
+			TabStroke = Color3.fromRGB(153, 154, 98),
 			TabBackgroundSelected = Color3.fromRGB(138, 104, 3),
 			TabTextColor = Color3.fromRGB(240, 240, 240),
-			SelectedTabTextColor = Color3.fromRGB(0, 0, 0),
+			SelectedTabTextColor = Color3.fromRGB(255, 255, 0),
 
 			ElementBackground = Color3.fromRGB(35, 35, 35),
 			ElementBackgroundHover = Color3.fromRGB(40, 40, 40),
@@ -213,7 +213,7 @@ local clicked = false
 local SearchHided = true
 local Notifications = Rayfield.Notifications
 
-local SelectedTheme = RayfieldLibrary.Theme.Light
+local SelectedTheme = RayfieldLibrary.Theme[_G.Theme or "Default"]
 
 function ChangeTheme(ThemeName)
 	SelectedTheme = RayfieldLibrary.Theme[ThemeName]
