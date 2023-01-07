@@ -1271,6 +1271,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 	TweenService:Create(LoadingFrame.Subtitle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 	wait(0.05)
 	TweenService:Create(LoadingFrame.Version, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
+    warn(":..:")
     TweenService:Create(Main.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0.1}):Play()
 
 	Elements.Template.LayoutOrder = 100000
