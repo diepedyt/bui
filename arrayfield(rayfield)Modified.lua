@@ -239,6 +239,8 @@ local SelectedTheme = RayfieldLibrary.Theme[_G.Theme or "Default"]
 Topbar.Search.ImageColor3 = SelectedTheme.SearchIcon
 Topbar.Hide.ImageColor3 = SelectedTheme.XIcon
 
+print("ok")
+
 function ChangeTheme(ThemeName)
 	SelectedTheme = RayfieldLibrary.Theme[ThemeName]
 	for _, obj in ipairs(Rayfield:GetDescendants()) do
@@ -255,9 +257,8 @@ function ChangeTheme(ThemeName)
 	Rayfield.Main.Topbar.CornerRepair.BackgroundColor3 = SelectedTheme.Topbar
 	Rayfield.Main.Shadow.Image.ImageColor3 = SelectedTheme.Shadow
 
-	Rayfield.Main.Topbar.ChangeSize.ImageColor3 = SelectedTheme.TextColor
-	Rayfield.Main.Topbar.Hide.ImageColor3 = SelectedTheme.TextColor
-	Rayfield.Main.Topbar.Theme.ImageColor3 = SelectedTheme.TextColor
+	Rayfield.Main.Topbar.Hide.ImageColor3 = SelectedTheme.XIcon
+    Rayfield.Main.Search.ImageColor3 = SelectedTheme.SearchIcon
 
 	for _, TabPage in ipairs(Elements:GetChildren()) do
 		for _, Element in ipairs(TabPage:GetChildren()) do
