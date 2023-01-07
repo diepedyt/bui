@@ -213,7 +213,7 @@ local clicked = false
 local SearchHided = true
 local Notifications = Rayfield.Notifications
 
-local SelectedTheme = RayfieldLibrary.Theme[_G.Theme or "Default"]
+local SelectedTheme = RayfieldLibrary.Theme.Default
 
 function ChangeTheme(ThemeName)
 	SelectedTheme = RayfieldLibrary.Theme[ThemeName]
@@ -2649,6 +2649,9 @@ function RayfieldLibrary:LoadConfiguration()
 	end
 end
 
-ChangeTheme(_G.Theme or "Default")
+task.spawn(function()
+    repeat task.wait() until _G.NowLoaded
+    ChangeTheme(_G.Theme or "Default")
+end)
 
 return RayfieldLibrary
