@@ -240,6 +240,10 @@ function ChangeTheme(ThemeName)
 			if Element.ClassName == "Frame" and Element.Name ~= "Placeholder" and Element.Name ~= "SectionSpacing" and Element.Name ~= "SectionTitle"  then
 				Element.BackgroundColor3 = SelectedTheme.ElementBackground
 				Element.UIStroke.Color = SelectedTheme.ElementStroke
+                if Element:FindFirstChild("Switch") then
+                    print(Element.Name)
+                    Element.Switch.UIStroke.Color = SelectedTheme.ElementStroke
+                end
 			end
 		end
 	end
