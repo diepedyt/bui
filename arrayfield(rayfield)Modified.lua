@@ -103,6 +103,8 @@ local RayfieldLibrary = {
 			TextFont = "Default", -- Default will use the various font faces used across Rayfield
 			TextColor = Color3.fromRGB(240, 240, 240),
 
+            LoadingBackground = Color3.fromRGB(98, 99, 64),
+
 			Background = Color3.fromRGB(25, 25, 25),
 			Topbar = Color3.fromRGB(72, 69, 43),
 			Shadow = Color3.fromRGB(255, 255, 0),
@@ -226,7 +228,7 @@ function ChangeTheme(ThemeName)
 		end
 	end
 
-	Rayfield.Main.BackgroundColor3 = SelectedTheme.Background
+	Rayfield.Main.BackgroundColor3 = SelectedTheme.LoadingBackground
 	Rayfield.Main.Topbar.BackgroundColor3 = SelectedTheme.Topbar
 	Rayfield.Main.Topbar.CornerRepair.BackgroundColor3 = SelectedTheme.Topbar
 	Rayfield.Main.Shadow.Image.ImageColor3 = SelectedTheme.Shadow
@@ -2474,6 +2476,8 @@ function RayfieldLibrary:CreateWindow(Settings)
 	TweenService:Create(LoadingFrame.Subtitle, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
 	TweenService:Create(LoadingFrame.Version, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
 	wait(0.2)
+    TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.Background}):Play()
+    task.wait(.03)
 	TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 475)}):Play()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
 
