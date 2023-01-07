@@ -105,7 +105,7 @@ local RayfieldLibrary = {
 
 			Background = Color3.fromRGB(25, 25, 25),
 			Topbar = Color3.fromRGB(72, 69, 43),
-			Shadow = Color3.fromRGB(47, 44, 37),
+			Shadow = Color3.fromRGB(255, 255, 0),
 
 			NotificationBackground = Color3.fromRGB(213, 143, 43 ),
 			NotificationActionsBackground = Color3.fromRGB(9, 9, 9),
