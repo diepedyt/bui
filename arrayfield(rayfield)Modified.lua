@@ -25,6 +25,9 @@ local RayfieldLibrary = {
 			TextFont = "Default", -- Default will use the various font faces used across Rayfield
 			TextColor = Color3.fromRGB(240, 240, 240),
 
+            SearchIcon = Color3.fromRGB(240, 240, 240),
+            XIcon = Color3.fromRGB(240, 240, 240),
+
             Divider = Color3.fromRGB(255,255,255),
 
             LoadingBackground = Color3.fromRGB(25, 25, 25),
@@ -68,6 +71,9 @@ local RayfieldLibrary = {
 			TextFont = "Gotham",  -- Default will use the various font faces used across Rayfield
 			TextColor = Color3.fromRGB(50, 50, 50), -- i need to make all text 240, 240, 240 and base gray on transparency not color to do this
 
+            SearchIcon = Color3.fromRGB(240, 240, 240),
+            XIcon = Color3.fromRGB(240, 240, 240),
+
             Divider = Color3.fromRGB(0,0,0),
 
             LoadingBackground = Color3.fromRGB(255, 255, 255),
@@ -110,6 +116,9 @@ local RayfieldLibrary = {
         Yellow = {
 			TextFont = "Default", -- Default will use the various font faces used across Rayfield
 			TextColor = Color3.fromRGB(240, 240, 240),
+
+            SearchIcon = Color3.fromRGB(255, 227, 36),
+            XIcon = Color3.fromRGB(255, 227, 36),
 
             Divider = Color3.fromRGB(255,255,255),
 
@@ -209,6 +218,7 @@ local SearchBar = Main.Searchbar
 local Filler = SearchBar.CanvasGroup.Filler
 local Prompt = Main.Prompt
 
+
 Rayfield.DisplayOrder = 100
 LoadingFrame.Version.Text = Release
 
@@ -226,6 +236,8 @@ local SearchHided = true
 local Notifications = Rayfield.Notifications
 
 local SelectedTheme = RayfieldLibrary.Theme[_G.Theme or "Default"]
+Topbar.Search.ImageColor3 = SelectedTheme.SearchIcon
+Topbar.Hide.ImageColor3 = SelectedTheme.XIcon
 
 function ChangeTheme(ThemeName)
 	SelectedTheme = RayfieldLibrary.Theme[ThemeName]
