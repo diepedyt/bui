@@ -258,7 +258,7 @@ function ChangeTheme(ThemeName)
 	Rayfield.Main.Shadow.Image.ImageColor3 = SelectedTheme.Shadow
 
 	Rayfield.Main.Topbar.Hide.ImageColor3 = SelectedTheme.XIcon
-    Rayfield.Main.Search.ImageColor3 = SelectedTheme.SearchIcon
+    Rayfield.Main.Topbar.Search.ImageColor3 = SelectedTheme.SearchIcon
 
 	for _, TabPage in ipairs(Elements:GetChildren()) do
 		for _, Element in ipairs(TabPage:GetChildren()) do
