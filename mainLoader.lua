@@ -1,5 +1,7 @@
 repeat wait() until game:IsLoaded()
 
+_G.FastLoad = true
+
 _G.games = {
     [10723695195] = {
         GameName = "Anime Evolution",
