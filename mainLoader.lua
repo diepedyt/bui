@@ -30,6 +30,13 @@ _G.games = {
         MainColor = Color3.fromRGB(255,255,255),
         TextColor = Color3.fromRGB(0, 0, 0),
         ID = "14042"
+    },
+    [11542692507] = {
+        GameName = "Anime Souls Simulator",
+        BackColor = Color3.fromRGB(92, 160, 131),
+        MainColor = Color3.fromRGB(255,255,255),
+        TextColor = Color3.fromRGB(0, 0, 0),
+        ID = "15541"
     }
 }
 
