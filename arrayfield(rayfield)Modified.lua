@@ -239,7 +239,6 @@ local SelectedTheme = RayfieldLibrary.Theme[_G.Theme or "Default"]
 Topbar.Search.ImageColor3 = SelectedTheme.SearchIcon
 Topbar.Hide.ImageColor3 = SelectedTheme.XIcon
 
-print("ok")
 
 function ChangeTheme(ThemeName)
 	SelectedTheme = RayfieldLibrary.Theme[ThemeName]
@@ -266,7 +265,6 @@ function ChangeTheme(ThemeName)
 				Element.BackgroundColor3 = SelectedTheme.ElementBackground
 				Element.UIStroke.Color = SelectedTheme.ElementStroke
                 if Element:FindFirstChild("Switch") then
-                    print(Element.Name)
                     Element.Switch.UIStroke.Color = SelectedTheme.ElementStroke
                 end
 			end
@@ -1294,7 +1292,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 	TweenService:Create(LoadingFrame.Subtitle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 	wait(0.05)
 	TweenService:Create(LoadingFrame.Version, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-    warn(":..:")
     TweenService:Create(Main.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0.1}):Play()
 
 	Elements.Template.LayoutOrder = 100000
@@ -2073,9 +2070,9 @@ function RayfieldLibrary:CreateWindow(Settings)
 				Toggle.Switch.Shadow.Visible = false
 			end
 
-			TweenService:Create(Toggle, TweenInfo.new(math.random(.7,4), Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-			TweenService:Create(Toggle.UIStroke, TweenInfo.new(math.random(.7,4), Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-			TweenService:Create(Toggle.Title, TweenInfo.new(math.random(.7,4), Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
+			TweenService:Create(Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+			TweenService:Create(Toggle.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+			TweenService:Create(Toggle.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
 			
 			if ToggleSettings.Info then
 				Toggle.Description.Text = ToggleSettings.Info
@@ -2182,7 +2179,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 					TweenService:Create(Toggle.Switch.Indicator.UIStroke, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = SelectedTheme.ToggleEnabledStroke}):Play()
 					TweenService:Create(Toggle.Switch.Indicator, TweenInfo.new(0.8, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = SelectedTheme.ToggleEnabled}):Play()
 					TweenService:Create(Toggle.Switch.UIStroke, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = SelectedTheme.ToggleEnabledOuterStroke}):Play()
-                    warn(SelectedTheme.ToggleEnabledOuterStroke)
 					wait(0.05)
 					TweenService:Create(Toggle.Switch.Indicator, TweenInfo.new(0.45, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(0,17,0,17)}):Play()	
 					wait(0.15)
@@ -2551,7 +2547,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 		
 		if PromptSettings.Actions then
 			for name,info in pairs(PromptSettings.Actions) do
-				print(info)
 				local Button = PromptUI.Buttons.Template:Clone()
 				Button.TextLabel.Text = info.Name
 				Button.Interact.MouseButton1Up:Connect(function()
