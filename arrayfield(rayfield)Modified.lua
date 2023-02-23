@@ -2073,9 +2073,9 @@ function RayfieldLibrary:CreateWindow(Settings)
 				Toggle.Switch.Shadow.Visible = false
 			end
 
-			TweenService:Create(Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-			TweenService:Create(Toggle.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-			TweenService:Create(Toggle.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
+			TweenService:Create(Toggle, TweenInfo.new(math.random(.7,2), Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+			TweenService:Create(Toggle.UIStroke, TweenInfo.new(math.random(.7,2), Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+			TweenService:Create(Toggle.Title, TweenInfo.new(math.random(.7,2), Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
 			
 			if ToggleSettings.Info then
 				Toggle.Description.Text = ToggleSettings.Info
