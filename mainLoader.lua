@@ -3,40 +3,21 @@ repeat wait() until game:IsLoaded()
 _G.FastLoad = true
 
 _G.games = {
-    [10723695195] = {
-        GameName = "Anime Evolution",
-        BackColor = Color3.fromRGB(31, 74, 167),
-        MainColor = Color3.fromRGB(255,255,255),
-        TextColor = Color3.fromRGB(0, 0, 0),
-        ID = "13694"
-    },
-    [11563572312] = {
-        GameName = "Ultimate Magnet Simulator",
-        BackColor = Color3.fromRGB(255, 0, 0),
-        MainColor = Color3.fromRGB(255,255,255),
-        TextColor = Color3.fromRGB(0, 0, 0),
-        ID = "13839"
-    },
-    [11445923563] = {
-        GameName = "One Fruit Simulator",
-        BackColor = Color3.fromRGB(131, 48, 141),
-        MainColor = Color3.fromRGB(255,255,255),
-        TextColor = Color3.fromRGB(0, 0, 0),
-        ID = "13911"
-    },
     [11040063484] = {
         GameName = "Sword Fighters Simulator",
         BackColor = Color3.fromRGB(92, 160, 131),
         MainColor = Color3.fromRGB(255,255,255),
         TextColor = Color3.fromRGB(0, 0, 0),
-        ID = "14042"
+        ID = "0",
+        Script = "'https://scripts.luawl.com/hosted/2607/11040063484.lua'"
     },
     [11542692507] = {
         GameName = "Anime Souls Simulator",
         BackColor = Color3.fromRGB(92, 160, 131),
         MainColor = Color3.fromRGB(255,255,255),
         TextColor = Color3.fromRGB(0, 0, 0),
-        ID = "15541"
+        ID = "0",
+        Script = "https://scripts.luawl.com/hosted/2607/11542692507.lua"
     }
 }
 
@@ -67,7 +48,7 @@ if isfile and delfile and isfile("Keys/"..game.Players.LocalPlayer.Name..".json"
     delfile("Keys/"..game.Players.LocalPlayer.Name..".json")
 end
 
-loadstring(game:HttpGet("https://scripts.luawl.com/".._G.games[game.PlaceId].ID.."/"..game.PlaceId..".lua"))()
+loadstring(game:HttpGet(_G.games[game.PlaceId].Script))()
 
 repeat task.wait(1) until _G.Settings
 
