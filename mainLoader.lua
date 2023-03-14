@@ -48,6 +48,8 @@ if isfile and delfile and isfile("Keys/"..game.Players.LocalPlayer.Name..".json"
     delfile("Keys/"..game.Players.LocalPlayer.Name..".json")
 end
 
+warn(_G.games[game.PlaceId].Script)
+
 loadstring(game:HttpGet(_G.games[game.PlaceId].Script))()
 
 repeat task.wait(1) until _G.Settings
