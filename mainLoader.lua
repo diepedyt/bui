@@ -9,7 +9,7 @@ _G.games = {
         MainColor = Color3.fromRGB(255,255,255),
         TextColor = Color3.fromRGB(0, 0, 0),
         ID = "0",
-        Script = "'https://scripts.luawl.com/hosted/2607/11040063484.lua'"
+        Script = "https://scripts.luawl.com/hosted/2607/11040063484.lua"
     },
     [11542692507] = {
         GameName = "Anime Souls Simulator",
