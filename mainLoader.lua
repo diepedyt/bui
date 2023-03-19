@@ -18,6 +18,14 @@ _G.games = {
         TextColor = Color3.fromRGB(0, 0, 0),
         ID = "0",
         Script = "https://scripts.luawl.com/hosted/2607/11542692507.lua"
+    },
+    [12413786484] = {
+        GameName = "Anime Lost Simulator",
+        BackColor = Color3.fromRGB(92, 160, 131),
+        MainColor = Color3.fromRGB(255,255,255),
+        TextColor = Color3.fromRGB(0, 0, 0),
+        ID = "0",
+        Script = "https://scripts.luawl.com/hosted/2607/12413786484.lua"
     }
 }
 
