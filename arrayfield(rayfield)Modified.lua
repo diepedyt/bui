@@ -331,6 +331,7 @@ local function LoadConfiguration(Configuration)
 end
 
 local function SaveConfiguration()
+	warn("called")
 	if not CEnabled then return end
 	local Data = {}
 	for i,v in pairs(RayfieldLibrary.Flags) do
