@@ -2125,7 +2125,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 
 			Toggle.Interact.MouseButton1Click:Connect(function()
 
-				print("toggle touched")
+				print("toggle touched !!!")
 
 				if ToggleSettings.CurrentValue then
 					ToggleSettings.CurrentValue = false
