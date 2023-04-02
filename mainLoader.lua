@@ -1,6 +1,7 @@
 repeat wait() until game:IsLoaded()
 
 pcall(function() loadstring(game:HttpGet('https://pastebin.com/raw/We8LUMRN'))()
+task.wait(5)
 game:GetService("Workspace").Camera.FieldOfView = 70
 game:GetService("CoreGui").MyScreenGui:Destroy()
 end)
