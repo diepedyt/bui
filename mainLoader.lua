@@ -34,6 +34,14 @@ _G.games = {
         TextColor = Color3.fromRGB(0, 0, 0),
         ID = "0",
         Script = "https://scripts.luawl.com/hosted/2607/19207/8425128940.lua"
+    },
+    [8720980067] = {
+        GameName = "Anime Tales",
+        BackColor = Color3.fromRGB(92, 160, 131),
+        MainColor = Color3.fromRGB(255,255,255),
+        TextColor = Color3.fromRGB(0, 0, 0),
+        ID = "0",
+        Script = "https://scripts.luawl.com/hosted/2607/19653/AnimeTales.lua"
     }
 }
 
