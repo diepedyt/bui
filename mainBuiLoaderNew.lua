@@ -446,11 +446,7 @@ if _G.Scripts[game.PlaceId] then
 
     ScreenGui:Destroy()
 
-    --
-
-    loadstring(game:HttpGet(_G.Scripts[game.PlaceId]))()
-
-    --
+    _G.Complete = true
 
 else
 
