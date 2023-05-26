@@ -298,7 +298,7 @@ UICorner_2.Parent = TextButtonA
 
 local a = TextButtonA.MouseButton1Click:Connect(function()
     if setclipboard then
-        setclipboard("https://discord.gg/SKnv5Ftwjb")
+        setclipboard(_G.DiscordInvite)
     end
 end)
 
