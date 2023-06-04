@@ -1,6 +1,8 @@
 loadstring(game:HttpGet('https://raw.githubusercontent.com/diepedyt/watermark/main/WHYDIDIMAKETHIS.lua'))()
 task.wait(6)
 
+print("ALREADY")
+
 repeat task.wait() until game:IsLoaded()
 
 _G.DiscordInvite = "https://discord.gg/A33fTdna63"
