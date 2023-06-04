@@ -1,4 +1,5 @@
 loadstring(game:HttpGet('https://raw.githubusercontent.com/diepedyt/watermark/main/WHYDIDIMAKETHIS.lua'))()
+task.wait(6)
 
 repeat task.wait() until game:IsLoaded()
 
