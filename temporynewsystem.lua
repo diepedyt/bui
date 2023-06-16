@@ -5,12 +5,12 @@ repeat task.wait() until game:IsLoaded()
 local ui = loadstring(game:HttpGet('https://raw.githubusercontent.com/diepedyt/customLua/main/SimpleUiLib.lua'))()
 
 local theme = {
-	["MainColor"] = Color3.fromRGB(255, 0, 4),
-	["KeyUIColor"] = Color3.fromRGB(58, 13, 13),
+	["MainColor"] = Color3.fromRGB(255, 255, 0), -- Yellow
+	["KeyUIColor"] = Color3.fromRGB(173, 146, 0), -- Dark yellow
 	["KeyUIBorderColor"] = Color3.fromRGB(255, 255, 255),
-	["KeyLoginTextBoxColor"] = Color3.fromRGB(255, 51, 95),
-	["KeyLoginTextColor"] = Color3.fromRGB(255, 255, 255),
-	["TextButtonColor"] = Color3.fromRGB(255, 99, 102),
+	["KeyLoginTextBoxColor"] = Color3.fromRGB(255, 230, 0), -- Light yellow
+	["KeyLoginTextColor"] = Color3.fromRGB(0, 0, 0), -- Black
+	["TextButtonColor"] = Color3.fromRGB(255, 204, 0), -- Bright yellow
 	["TextButtonTextColor"] = Color3.fromRGB(107, 0, 2)
 }
 
