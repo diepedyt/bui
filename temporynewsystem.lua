@@ -1,4 +1,6 @@
-_G.Scripts = {o = "yek",d = "b7UfqFzCzF"}
+_G.Scripts = {o = "yek",d = "b7UfqFzCzF",
+	[8425128940] = "https://scripts.luawl.com/hosted/3423/19726/AnimeWarriors2Free.lua",
+    [8720980067] = "https://scripts.luawl.com/hosted/3423/19690/AnimeTalesScript.lua"}
 
 repeat task.wait() until game:IsLoaded()
 
