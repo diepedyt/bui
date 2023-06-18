@@ -4,9 +4,6 @@ _G.Scripts = {o = "yEkdOogRepUsa",d = "discord.gg/KMQPWsSB",
 		["Banana Hub"] = 
 		"https://scripts.luawl.com/hosted/3423/19726/AnimeWarriors2Free.lua"},
     [8720980067] = {["Banana Hub"] = "https://scripts.luawl.com/hosted/3423/19690/AnimeTalesScript.lua"},[6777872443] = {["Banana Hub"] ="https://scripts.luawl.com/hosted/3423/20014/pixelpiecefreee.lua"}}
-if false then
-loadstring(game:HttpGet('https://raw.githubusercontent.com/diepedyt/bui/main/temporynewsystem.lua'))()
-	end
 _G.DiscordInvite = "discord.gg/KMQPWsSB"
 loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/mainBuiLoaderNew.lua"))()
-
+loadstring(game:HttpGet('https://raw.githubusercontent.com/diepedyt/bui/main/temporynewsystem.lua'))()
