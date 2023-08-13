@@ -175,9 +175,6 @@ local CoreGui = game:GetService("CoreGui")
 
 -- Interface Management
 local Rayfield =  game:GetObjects("rbxassetid://14412610844")[1]
-if Rayfield and tostring(Rayfield):match("400") then
-Rayfield =  game:GetObjects("rbxassetid://12079311285")[1]
-end
 
 --studio
 --function gethui() return Rayfield end local http_request = nil local syn = {protect_gui = false,request = false,}local http = nil function writefile(tt,t,ttt)end function isfolder(t)end function makefolder(t)end function isfile(r)end function readfile(t)end
@@ -214,6 +211,11 @@ end
 local Camera = workspace.CurrentCamera
 local Main = Rayfield.Main
 local Topbar = Main.Topbar
+local TabListBack = Main.TabListBack
+TabListBack.BackgroundTransparency = 1
+TabListBack.Title.TextTransparency = 1
+TabListBack.BackgroundTransparency = 1
+TabListBack.Divider.Size = UDim2.new(0, 1, 0, 0)
 local Elements = Main.Elements
 local LoadingFrame = Main.LoadingFrame
 local TabList = Main.TabList
@@ -224,6 +226,7 @@ local Prompt = Main.Prompt
 
 Rayfield.DisplayOrder = 100
 LoadingFrame.Version.Text = Release
+
 
 
  --Variables
@@ -791,7 +794,7 @@ function Unhide()
 	Debounce = true
 	Main.Position = UDim2.new(0.5, 0, 0.5, 0)
 	Main.Visible = true
-	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 475)}):Play()
+	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 718, 0, 475)}):Play()
 	TweenService:Create(Main.Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 45)}):Play()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
 	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
@@ -918,7 +921,7 @@ function Maximise()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
 	TweenService:Create(Topbar.CornerRepair, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 	TweenService:Create(Topbar.Divider, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 475)}):Play()
+	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 718, 0, 475)}):Play()
 	TweenService:Create(Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 45)}):Play()
 	TabList.Visible = true
 	wait(0.2)
@@ -1315,7 +1318,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 		TabButton.Title.Text = Name
 		TabButton.Parent = TabList
 		TabButton.Title.TextWrapped = false
-		TabButton.Size = UDim2.new(0, TabButton.Title.TextBounds.X + 30, 0, 30)
+		TabButton.Size = UDim2.new(0, 201, 0, 30)
 
 		if Image then
 			TabButton.Title.AnchorPoint = Vector2.new(0, 0.5)
@@ -1323,7 +1326,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 			TabButton.Image.Image = "rbxassetid://"..Image
 			TabButton.Image.Visible = true
 			TabButton.Title.TextXAlignment = Enum.TextXAlignment.Left
-			TabButton.Size = UDim2.new(0, TabButton.Title.TextBounds.X + 46, 0, 30)
+			TabButton.Size = UDim2.new(0, 201, 0, 30)
 		end
 
 		TabButton.BackgroundTransparency = 1
@@ -1409,7 +1412,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 				TweenService:Create(Elements, TweenInfo.new(1, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 460,0, 330)}):Play()
 				Elements.UIPageLayout:JumpTo(TabPage)
 				wait(0.2)
-				TweenService:Create(Elements, TweenInfo.new(0.8, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 475,0, 366)}):Play()
+				TweenService:Create(Elements, TweenInfo.new(0.8, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 475, 0, 407)}):Play()
 			end
 
 		end)
@@ -2511,11 +2514,12 @@ function RayfieldLibrary:CreateWindow(Settings)
 	wait(0.2)
     TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.Background}):Play()
     task.wait(.03)
-	TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 475)}):Play()
+	TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 718, 0, 475)}):Play()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
 
 	Topbar.BackgroundTransparency = 1
 	Topbar.Divider.Size = UDim2.new(0, 0, 0, 1)
+	TabListBack.Divider.Size = UDim2.new(0, 1, 0, 0)
 	Topbar.CornerRepair.BackgroundTransparency = 1
 	Topbar.Title.TextTransparency = 1
 	Topbar.Theme.ImageTransparency = 1
@@ -2529,6 +2533,10 @@ function RayfieldLibrary:CreateWindow(Settings)
 	wait(0.1)
 	TweenService:Create(Topbar.Divider, TweenInfo.new(3.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, 0, 0, 1), BackgroundColor3 = SelectedTheme.Divider}):Play()
 	wait(0.1)
+	task.delay(.3, function()
+	TweenService:Create(TabListBack.Divider, TweenInfo.new(5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 1, 1, 0), BackgroundColor3 = SelectedTheme.Divider}):Play()
+	TweenService:Create(TabListBack.Title, TweenInfo.new(0.45, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
+	end)
 	TweenService:Create(Topbar.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 	wait(0.1)
 	TweenService:Create(Topbar.Theme, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
