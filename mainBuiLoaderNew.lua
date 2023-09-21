@@ -130,7 +130,7 @@ TextBox.TextTransparency = 1
 local canClick = true
 local waitE = 0
 
-if false then
+if true then
     task.spawn(function()
         if isfile and readfile and isfile("Keys/"..game.Players.LocalPlayer.Name..".json") then
             canClick = false
@@ -139,6 +139,9 @@ if false then
                 waitE = 1
                 _G.wl_key = HP:JSONDecode(readfile("Keys/"..game.Players.LocalPlayer.Name..".json"))
                 TextBox.Text = _G.wl_key
+            end
+            if _G.wl_key == "" then
+                canClick = true
             end
         end
     end)
@@ -420,7 +423,12 @@ Initilize_2.Visible = true
 Tween:Create(Initilize_2, TweenInfo.new(.7, Enum.EasingStyle.Quint), {Size = UDim2.new(0.263924727, 0, 0.325954437, 0)}):Play()
 task.wait(1)
 
-if _G.Scripts[game.PlaceId] then
+if _G.Scripts[game.gameId] then
+
+    if not isfolder("Keys") then
+        makefolder("Keys")
+    end
+    writefile("Keys/"..game.Players.LocalPlayer.Name..".json",game:GetService("HttpService"):JSONEncode(_G.wl_key))
 
     TextLabel.Text = "Checking Game..."
     Tween:Create(TextLabel, TweenInfo.new(.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
@@ -453,4 +461,3 @@ else
     game.Players.LocalPlayer:Kick("Error Game Not Found")
 
 end
-
