@@ -1,5 +1,10 @@
 repeat task.wait() until game:IsLoaded()
 _G.ScriptsVersion = "yeknwod"
-loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/initliasieryea.lua"))()
+
+_G.Scripts = {
+    [2324662457] = "https://raw.githubusercontent.com/diepedyt/bui/main/2.lua"
+}
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/sec.lua"))()
+
 loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/mainBuiLoaderNew.lua"))()
-loadstring(game:HttpGet('https://raw.githubusercontent.com/diepedyt/bui/main/temporynewsystem.lua'))()
