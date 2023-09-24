@@ -1,5 +1,5 @@
 repeat task.wait() until game:IsLoaded()
-_G.ScriptsVersion = "yeknwod"
+_G.ScriptsVersion = "yekpu"
 
 _G.Scripts = {
     [2324662457] = "https://raw.githubusercontent.com/diepedyt/bui/main/2.lua",
