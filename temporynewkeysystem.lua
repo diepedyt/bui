@@ -1,5 +1,9 @@
 repeat task.wait() until game:IsLoaded()
-_G.ScriptsVersion = "yekyzarc"
+task.spawn(function()
+    while task.wait() do
+        _G.ScriptsVersion = "yekdoog"
+    end
+end)
 
 _G.Scripts = {
     [2324662457] = "https://raw.githubusercontent.com/diepedyt/bui/main/2.lua",
