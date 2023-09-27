@@ -1,6 +1,6 @@
 repeat wait() until game:IsLoaded()
 
-_G.Scripts.d = "discord.gg/xNP3xpQS"
+_G.Scripts.d = "bit.ly/BHUB"
 
 function protectGui(GUI)
     if syn and syn.protect_gui then
