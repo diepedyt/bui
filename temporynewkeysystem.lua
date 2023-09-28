@@ -1,7 +1,7 @@
 repeat task.wait() until game:IsLoaded()
 task.spawn(function()
     while task.wait() do
-        _G.ScriptsVersion = "nooslwwen"
+        _G.ScriptsVersion = "yekananab"
     end
 end)
 
