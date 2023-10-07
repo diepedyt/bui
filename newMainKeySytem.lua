@@ -5,4 +5,4 @@ _G.Scripts = {
     [4986566693] = "https://raw.githubusercontent.com/diepedyt/bui/main/AnimeChampions.lua"
 }
 
-loadstring(game:HttpGet(_G.Scripts[game.gameId]))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/loader.lua"))()
