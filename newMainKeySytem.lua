@@ -5,7 +5,8 @@ _G.Scripts = {
     [4986566693] = "https://raw.githubusercontent.com/diepedyt/bui/main/AnimeChampions.lua",
     [5166944221] = "https://raw.githubusercontent.com/diepedyt/bui/main/DeathBallLite.lua",
     [4777817887] = "https://raw.githubusercontent.com/diepedyt/bui/main/BladeBall.lua",
-    [3541611379] = "https://raw.githubusercontent.com/diepedyt/bui/main/TDX.lua"
+    [3541611379] = "https://raw.githubusercontent.com/diepedyt/bui/main/TDX.lua",
+    [3317771874] = "https://raw.githubusercontent.com/diepedyt/bui/main/PS99.lua"
 }
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/loader.lua"))()
