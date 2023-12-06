@@ -9,4 +9,6 @@ _G.Scripts = {
     [3317771874] = "https://raw.githubusercontent.com/diepedyt/bui/main/PS99.lua"
 }
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/loader.lua"))()
+if not _g.dont then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/loader.lua"))()
+end
