@@ -9,6 +9,7 @@ iRay  | Programming
 ]]
 
 
+_G.Theme = _G.RayfieldTheme or _G.Theme
 
 local Release = "Beta 7R"
 local NotificationDuration = 6.5
