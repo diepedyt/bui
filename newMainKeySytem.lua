@@ -6,7 +6,8 @@ _G.Scripts = {
     [5166944221] = "https://raw.githubusercontent.com/diepedyt/bui/main/DeathBallLite.lua",
     [4777817887] = "https://raw.githubusercontent.com/diepedyt/bui/main/BladeBall.lua",
     [3541611379] = "https://raw.githubusercontent.com/diepedyt/bui/main/TDX.lua",
-    [3317771874] = "https://raw.githubusercontent.com/diepedyt/bui/main/PS99.lua"
+    [3317771874] = "https://raw.githubusercontent.com/diepedyt/bui/main/PS99.lua",
+    [5300677688] = "https://raw.githubusercontent.com/diepedyt/bui/main/AnimeSoulsX.lua"    
 }
 
 if not _G.dont then
