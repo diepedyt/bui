@@ -252,7 +252,7 @@ else
 	end
 end
 
- --Object Variables
+ Object Variables
 
 local Camera = workspace.CurrentCamera
 local Main = Rayfield.Main
@@ -275,7 +275,7 @@ LoadingFrame.Version.Text = Release
 
 
 
- --Variables
+ Variables
 
 local request = (syn and syn.request) or (http and http.request) or http_request
 local CFileName = nil
@@ -397,7 +397,7 @@ local function SaveConfiguration()
 	writefile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension, tostring(HttpService:JSONEncode(Data)))
 end
 
-local neon = (function()  --Open sourced neon module
+local neon = (function()  Open sourced neon module
 	local module = {}
 
 	do
@@ -717,7 +717,7 @@ function RayfieldLibrary:Notify(NotificationSettings)
 
 
 
-		-- Requires Graphics Level 8-10
+		 Requires Graphics Level 8-10
 		if false == nil then
 			TweenService:Create(Notification, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 0.4}):Play()
 		else
@@ -1894,6 +1894,11 @@ function RayfieldLibrary:CreateWindow(Settings)
 						wait(0.2)
 						TweenService:Create(DropdownOption.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 						wait(0.1)
+							--custom shi
+						    TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
+						    TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
+						    TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.313, 0, 0.479, 0)}):Play()            
+						    --
 						TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
 						for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
 							if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "ZZZZZZZZZ" and DropdownOpt.Name ~= "," and DropdownOpt.Name ~= ",---S=()earch" then
