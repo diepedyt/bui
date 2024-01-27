@@ -1,4 +1,3 @@
-warn("diasjiodoas")
 --[[
 
 Rayfield Interface Suite
@@ -1348,6 +1347,20 @@ function RayfieldLibrary:CreateWindow(Settings)
 	wait(0.05)
 	TweenService:Create(LoadingFrame.Version, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
     TweenService:Create(Main.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0.1}):Play()
+
+    task.spawn(function()
+		_G.UiSizeDown = function(amount)
+			local correctSizeX = Main.Size.X.Scale - (amount * -0.15)
+			local correctSizeY = Main.Size.Y.Scale - (amount * -0.10)
+			Main.Size = UDim2.new(correctSizeX, 0, correctSizeY, 0)
+		end
+
+		_G.UiSizeUp = function(amount)
+			local correctSizeX = Main.Size.X.Scale - (amount * 0.15)
+			local correctSizeY = Main.Size.Y.Scale - (amount * 0.10)
+			Main.Size = UDim2.new(correctSizeX, 0, correctSizeY, 0)
+		end
+	end)
 
 	Elements.Template.LayoutOrder = 100000
 	Elements.Template.Visible = false
