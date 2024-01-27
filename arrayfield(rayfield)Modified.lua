@@ -1350,17 +1350,18 @@ function RayfieldLibrary:CreateWindow(Settings)
 
     task.spawn(function()
 		_G.UiSizeDown = function(amount)
-			local correctSizeX = Main.Size.X.Scale - (amount * -0.15)
-			local correctSizeY = Main.Size.Y.Scale - (amount * -0.10)
+			local correctSizeX = Main.Size.X.Scale - (amount * 0.12)
+			local correctSizeY = Main.Size.Y.Scale - (amount * 0.10)
 			Main.Size = UDim2.new(correctSizeX, 0, correctSizeY, 0)
 		end
 
 		_G.UiSizeUp = function(amount)
-			local correctSizeX = Main.Size.X.Scale - (amount * 0.15)
-			local correctSizeY = Main.Size.Y.Scale - (amount * 0.10)
+			local correctSizeX = Main.Size.X.Scale + (amount * 0.12)
+			local correctSizeY = Main.Size.Y.Scale + (amount * 0.10)
 			Main.Size = UDim2.new(correctSizeX, 0, correctSizeY, 0)
 		end
 	end)
+
 
 	Elements.Template.LayoutOrder = 100000
 	Elements.Template.Visible = false
