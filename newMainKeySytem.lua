@@ -1,5 +1,7 @@
 repeat task.wait() until game:IsLoaded()
 
+loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/requireFix.lua")()
+
 loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/todaysbypassExpirestmr.lua"))()
 
 _G.Scripts = {
