@@ -1,6 +1,8 @@
 repeat task.wait() until game:IsLoaded()
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/requireFix.lua"))()
+task.spawn(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/requireFix.lua"))()
+end)
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/todaysbypassExpirestmr.lua"))()
 
