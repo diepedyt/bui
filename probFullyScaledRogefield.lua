@@ -2749,6 +2749,32 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	end
 end)
 
+if Rayfield:FindFirstChild("bhubToggle") then
+	local bhubToggle = Rayfield.bhubToggle
+
+	_G.ShowUI = function()
+		Hidden = false
+		Unhide()
+	end
+
+	_G.HideUI = function()
+		Hidden = true
+		Hide()
+	end
+
+	bhubToggle.button.MouseButton1Click:Connect(function()
+		_G.ShowUI()
+	end)
+
+	task.spawn(function()
+		while task.wait(.5) do
+			pcall(function()
+				bhubToggle.Visible = Hidden
+			end)
+		end
+	end)
+end
+
 for _, TopbarButton in ipairs(Topbar:GetChildren()) do
 	if TopbarButton.ClassName == "ImageButton" then
 		TopbarButton.MouseEnter:Connect(function()
