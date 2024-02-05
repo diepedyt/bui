@@ -17,6 +17,13 @@ _G.Scripts = {
     [5454107027] = "https://raw.githubusercontent.com/diepedyt/bui/main/APS.lua"
 }
 
+if not _G.Override then
+    _G.Override = {}
+end
+for i,v in pairs(_G.Override) do
+    _G.Scripts[i] = v
+end
+
 if not _G.dont then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/loader.lua"))()
 end
