@@ -1,6 +1,9 @@
 repeat task.wait() until game:IsLoaded()
 
-warn("yuh")
+local old = getgenv().setthreadidentity
+getgenv().setthreadidentity = function(identity)
+    return old(tonumber(identity)) --its inputting the identity as a string for some reason, so we convert it to a number
+end
 
 task.spawn(function()
     --loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/requireFix.lua"))()
