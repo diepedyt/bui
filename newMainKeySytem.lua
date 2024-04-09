@@ -1,5 +1,8 @@
 repeat task.wait() until game:IsLoaded()
 
+if not readfile then
+    delfolder("Banana Hub")
+end
 
 task.spawn(function()
     --loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/requireFix.lua"))()
