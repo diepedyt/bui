@@ -32,7 +32,6 @@ for i,v in pairs(_G.Override) do
 end
 
 if not _G.dont then
-    print("neW")
     loadstring(game:HttpGet(_G.Scripts[game.gameId]))()
     --loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/loader.lua"))()
 end
