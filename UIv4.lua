@@ -2068,19 +2068,22 @@ function RayfieldLibrary:CreateWindow(Settings)
 			Dropdown.List.Visible = false
 			
 			local selectedOptions = {}
-			local function setSelectedOptions(option)
-				if option and table.find(selectedOptions, option) then
-					table.remove(selectedOptions, table.find(selectedOptions, option))
-				elseif option then
-					table.insert(selectedOptions, option)
+			local function setSelectedOptions(option, change)
+				if option ~= "" then
+					selectedOptions = change or selectedOptions
+					if option and table.find(selectedOptions, option) then
+						table.remove(selectedOptions, table.find(selectedOptions, option))
+					elseif option then
+						table.insert(selectedOptions, option)
+					end
+					Dropdown.Selected.Text = table.concat(selectedOptions, ", ")
+					DropdownSettings.SelectedOptions = selectedOptions
 				end
-				Dropdown.Selected.Text = table.concat(selectedOptions, ", ")
-				DropdownSettings.SelectedOptions = selectedOptions
 			end	
 			
 			--setSelectedOptions(DropdownSettings.CurrentOption)
 			
-			--Dropdown.Selected.Text = DropdownSettings.CurrentOption
+			Dropdown.Selected.Text = ""
 
 			Dropdown.BackgroundTransparency = 1
 			Dropdown.UIStroke.Transparency = 1
@@ -2268,9 +2271,8 @@ function RayfieldLibrary:CreateWindow(Settings)
 					NewOption = game:GetService("HttpService"):JSONDecode(NewOption)
 				end)
 				--Dropdown.Selected.Text = NewOption
-				DropdownSettings.CurrentOption = NewOption
-				selectedOptions = (type(NewOption) == "table" and NewOption) or {NewOption}
-				setSelectedOptions()
+				--DropdownSettings.CurrentOption = NewOption
+				setSelectedOptions(nil, (type(NewOption) == "table" and NewOption) or {NewOption})
 				SaveConfiguration()
 				local Success, Response = pcall(function()
 					DropdownSettings.Callback(selectedOptions)
