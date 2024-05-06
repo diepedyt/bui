@@ -1626,6 +1626,54 @@ function RayfieldLibrary:CreateWindow(Settings)
 			return LabelValue
 		end
 
+		-- Big Label
+		function Tab:CreateBigLabel(LabelText, Size)
+			local LabelValue = {}
+
+			local Label = Elements.Template.BigLabel:Clone()
+			Label.Title.Text = LabelText
+			Label.Visible = true
+			Label.Parent = TabPage
+			
+			Label.Size = UDim2.new(1,-10, 0, Size or 35)
+
+			Label.BackgroundTransparency = 1
+			Label.UIStroke.Transparency = 1
+			Label.Title.TextTransparency = 1
+
+			Label.BackgroundColor3 = SelectedTheme.SecondaryElementBackground
+			Label.UIStroke.Color = SelectedTheme.SecondaryElementStroke
+
+			TweenService:Create(Label, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+			TweenService:Create(Label.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+			TweenService:Create(Label.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
+
+			function LabelValue:Set(NewLabel, NewSize)
+				Label.Title.Text = NewLabel
+				Label.Size = UDim2.new(1,-10, 0, NewSize or 35)
+			end
+
+			return LabelValue
+		end
+		
+		-- Space
+		function Tab:CreateSpace(Size)
+			local SpaeceValue = {}
+
+			local Space = Elements.Template.Space:Clone()
+			Space.Visible = true
+			Space.Parent = TabPage
+
+			Space.Size = UDim2.new(1,-10, 0, Size or 35)
+
+
+			function SpaeceValue:Set(NewSize)
+				Space.Size = UDim2.new(1,-10, 0, NewSize or 35)
+			end
+
+			return SpaeceValue
+		end
+
 		-- Paragraph
 		function Tab:CreateParagraph(ParagraphSettings)
 			local ParagraphValue = {}
