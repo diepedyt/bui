@@ -373,7 +373,7 @@ local function LoadConfiguration(Configuration)
 				if RayfieldLibrary.Flags[FlagName].Type == "Colorpicker" then
 					RayfieldLibrary.Flags[FlagName]:Set(UnpackColor(FlagValue))
 				else
-					if RayfieldLibrary.Flags[FlagName].CurrentValue or RayfieldLibrary.Flags[FlagName].CurrentKeybind or RayfieldLibrary.Flags[FlagName].CurrentOption ~= FlagValue then RayfieldLibrary.Flags[FlagName]:Set(FlagValue) end
+					if RayfieldLibrary.Flags[FlagName].CurrentValue or RayfieldLibrary.Flags[FlagName].CurrentKeybind or RayfieldLibrary.Flags[FlagName].CurrentOption ~= FlagValue then RayfieldLibrary.Flags[FlagName]:Set(FlagValue, nil, nil, nil, true) end
 				end    
 			end)
 		else
@@ -2266,10 +2266,12 @@ function RayfieldLibrary:CreateWindow(Settings)
 			end
 			AddOptions(DropdownSettings.Options)
 
-			function DropdownSettings:Set(NewOption)
-				pcall(function()
-					NewOption = game:GetService("HttpService"):JSONDecode(NewOption)
-				end)
+			function DropdownSettings:Set(NewOption, a, b, c, decode)
+				if decode then
+					local s,f = pcall(function()
+						NewOption = game:GetService("HttpService"):JSONDecode(NewOption)
+					end)
+				end
 				--Dropdown.Selected.Text = NewOption
 				--DropdownSettings.CurrentOption = NewOption
 				setSelectedOptions(nil, (type(NewOption) == "table" and NewOption) or {NewOption})
