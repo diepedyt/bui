@@ -1,3 +1,4 @@
+print("gng wsg")
 --[[
 
 Rayfield Interface Suite
@@ -373,7 +374,7 @@ local function LoadConfiguration(Configuration)
 				if RayfieldLibrary.Flags[FlagName].Type == "Colorpicker" then
 					RayfieldLibrary.Flags[FlagName]:Set(UnpackColor(FlagValue))
 				else
-					if RayfieldLibrary.Flags[FlagName].CurrentValue or RayfieldLibrary.Flags[FlagName].CurrentKeybind or RayfieldLibrary.Flags[FlagName].CurrentOption ~= FlagValue then RayfieldLibrary.Flags[FlagName]:Set(FlagValue) end
+					if RayfieldLibrary.Flags[FlagName].CurrentValue or RayfieldLibrary.Flags[FlagName].CurrentKeybind or RayfieldLibrary.Flags[FlagName].CurrentOption ~= FlagValue then RayfieldLibrary.Flags[FlagName]:Set(FlagValue, nil, nil, nil, true) end
 				end    
 			end)
 		else
@@ -390,7 +391,7 @@ local function SaveConfiguration()
 		if v.Type == "Colorpicker" then
 			Data[i] = PackColor(v.CurrentValue)
 		else
-			Data[i] = v.CurrentValue or v.CurrentKeybind or v.CurrentOption
+			Data[i] = (v.SelectedOptions and game:GetService("HttpService"):JSONEncode(v.SelectedOptions)) or v.CurrentValue or v.CurrentKeybind or v.CurrentOption
 		end
 	end	
 	print("Saving")
@@ -878,7 +879,7 @@ function Unhide()
 		if tab.Name ~= "Template" and tab.ClassName == "ScrollingFrame" and tab.Name ~= "Placeholder" then
 			for _, element in ipairs(tab:GetChildren()) do
 				if element.ClassName == "Frame" then
-					if element.Name ~= "SectionSpacing" and element.Name ~= "Placeholder" then
+					if element.Name ~= "SectionSpacing" and element.Name ~= "Placeholder" and element.Name ~= "Space" then
 						if element.Name == "SectionTitle" then
 							TweenService:Create(element.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 						else
@@ -900,6 +901,7 @@ function Unhide()
 	Minimised = false
 	Debounce = false
 end
+
 function CloseSearch()
 	Debounce = true
 	TweenService:Create(SearchBar, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundTransparency = 1,Size = UDim2.new(0, 460,0, 35)}):Play()
@@ -1625,6 +1627,54 @@ function RayfieldLibrary:CreateWindow(Settings)
 			return LabelValue
 		end
 
+		-- Big Label
+		function Tab:CreateBigLabel(LabelText, Size)
+			local LabelValue = {}
+
+			local Label = Elements.Template.BigLabel:Clone()
+			Label.Title.Text = LabelText
+			Label.Visible = true
+			Label.Parent = TabPage
+			
+			Label.Size = UDim2.new(1,-10, 0, Size or 35)
+
+			Label.BackgroundTransparency = 1
+			Label.UIStroke.Transparency = 1
+			Label.Title.TextTransparency = 1
+
+			Label.BackgroundColor3 = SelectedTheme.SecondaryElementBackground
+			Label.UIStroke.Color = SelectedTheme.SecondaryElementStroke
+
+			TweenService:Create(Label, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+			TweenService:Create(Label.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+			TweenService:Create(Label.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
+
+			function LabelValue:Set(NewLabel, NewSize)
+				Label.Title.Text = NewLabel
+				Label.Size = UDim2.new(1,-10, 0, NewSize or 35)
+			end
+
+			return LabelValue
+		end
+		
+		-- Space
+		function Tab:CreateSpace(Size)
+			local SpaeceValue = {}
+
+			local Space = Elements.Template.Space:Clone()
+			Space.Visible = true
+			Space.Parent = TabPage
+
+			Space.Size = UDim2.new(1,-10, 0, Size or 35)
+
+
+			function SpaeceValue:Set(NewSize)
+				Space.Size = UDim2.new(1,-10, 0, NewSize or 35)
+			end
+
+			return SpaeceValue
+		end
+
 		-- Paragraph
 		function Tab:CreateParagraph(ParagraphSettings)
 			local ParagraphValue = {}
@@ -1750,7 +1800,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 			end)
 		end
 
-		function Tab:CreateMacroExplorer(rigs, unitData, callbacks)
+				function Tab:CreateMacroExplorer(rigs, unitData, callbacks)
 			local oldTabPage = TabPage
 			
 			local MacroSettings = {}
@@ -2157,6 +2207,286 @@ function RayfieldLibrary:CreateWindow(Settings)
 			return DropdownSettings
 		end
 
+    -- Multi-Dropdown
+		function Tab:CreateMultiDropdown(DropdownSettings)
+			local Dropdown = Elements.Template.Dropdown:Clone()
+			if string.find(DropdownSettings.Name,"closed") then
+				Dropdown.Name = "Dropdown"
+			else
+				Dropdown.Name = DropdownSettings.Name
+			end
+			Dropdown.Title.Text = DropdownSettings.Name
+			Dropdown.Visible = true
+			Dropdown.Parent = TabPage
+
+			Dropdown.List.Visible = false
+			
+			local selectedOptions = {}
+			local function setSelectedOptions(option, change)
+				if option ~= "" then
+					selectedOptions = change or selectedOptions
+					if option and table.find(selectedOptions, option) then
+						table.remove(selectedOptions, table.find(selectedOptions, option))
+					elseif option then
+						table.insert(selectedOptions, option)
+					end
+					Dropdown.Selected.Text = table.concat(selectedOptions, ", ")
+					DropdownSettings.SelectedOptions = selectedOptions
+				end
+			end	
+			
+			--setSelectedOptions(DropdownSettings.CurrentOption)
+			
+			Dropdown.Selected.Text = ""
+
+			Dropdown.BackgroundTransparency = 1
+			Dropdown.UIStroke.Transparency = 1
+			Dropdown.Title.TextTransparency = 1
+
+			Dropdown.Size = UDim2.new(1, -10, 0, 45)
+
+			TweenService:Create(Dropdown, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+			TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+			TweenService:Create(Dropdown.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
+
+			--custom shi
+			TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
+			TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
+			TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.313, 0, 0.479, 0)}):Play()      
+			--
+
+			for _, ununusedoption in ipairs(Dropdown.List:GetChildren()) do
+				if ununusedoption.ClassName == "Frame" and ununusedoption.Name ~= "ZZZZZZZZZ" and ununusedoption.Name ~= "," and ununusedoption.Name ~= ",---S=()earch" then
+					ununusedoption:Destroy()
+				end
+			end
+
+			Dropdown.Toggle.Rotation = 180
+
+			Dropdown.Interact.MouseButton1Click:Connect(function()
+				TweenService:Create(Dropdown, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
+				TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+				wait(0.1)
+				TweenService:Create(Dropdown, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+				TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+				if Debounce then return end
+				if Dropdown.List.Visible then
+					--custom shi
+					TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
+					TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
+					TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.313, 0, 0.479, 0)}):Play()     
+					--
+					Debounce = true
+					TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
+					for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
+						if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "ZZZZZZZZZ" and DropdownOpt.Name ~= "," and DropdownOpt.Name ~= ",---S=()earch" then
+							TweenService:Create(DropdownOpt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
+							TweenService:Create(DropdownOpt.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+							TweenService:Create(DropdownOpt.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
+						end
+					end
+					TweenService:Create(Dropdown.List, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 1}):Play()
+					TweenService:Create(Dropdown.Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Rotation = 180}):Play()	
+					wait(0.35)
+					Dropdown.List.Visible = false
+					Debounce = false
+				else
+					--custom shi
+					TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0,0.151, 0), Position = UDim2.new(0.962, 0,0.113, 0)}):Play()
+					TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0,0.075, 0), Position = UDim2.new(0.742, 0,0.113, 0)}):Play()
+					TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.55, 0,0.075, 0), Position = UDim2.new(0.313, 0,0.113, 0)}):Play()
+					--
+					TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 186)}):Play()
+					Dropdown.List.Visible = true
+					TweenService:Create(Dropdown.List, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 0.7}):Play()
+					TweenService:Create(Dropdown.Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Rotation = 0}):Play()	
+					for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
+						if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "ZZZZZZZZZ" and DropdownOpt.Name ~= "," and DropdownOpt.Name ~= ",---S=()earch" then
+							TweenService:Create(DropdownOpt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+							TweenService:Create(DropdownOpt.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+							TweenService:Create(DropdownOpt.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
+						end
+					end
+				end
+			end)
+
+			Dropdown.List[',---S=()earch'].Input:GetPropertyChangedSignal('Text'):Connect(function()
+				local InputText=string.upper(Dropdown.List[',---S=()earch'].Input.Text)
+				for _,item in ipairs(Dropdown.List:GetChildren()) do
+					if item:IsA('Frame') and item.Name ~= 'Template' and item.Name ~= ',---S=()earch' and item.Name ~= ',' and item.Name ~= 'ZZZZZZZZZ' then
+						if InputText==""or string.find(string.upper(item.Name),InputText)~=nil then
+							item.Visible=true
+						else
+							item.Visible=false
+						end
+					end
+				end
+			end)
+			Dropdown.MouseEnter:Connect(function()
+				if not Dropdown.List.Visible then
+					TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
+				end
+			end)
+
+			Dropdown.MouseLeave:Connect(function()
+				TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+			end)
+
+			local function Error(text)
+				TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
+				TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+				Dropdown.Title.Text = text
+				wait(0.5)
+				Dropdown.Title.Text = DropdownSettings.Name
+				TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+				TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+			end
+
+			local function AddOption(Option,Selected)
+				local DropdownOption = Elements.Template.Dropdown.List.Template:Clone()
+				DropdownOption.Name = Option
+				DropdownOption.Title.Text = Option
+				DropdownOption.Parent = Dropdown.List
+				DropdownOption.Visible = true
+
+				if DropdownSettings.CurrentOption == Option then
+					DropdownOption.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+				end
+
+				DropdownOption.BackgroundTransparency = 1
+				DropdownOption.UIStroke.Transparency = 1
+				DropdownOption.Title.TextTransparency = 1
+
+				DropdownOption.Interact.ZIndex = 50
+				DropdownOption.Interact.MouseButton1Click:Connect(function()
+					if Dropdown.Selected.Text ~= Option or true then
+						--Dropdown.Selected.Text = Option
+						
+						setSelectedOptions(Option)
+
+						SaveConfiguration()
+						local Success, Response = pcall(function()
+							DropdownSettings.Callback(selectedOptions)
+						end)
+						if not Success then
+							Error('Callback Error')
+							print("Rayfield | "..DropdownSettings.Name.." Callback Error " ..tostring(Response))
+						end
+						DropdownSettings.CurrentOption = Option
+						for _, droption in ipairs(Dropdown.List:GetChildren()) do
+							if droption.ClassName == "Frame" and droption.Name ~= "ZZZZZZZZZ" and droption.Name ~= "," and droption.Name ~= ",---S=()earch" and droption.Name ~= DropdownSettings.CurrentOption then
+								TweenService:Create(droption, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
+							end
+						end
+						TweenService:Create(DropdownOption.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+						TweenService:Create(DropdownOption, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}):Play()
+						Debounce = true
+						wait(0.2)
+						TweenService:Create(DropdownOption.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+						wait(0.1)
+						--custom shi
+						TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
+						TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
+						TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.313, 0, 0.479, 0)}):Play()      
+						--
+						TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
+						for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
+							if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "ZZZZZZZZZ" and DropdownOpt.Name ~= "," and DropdownOpt.Name ~= ",---S=()earch" then
+								TweenService:Create(DropdownOpt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
+								TweenService:Create(DropdownOpt.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+								TweenService:Create(DropdownOpt.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
+							end
+						end
+						TweenService:Create(Dropdown.List, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 1}):Play()
+						TweenService:Create(Dropdown.Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Rotation = 180}):Play()	
+						wait(0.35)
+						Dropdown.List.Visible = false
+						Debounce = false	
+					end
+				end)
+			end
+			function DropdownSettings:Add(Item,Selected)
+				AddOption(Item,Selected)
+			end
+			local function AddOptions(Options,Selected)
+				for _, Option in ipairs(Options) do
+					AddOption(Option,Selected)
+				end
+				if Settings.ConfigurationSaving then
+					if Settings.ConfigurationSaving.Enabled and DropdownSettings.Flag then
+						RayfieldLibrary.Flags[DropdownSettings.Flag] = DropdownSettings
+					end
+				end
+			end
+			AddOptions(DropdownSettings.Options)
+
+			function DropdownSettings:Set(NewOption, a, b, c, decode)
+				if decode then
+					local s,f = pcall(function()
+						NewOption = game:GetService("HttpService"):JSONDecode(NewOption)
+					end)
+				end
+				--Dropdown.Selected.Text = NewOption
+				--DropdownSettings.CurrentOption = NewOption
+				setSelectedOptions(nil, (type(NewOption) == "table" and NewOption) or {NewOption})
+				SaveConfiguration()
+				local Success, Response = pcall(function()
+					DropdownSettings.Callback(selectedOptions)
+				end)
+				if not Success then
+					TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
+					TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+					Dropdown.Title.Text = "Callback Error"
+					print("Rayfield | "..DropdownSettings.Name.." Callback Error " ..tostring(Response))
+					wait(0.5)
+					Dropdown.Title.Text = DropdownSettings.Name
+					TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+					TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+				end
+
+				for _, droption in ipairs(Dropdown.List:GetChildren()) do
+					if droption.Name ~= NewOption then
+						if droption.ClassName == "Frame" and droption.Name ~= "ZZZZZZZZZ" and droption.Name ~= "," and droption.Name ~= '---S=()earch' then
+							droption.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+						end
+					else
+						droption.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+					end
+
+				end
+			end
+			function DropdownSettings:Error(text)
+				Error(text)
+			end
+			function DropdownSettings:Refresh(NewOptions,Default)
+				--Dropdown.Selected.Text = Default
+				selectedOptions = (type(Default) == "table" and Default) or {Default}
+				setSelectedOptions()
+				for _, option in ipairs(Dropdown.List:GetChildren()) do
+					if option.ClassName == "Frame" and option.Name ~= ',---S=()earch' and option.Name ~= "ZZZZZZZZZ" and option.Name ~= "," and option.Name ~= '---S=()earch' then
+						option:Destroy()
+					end
+				end
+				AddOptions(NewOptions,Default)
+			end
+			function DropdownSettings:Remove(Item)
+				if Item.Name ~= "ZZZZZZZZZ" and Item.Name ~= "," and Item ~= '---S=()earch' then
+					if Dropdown.List:FindFirstChild(Item) then
+						Dropdown.List[Item]:Destroy()
+					else
+						Error('Option not found.')
+					end
+				else
+					Error("No")
+				end
+				if table.find(selectedOptions, Item) then
+					setSelectedOptions(Item)
+				end
+			end
+
+			return DropdownSettings
+		end
+    
 		-- Keybind
 		function Tab:CreateKeybind(KeybindSettings)
 			local CheckingForKey = false
