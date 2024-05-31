@@ -1800,7 +1800,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 			end)
 		end
 
-				function Tab:CreateMacroExplorer(rigs, unitData, callbacks)
+		function Tab:CreateMacroExplorer(rigs, unitData, callbacks)
 			local oldTabPage = TabPage
 			
 			local MacroSettings = {}
@@ -1927,15 +1927,20 @@ function RayfieldLibrary:CreateWindow(Settings)
 						rig.Parent = unit_template.Button.ViewportFrame.WorldModel
 						rig.HumanoidRootPart.Position = Vector3.new(0,0,0)
 						
+						
+						task.delay(.5, function()
+							local Animation = Instance.new("Animation")
+							Animation.AnimationId = "rbxassetid://"..tostring(unit_data.AnimationId)
+							Animation.Looped = true
 
-						local Animation = Instance.new("Animation")
-						Animation.AnimationId = "rbxassetid://"..tostring(unit_data.AnimationId)
+							local ViewportRigAnimator = unit_template.Button.ViewportFrame.WorldModel.rig.Humanoid
+							
+							print(ViewportRigAnimator, unit_data.AnimationId)
+							
+							local ViewportTrack = ViewportRigAnimator:LoadAnimation(Animation)
 
-						local ViewportRigAnimator = unit_template.Button.ViewportFrame.WorldModel.rig.Humanoid
-
-						local ViewportTrack = ViewportRigAnimator:LoadAnimation(Animation)
-
-						ViewportTrack:Play()
+							ViewportTrack:Play()
+						end)
 						
 						
 						unit_template.Visible = true
