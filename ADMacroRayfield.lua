@@ -1925,7 +1925,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 						
 						rig.Name = "rig"
 						rig.Parent = unit_template.Button.ViewportFrame.WorldModel
-						rig.HumanoidRootPart.Position = Vector3.new(0,0,0)
+						rig.HumanoidRootPart.Position = Vector3.new(0, 0, 1)
 						
 						
 						task.delay(.5, function()
