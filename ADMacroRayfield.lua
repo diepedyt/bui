@@ -1931,7 +1931,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 						task.delay(.5, function()
 							local Animation = Instance.new("Animation")
 							Animation.AnimationId = "rbxassetid://"..tostring(unit_data.AnimationId)
-							Animation.Looped = true
 
 							local ViewportRigAnimator = unit_template.Button.ViewportFrame.WorldModel.rig.Humanoid
 							
