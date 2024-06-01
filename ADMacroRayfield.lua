@@ -1,4 +1,4 @@
-print("7am")
+print("8am")
 --[[
 
 Rayfield Interface Suite
@@ -221,7 +221,7 @@ local CoreGui = game:GetService("CoreGui")
 
 -- Interface Management
 
-local Rayfield =  game:GetObjects("rbxassetid://17678083296")[1] --14412610844
+local Rayfield =  game:GetObjects("rbxassetid://17690150641")[1] --14412610844 -- 17678083296
 
 --studio
 --function gethui() return Rayfield end local http_request = nil local syn = {protect_gui = false,request = false,}local http = nil function writefile(tt,t,ttt)end function isfolder(t)end function makefolder(t)end function isfile(r)end function readfile(t)end
@@ -1800,21 +1800,96 @@ function RayfieldLibrary:CreateWindow(Settings)
 			end)
 		end
 
-		function Tab:CreateMacroExplorer(rigs, unitData, callbacks)
+function Tab:CreateMacroExplorer(rigs, unitData, callbacks)
 			local oldTabPage = TabPage
-			
+
 			local MacroSettings = {}
-			
+
 			Tab:CreateSpace(20)
-			
+
 			local searchBar = Elements.Template.Macro_Explorer:Clone()
 			searchBar.Visible = true
 			searchBar.Parent = oldTabPage
+
+			Tab:CreateSpace(15)
 			
-			Tab:CreateSpace(20)
+			local macro_navigator = Elements.Template.Macro_Navigator:Clone()
+			
+			
+			function MacroSettings:SetNavigatorV(current_page, max_pages)
+				macro_navigator.Page.Title.Text = tostring(current_page).."/"..tostring(max_pages)
+				macro_navigator[">"].Visible = (current_page < max_pages)
+				macro_navigator["<"].Visible = (current_page > 1)
+			end
+			
+			MacroSettings:SetNavigatorV(1,1)
+
+			
+			local oldCons = {}
+			function MacroSettings:SetCurrentNavigatorList(list)
+				for _, con in pairs(oldCons) do
+					con:Disconnect()
+				end
+				
+				table.sort(list, function(a,b)
+					return (a.upvotes - a.downvotes) > (b.upvotes - b.downvotes)
+				end)
+				
+				local current_page = 1
+				local list_size = math.ceil(#list / 10)
+				
+				local function getMacrosByPage(page, Macros)
+					local macros = {}
+					
+					
+					for i = (page-1)*10, page*10 do
+						if Macros[i] then
+							table.insert(macros, Macros[i])
+						end
+					end
+					
+					
+					return macros
+				end
+				
+				local db = false
+				
+				local con1 = macro_navigator["<"].Interact.MouseButton1Click:Connect(function()
+					if not db then
+						db = true
+						current_page = current_page - 1
+						MacroSettings:SetNavigatorV(current_page, list_size)
+						MacroSettings:SetMacros(getMacrosByPage(current_page, list))
+						db = false
+					end
+				end)
+				
+				table.insert(oldCons, con1)
+
+				local con2 = macro_navigator[">"].Interact.MouseButton1Click:Connect(function()
+					if not db then
+						db = true
+						current_page = current_page + 1
+						MacroSettings:SetNavigatorV(current_page, list_size)
+						MacroSettings:SetMacros(getMacrosByPage(current_page, list))
+						db = false
+					end
+				end)
+				
+				table.insert(oldCons, con2)
+				
+				MacroSettings:SetNavigatorV(1, list_size)
+				MacroSettings:SetMacros(getMacrosByPage(1, list))
+				
+			end
+			
+			macro_navigator.Parent = oldTabPage
+			macro_navigator.Visible = true
+
+			Tab:CreateSpace(5)
 			
 			local macro_template = Elements.Template.Macro_Template
-			
+
 			searchBar.InputFrame.InputBox.FocusLost:Connect(function(enter)
 				local searched = searchBar.InputFrame.InputBox.Text
 				for _, frame in pairs(oldTabPage:GetChildren()) do
@@ -1824,7 +1899,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 				end
 			end)
 
-			
+
 			searchBar.MouseEnter:Connect(function()
 				TweenService:Create(searchBar, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
 			end)
@@ -1836,17 +1911,19 @@ function RayfieldLibrary:CreateWindow(Settings)
 			searchBar.InputFrame.InputBox:GetPropertyChangedSignal("Text"):Connect(function()
 				TweenService:Create(searchBar.InputFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, searchBar.InputFrame.InputBox.TextBounds.X + 24, 0, 30)}):Play()
 			end)
-			
+
 			local old = {}
-			
+
 			function MacroSettings:SetMacros(Macros)
 				for _, mc in pairs(old) do
 					mc:Destroy()
 				end
 				
+
+
 				local a = '{"1": "0 0.466667 0.466667 0.466667 0 0.291287 0.631373 0.631373 0.631373 0 0.62462 0.631373 0.631373 0.631373 0 0.957954 0.466667 0.466667 0.466667 0 1 0.631373 0.631373 0.631373 0 ","2": "0 0 0.4 1 0 0.291359 0.298039 0.662745 1 0 0.624693 0.298039 0.662745 1 0 0.958026 0 0.4 1 0 1 0.298039 0.662745 1 0 ","3": "0 0.564706 0 0.941176 0 0.290703 0.662745 0.45098 1 0 0.624037 0.662745 0.45098 1 0 0.95737 0.564706 0 0.941176 0 1 0.662745 0.45098 1 0 ","4": "0 0.988235 1 0.188235 0 0.29077 1 0.584314 0 0 0.624104 1 0.584314 0 0 0.957437 0.988235 1 0.188235 0 1 1 0.584314 0 0 ","5": "0 0.109804 1 0.101961 0 0.124088 0.172549 0.364706 1 0 0.290755 1 0.101961 0.988235 0 0.457422 1 0.160784 0.176471 0 0.624088 1 0.584314 0 0 0.790755 0.984314 1 0.0235294 0 0.957421 0.109804 1 0.101961 0 1 0.172549 0.364706 1 0 ","6": "0 0.16 0 0 0 0.124805 1 0 0 0 0.291472 0.16 0 0 0 0.458139 1 0 0 0 0.624805 0.16 0 0 0 0.791472 1 0 0 0 0.958139 0.16 0 0 0 1 1 0 0 0 "}'
 				local rars = game:GetService("HttpService"):JSONDecode(a)
-				
+
 				local function GetColorSequenceByRarity(r)
 					local colorString = rars[tostring(r)]
 					local numbers = {}
@@ -1866,11 +1943,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 
 					return ColorSequence.new(keypoints)
 				end
-				
-				table.sort(Macros, function(a,b)
-					return (a.upvotes - a.downvotes) > (b.upvotes - b.downvotes)
-				end)
-				
+
 				for _, macroData in pairs(Macros) do
 					local name = macroData.name or "error"
 					local description = macroData.description or "error"
@@ -1879,49 +1952,50 @@ function RayfieldLibrary:CreateWindow(Settings)
 					local downvotes = macroData.downvotes or "999"
 					local userUpvoted = macroData.user_upvoted or false
 					local userDownvoted = macroData.user_downvoted or false
-					
+
 					local clonedTemp = macro_template:Clone()
 					clonedTemp.Name = name
-					
+
 					clonedTemp.Download.amount.Text = "0"
 					clonedTemp.UpVote.amount.Text = upvotes
 					clonedTemp.DownVote.amount.Text = downvotes
-					
+
 					clonedTemp.InfoFrame.Title.Text = name
 					clonedTemp.InfoFrame.Description.Text = description
-					
+
 					clonedTemp.Download.Button.MouseButton1Click:Connect(function()
 						callbacks.Download(macroData.id)
 					end)
-					
+
 					clonedTemp.UpVote.Button.MouseButton1Click:Connect(function()
 						callbacks.Upvote(macroData.id)
 					end)
-					
+
 					clonedTemp.DownVote.Button.MouseButton1Click:Connect(function()
 						callbacks.Downvote(macroData.id)
 					end)
-					
+
 					clonedTemp.InfoFrame.Units.Template.Visible = false
 					for _, unit in pairs(units) do
-						
+
 						local unit_template = clonedTemp.InfoFrame.Units.Template:Clone()
-						
+
 						local unit_data = unitData[unit.Name]
-						
+
 						local name = unit.Name
 						local rarColorSequence = GetColorSequenceByRarity(unit_data.Rarity)
 						local rig = rigs[name]:Clone()
 						local level = unit.Level
 						local isShiny = unit.Shiny
-						
-						unit_template.Button.UIGradient.Color = rarColorSequence
-						
+
+						--unit_template.Button.UIGradient.Color = rarColorSequence
+
 						if level then
 							unit_template.Button.UnitNameLabel.Text = "Lvl "..tostring(level)
 						else
 							unit_template.Button.UnitNameLabel.Visible = false
 						end
+
 						
 						rig.Name = "rig"
 						rig.Parent = unit_template.Button.ViewportFrame.WorldModel
@@ -1933,27 +2007,28 @@ function RayfieldLibrary:CreateWindow(Settings)
 							Animation.AnimationId = "rbxassetid://"..tostring(unit_data.AnimationId)
 
 							local ViewportRigAnimator = unit_template.Button.ViewportFrame.WorldModel.rig.Humanoid
-							
+
 							print(ViewportRigAnimator, unit_data.AnimationId)
-							
+
 							local ViewportTrack = ViewportRigAnimator:LoadAnimation(Animation)
 
 							ViewportTrack:Play()
 						end)
 						
-						
+
+
 						unit_template.Visible = true
 						unit_template.Parent = clonedTemp.InfoFrame.Units
 					end
-					
+
 					clonedTemp.Parent = TabPage
-					
+
 					table.insert(old, clonedTemp)
-					
+
 				end
-				
+
 			end
-			
+
 			return MacroSettings
 		end
 		
