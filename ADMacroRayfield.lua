@@ -1480,6 +1480,13 @@ function RayfieldLibrary:CreateWindow(Settings)
 
 		end)
 
+		function Window:CreatePlaceHolder()
+			local cloned = TabList.Placeholder:Clone()
+			cloned.LayoutOrder = 0
+			cloned.Parent = TabList
+			return cloned
+		end
+		
 		local Tab = {}
 
 		-- Button
