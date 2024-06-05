@@ -1377,9 +1377,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 	function Window:CreateTab(Name,Image,Seperator)
 		local SDone = false
 		local TabButton = TabList.Template:Clone()
-		if Seperator then
-			TabButton.Seperator.Visible = true
-		end
+		TabButton.Seperator.Visible = (Seperator ~= nil)
 		TabButton.Name = Name
 		TabButton.Title.Text = Name
 		TabButton.Parent = TabList
