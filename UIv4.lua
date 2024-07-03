@@ -2747,144 +2747,156 @@ function RayfieldLibrary:CreateWindow(Settings)
 			end)
 		end
 
-		 --Slider
-		function Tab:CreateSlider(SliderSettings)
-			local Dragging = false
-			local Slider = Elements.Template.Slider:Clone()
-			Slider.Name = SliderSettings.Name
-			Slider.Title.Text = SliderSettings.Name
-			Slider.Visible = true
-			Slider.Parent = TabPage
-
-			Slider.BackgroundTransparency = 1
-			Slider.UIStroke.Transparency = 1
-			Slider.Title.TextTransparency = 1
-
-			if SelectedTheme ~= RayfieldLibrary.Theme.Default then
-				Slider.Main.Shadow.Visible = false
-			end
-			if SliderSettings.Info then
-				Slider.Description.Text = SliderSettings.Info
-				local IsHover = false
-				local opened = false
-				local osize = Slider.Size.Y.Offset
-
-				Slider.MouseEnter:Connect(function(x,y)
-					IsHover = true
-					wait(0.2)
-					if IsHover then
-						opened = true
-						Slider.Description.Visible = true
-						game:GetService('TweenService'):Create(Slider,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Size = UDim2.new(1, -10,0, osize + Slider.Description.Size.Y.Offset + 15)}):Play()
-					end
-				end)
-				Slider.MouseLeave:Connect(function(x,y)
-					if IsHover then IsHover = false end
-					if opened then
-						opened = false
-						game:GetService('TweenService'):Create(Slider,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Size = UDim2.new(1, -10,0, osize)}):Play()
-						delay(.4,function()
-							if not opened then Slider.Description.Visible = false end
-						end)
-					end
-				end)
-			end
-			Slider.Main.BackgroundColor3 = SelectedTheme.SliderBackground
-			Slider.Main.UIStroke.Color = SelectedTheme.SliderStroke
-			Slider.Main.Progress.BackgroundColor3 = SelectedTheme.SliderProgress
-
-			TweenService:Create(Slider, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-			TweenService:Create(Slider.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-			TweenService:Create(Slider.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
-
-			Slider.Main.Progress.Size =	UDim2.new(0, Slider.Main.AbsoluteSize.X * ((SliderSettings.CurrentValue + SliderSettings.Range[1]) / (SliderSettings.Range[2] - SliderSettings.Range[1])) > 5 and Slider.Main.AbsoluteSize.X * (SliderSettings.CurrentValue / (SliderSettings.Range[2] - SliderSettings.Range[1])) or 5, 1, 0)
-
-			if not SliderSettings.Suffix then
-				Slider.Main.Information.Text = tostring(SliderSettings.CurrentValue)
-			else
-				Slider.Main.Information.Text = tostring(SliderSettings.CurrentValue) .. " " .. SliderSettings.Suffix
-			end
-
-
-			Slider.MouseEnter:Connect(function()
-				TweenService:Create(Slider, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
-			end)
-
-			Slider.MouseLeave:Connect(function()
-				TweenService:Create(Slider, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
-			end)
-
-			Slider.Main.Interact.InputBegan:Connect(function(Input)
-				if Input.UserInputType == Enum.UserInputType.MouseButton1 then 
-					Dragging = true 
-				end 
-			end)
-			Slider.Main.Interact.InputEnded:Connect(function(Input) 
-				if Input.UserInputType == Enum.UserInputType.MouseButton1 then 
-					Dragging = false 
-				end 
-			end)
-
-			Slider.Main.Interact.MouseButton1Down:Connect(function(X)
-				local Current = Slider.Main.Progress.AbsolutePosition.X + Slider.Main.Progress.AbsoluteSize.X
-				local Start = Current
-				local Location = X
-				local Loop; Loop = RunService.Stepped:Connect(function()
-					if Dragging then
-						Location = UserInputService:GetMouseLocation().X
-						Current = Current + 0.025 * (Location - Start)
-
-						if Location < Slider.Main.AbsolutePosition.X then
-							Location = Slider.Main.AbsolutePosition.X
-						elseif Location > Slider.Main.AbsolutePosition.X + Slider.Main.AbsoluteSize.X then
-							Location = Slider.Main.AbsolutePosition.X + Slider.Main.AbsoluteSize.X
-						end
-
-						if Current < Slider.Main.AbsolutePosition.X + 5 then
-							Current = Slider.Main.AbsolutePosition.X + 5
-						elseif Current > Slider.Main.AbsolutePosition.X + Slider.Main.AbsoluteSize.X then
-							Current = Slider.Main.AbsolutePosition.X + Slider.Main.AbsoluteSize.X
-						end
-
-						if Current <= Location and (Location - Start) < 0 then
-							Start = Location
-						elseif Current >= Location and (Location - Start) > 0 then
-							Start = Location
-						end
-						TweenService:Create(Slider.Main.Progress, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, Current - Slider.Main.AbsolutePosition.X, 1, 0)}):Play()
-						local NewValue = SliderSettings.Range[1] + (Location - Slider.Main.AbsolutePosition.X) / Slider.Main.AbsoluteSize.X * (SliderSettings.Range[2] - SliderSettings.Range[1])
-
-						NewValue = math.floor(NewValue / SliderSettings.Increment + 0.5) * (SliderSettings.Increment * 10000000) / 10000000
-						if not SliderSettings.Suffix then
-							Slider.Main.Information.Text = tostring(NewValue)
-						else
-							Slider.Main.Information.Text = tostring(NewValue) .. " " .. SliderSettings.Suffix
-						end
-
-						if SliderSettings.CurrentValue ~= NewValue then
-							SaveConfiguration()
-							local Success, Response = pcall(function()
-								SliderSettings.Callback(NewValue)
-							end)
-							if not Success then
-								TweenService:Create(Slider, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
-								TweenService:Create(Slider.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-								Slider.Title.Text = "Callback Error"
-								print("Rayfield | "..SliderSettings.Name.." Callback Error " ..tostring(Response))
-								wait(0.5)
-								Slider.Title.Text = SliderSettings.Name
-								TweenService:Create(Slider, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
-								TweenService:Create(Slider.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-							end
-
-							SliderSettings.CurrentValue = NewValue
-						end
-					else
-						TweenService:Create(Slider.Main.Progress, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, Location - Slider.Main.AbsolutePosition.X > 5 and Location - Slider.Main.AbsolutePosition.X or 5, 1, 0)}):Play()
-						Loop:Disconnect()
-					end
-				end)
-			end)
+				 --Slider
+         function Tab:CreateSlider(SliderSettings)
+            local Dragging = false
+            local Slider = Elements.Template.Slider:Clone()
+            Slider.Name = SliderSettings.Name
+            Slider.Title.Text = SliderSettings.Name
+            Slider.Visible = true
+            Slider.Parent = TabPage
+        
+            Slider.BackgroundTransparency = 1
+            Slider.UIStroke.Transparency = 1
+            Slider.Title.TextTransparency = 1
+        
+            if SelectedTheme ~= RayfieldLibrary.Theme.Default then
+                Slider.Main.Shadow.Visible = false
+            end
+        
+            if SliderSettings.Info then
+                Slider.Description.Text = SliderSettings.Info
+                local IsHover = false
+                local opened = false
+                local osize = Slider.Size.Y.Offset
+        
+                Slider.MouseEnter:Connect(function()
+                    IsHover = true
+                    wait(0.2)
+                    if IsHover then
+                        opened = true
+                        Slider.Description.Visible = true
+                        game:GetService('TweenService'):Create(Slider, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(1, -10, 0, osize + Slider.Description.Size.Y.Offset + 15)}):Play()
+                    end
+                end)
+                Slider.MouseLeave:Connect(function()
+                    if IsHover then IsHover = false end
+                    if opened then
+                        opened = false
+                        game:GetService('TweenService'):Create(Slider, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(1, -10, 0, osize)}):Play()
+                        delay(.4, function()
+                            if not opened then Slider.Description.Visible = false end
+                        end)
+                    end
+                end)
+            end
+        
+            Slider.Main.BackgroundColor3 = SelectedTheme.SliderBackground
+            Slider.Main.UIStroke.Color = SelectedTheme.SliderStroke
+            Slider.Main.Progress.BackgroundColor3 = SelectedTheme.SliderProgress
+        
+            TweenService:Create(Slider, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+            TweenService:Create(Slider.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+            TweenService:Create(Slider.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
+        
+            Slider.Main.Progress.Size = UDim2.new(0, Slider.Main.AbsoluteSize.X * ((SliderSettings.CurrentValue + SliderSettings.Range[1]) / (SliderSettings.Range[2] - SliderSettings.Range[1])) > 5 and Slider.Main.AbsoluteSize.X * (SliderSettings.CurrentValue / (SliderSettings.Range[2] - SliderSettings.Range[1])) or 5, 1, 0)
+        
+            if not SliderSettings.Suffix then
+                Slider.Main.Information.Text = tostring(SliderSettings.CurrentValue)
+            else
+                Slider.Main.Information.Text = tostring(SliderSettings.CurrentValue) .. " " .. SliderSettings.Suffix
+            end
+        
+            Slider.MouseEnter:Connect(function()
+                TweenService:Create(Slider, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
+            end)
+        
+            Slider.MouseLeave:Connect(function()
+                TweenService:Create(Slider, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+            end)
+        
+            Slider.Main.Interact.InputBegan:Connect(function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then 
+                    Dragging = true 
+                end 
+            end)
+            Slider.Main.Interact.InputEnded:Connect(function(Input) 
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then 
+                    Dragging = false 
+                end 
+            end)
+        
+            Slider.Main.Interact.InputChanged:Connect(function(Input)
+                if Dragging and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+                    local Location = UserInputService:GetMouseLocation().X
+                    if Input.UserInputType == Enum.UserInputType.Touch then
+                        Location = Input.Position.X
+                    end
+                    local Current = Slider.Main.Progress.AbsolutePosition.X + Slider.Main.Progress.AbsoluteSize.X
+                    local Start = Current
+        
+                    local Loop; Loop = RunService.Stepped:Connect(function()
+                        if Dragging then
+                            if Input.UserInputType == Enum.UserInputType.MouseMovement then
+                                Location = UserInputService:GetMouseLocation().X
+                            elseif Input.UserInputType == Enum.UserInputType.Touch then
+                                Location = Input.Position.X
+                            end
+                            Current = Current + 0.025 * (Location - Start)
+        
+                            if Location < Slider.Main.AbsolutePosition.X then
+                                Location = Slider.Main.AbsolutePosition.X
+                            elseif Location > Slider.Main.AbsolutePosition.X + Slider.Main.AbsoluteSize.X then
+                                Location = Slider.Main.AbsolutePosition.X + Slider.Main.AbsoluteSize.X
+                            end
+        
+                            if Current < Slider.Main.AbsolutePosition.X + 5 then
+                                Current = Slider.Main.AbsolutePosition.X + 5
+                            elseif Current > Slider.Main.AbsolutePosition.X + Slider.Main.AbsoluteSize.X then
+                                Current = Slider.Main.AbsolutePosition.X + Slider.Main.AbsoluteSize.X
+                            end
+        
+                            if Current <= Location and (Location - Start) < 0 then
+                                Start = Location
+                            elseif Current >= Location and (Location - Start) > 0 then
+                                Start = Location
+                            end
+                            TweenService:Create(Slider.Main.Progress, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, Current - Slider.Main.AbsolutePosition.X, 1, 0)}):Play()
+                            local NewValue = SliderSettings.Range[1] + (Location - Slider.Main.AbsolutePosition.X) / Slider.Main.AbsoluteSize.X * (SliderSettings.Range[2] - SliderSettings.Range[1])
+        
+                            NewValue = math.floor(NewValue / SliderSettings.Increment + 0.5) * (SliderSettings.Increment * 10000000) / 10000000
+                            if not SliderSettings.Suffix then
+                                Slider.Main.Information.Text = tostring(NewValue)
+                            else
+                                Slider.Main.Information.Text = tostring(NewValue) .. " " .. SliderSettings.Suffix
+                            end
+        
+                            if SliderSettings.CurrentValue ~= NewValue then
+                                SaveConfiguration()
+                                local Success, Response = pcall(function()
+                                    SliderSettings.Callback(NewValue)
+                                end)
+                                if not Success then
+                                    TweenService:Create(Slider, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
+                                    TweenService:Create(Slider.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+                                    Slider.Title.Text = "Callback Error"
+                                    print("Rayfield | " .. SliderSettings.Name .. " Callback Error " .. tostring(Response))
+                                    wait(0.5)
+                                    Slider.Title.Text = SliderSettings.Name
+                                    TweenService:Create(Slider, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+                                    TweenService:Create(Slider.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+                                end
+        
+                                SliderSettings.CurrentValue = NewValue
+                            end
+                        else
+                            TweenService:Create(Slider.Main.Progress, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, Location - Slider.Main.AbsolutePosition.X > 5 and Location - Slider.Main.AbsolutePosition.X or 5, 1, 0)}):Play()
+                            Loop:Disconnect()
+                        end
+                    end)
+                end
+            end)
+        
 
 			function SliderSettings:Set(NewVal)
 				TweenService:Create(Slider.Main.Progress, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Slider.Main.AbsoluteSize.X * ((NewVal + SliderSettings.Range[1]) / (SliderSettings.Range[2] - SliderSettings.Range[1])) > 5 and Slider.Main.AbsoluteSize.X * (NewVal / (SliderSettings.Range[2] - SliderSettings.Range[1])) or 5, 1, 0)}):Play()
