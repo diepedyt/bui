@@ -9,6 +9,11 @@ iRay  | Programming
 
 ]]
 
+function custom_match(s, pattern)
+    pattern = pattern:gsub("%%", "%%%%")
+    return string.match(s, pattern)
+end
+
 
 _G.Theme = _G.RayfieldTheme or _G.Theme
 
