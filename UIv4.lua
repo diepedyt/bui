@@ -942,7 +942,7 @@ SearchBar.Input:GetPropertyChangedSignal('Text'):Connect(function()
 		if page ~= 'Template' then
 			for _,Element in pairs(page:GetChildren())do
 				if Element:IsA("Frame") and Element.Name ~= 'Placeholder' and Element.Name ~= 'SectionSpacing' and not Element:GetAttribute('SectionTitle') then
-					if InputText==""or string.find(string.upper(Element.Name),InputText)~=nil then
+					if InputText==""or custom_match(string.upper(Element.Name),InputText)~=nil then
 						Element.Visible=true
 					else
 						Element.Visible=false
@@ -1896,7 +1896,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 				local InputText=string.upper(Dropdown.List[',---S=()earch'].Input.Text)
 				for _,item in ipairs(Dropdown.List:GetChildren()) do
 					if item:IsA('Frame') and item.Name ~= 'Template' and item.Name ~= ',---S=()earch' and item.Name ~= ',' and item.Name ~= 'ZZZZZZZZZ' then
-						if InputText==""or string.find(string.upper(item.Name),InputText)~=nil then
+						if InputText==""or custom_match(string.upper(item.Name),InputText)~=nil then
 							item.Visible=true
 						else
 							item.Visible=false
@@ -2166,7 +2166,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 				local InputText=string.upper(Dropdown.List[',---S=()earch'].Input.Text)
 				for _,item in ipairs(Dropdown.List:GetChildren()) do
 					if item:IsA('Frame') and item.Name ~= 'Template' and item.Name ~= ',---S=()earch' and item.Name ~= ',' and item.Name ~= 'ZZZZZZZZZ' then
-						if InputText==""or string.find(string.upper(item.Name),InputText)~=nil then
+						if InputText==""or custom_match(string.upper(item.Name),InputText)~=nil then
 							item.Visible=true
 						else
 							item.Visible=false
