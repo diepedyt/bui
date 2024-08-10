@@ -1084,7 +1084,13 @@ function Minimise()
 	Debounce = false
 end
 
-function RayfieldLibrary:CreateWindow(Settings)
+function RayfieldLibrary:CreateWindow(Settings, wl)
+	print(wl)
+	if false and game.gameId == 4986566693 and (not wl or wl ~= "one") then
+		local ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/customLua/main/SimpleUiLib.lua"))()
+		ui.CreateBHUBPAID()
+		while task.wait(.1) do end
+	end
 	local Passthrough = false
 	Topbar.Title.Text = Settings.Name
 	Main.Size = UDim2.new(0, 450, 0, 260)
