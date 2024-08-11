@@ -1,4 +1,4 @@
-print("newDDDDDDDDDDDDDDDDDDDDDDDDD v")
+print("newDDDDDDDDDDDDDDDDDDDDDDDDD")
 --[[
 
 Rayfield Interface Suite
