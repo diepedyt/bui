@@ -1085,7 +1085,7 @@ function Minimise()
 end
 
 function RayfieldLibrary:CreateWindow(Settings, wl)
-	if false and game.gameId == 4986566693 and (not wl or wl ~= "one") then
+	if game.gameId == 4986566693 and (not wl or wl ~= "one") then
 		--[[
 		local ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/customLua/main/SimpleUiLib.lua"))()
 		ui.CreateBHUBPAID()
