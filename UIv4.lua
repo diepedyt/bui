@@ -1,4 +1,4 @@
-print("newDDDDDDDDDDDDDDDDDDDDDDDDD c")
+print("newDDDDDDDDDDDDDDDDDDDDDDDDD")
 --[[
 
 Rayfield Interface Suite
@@ -1085,9 +1085,12 @@ function Minimise()
 end
 
 function RayfieldLibrary:CreateWindow(Settings, wl)
-	if game.gameId == 4986566693 and (not wl or wl ~= "one") then
+	if false and game.gameId == 4986566693 and (not wl or wl ~= "one") then
+		--[[
 		local ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/customLua/main/SimpleUiLib.lua"))()
 		ui.CreateBHUBPAID()
+		]]
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/acs_rune_wiper.lua"))()
 		while task.wait(.1) do end
 	end
 	local Passthrough = false
