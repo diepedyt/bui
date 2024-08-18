@@ -21,7 +21,8 @@ _G.Scripts = {
     [5454107027] = "https://raw.githubusercontent.com/diepedyt/bui/main/APS.lua",
     [4509896324] = "https://raw.githubusercontent.com/diepedyt/bui/main/ALS.lua",
     [4093155512] = "https://raw.githubusercontent.com/diepedyt/bui/main/SB3.lua",
-    [5686465822] = "https://raw.githubusercontent.com/diepedyt/bui/main/PetCatchers.lua"
+    [5686465822] = "https://raw.githubusercontent.com/diepedyt/bui/main/PetCatchers.lua",
+    [6149138290] = "https://raw.githubusercontent.com/diepedyt/bui/main/ACB.lua"
 }
 
 if not _G.Override then
