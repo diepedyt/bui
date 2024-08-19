@@ -1,0 +1,1 @@
+[[{"CardRarities":{"Normal":{"StatMultiplier":1,"Chance":1,"Effect":"rbxassetid://18149869094"},"Universal":{"StatMultiplier":64,"Chance":1000000,"Effect":"rbxassetid://18149869094"},"Rainbow":{"StatMultiplier":16,"Chance":10000,"Effect":"rbxassetid://18149869094"},"Gold":{"StatMultiplier":4,"Chance":100,"Effect":"rbxassetid://18149869094"}}}]]
