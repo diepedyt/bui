@@ -1,5 +1,7 @@
 local HM, CardInfoMod, CardRaritiesMod;
 
+local HS = game:GetService("HttpService")
+
 local function GCFCRMs()
     local CardInfoMod = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/ACB_CardInfoMod.lua"))()
     CardInfoMod = HS:JSONDecode(CardInfoMod)
