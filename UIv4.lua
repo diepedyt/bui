@@ -1,4 +1,4 @@
-print("newDDDDDDDDDDDDDDDDDDDDDDDDD")
+print("newDDDDDDDDDDDDDDDDDDDDDDDDD v")
 --[[
 
 Rayfield Interface Suite
@@ -1933,11 +1933,12 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 			end
 			
-			local function AddOption(Option,Selected)
+			local function AddOption(Option,Selected,LayoutOrder)
 				local DropdownOption = Elements.Template.Dropdown.List.Template:Clone()
 				DropdownOption.Name = Option
 				DropdownOption.Title.Text = Option
 				DropdownOption.Parent = Dropdown.List
+				DropdownOption.LayoutOrder = LayoutOrder or 0
 				DropdownOption.Visible = true
 
 				if DropdownSettings.CurrentOption == Option then
@@ -1998,8 +1999,8 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				AddOption(Item,Selected)
 			end
 			local function AddOptions(Options,Selected)
-				for _, Option in ipairs(Options) do
-					AddOption(Option,Selected)
+				for i, Option in ipairs(Options) do
+					AddOption(Option,Selected,i)
 				end
 				if Settings.ConfigurationSaving then
 					if Settings.ConfigurationSaving.Enabled and DropdownSettings.Flag then
