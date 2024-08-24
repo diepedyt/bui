@@ -1,4 +1,4 @@
-local HM, CardInfoMod, CardRaritiesMod;
+local HM, CardInfoMod, CardRaritiesMod, R_MS;
 
 local HS = game:GetService("HttpService")
 
@@ -9,10 +9,13 @@ local function GCFCRMs()
     local CardRaritiesMod = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/ACB_CardRaritiesMod.lua"))()
     CardRaritiesMod = HS:JSONDecode(CardRaritiesMod)
 
-    return CardInfoMod, CardRaritiesMod
+    local R_MS = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/ACB_RaidInfoMod.lua"))()
+    R_MS = HS:JSONDecode(R_MS)
+
+    return CardInfoMod, CardRaritiesMod, R_MS
 end
 
-CardInfoMod, CardRaritiesMod = GCFCRMs()
+CardInfoMod, CardRaritiesMod, R_MS = GCFCRMs()
 
 HM = {}
 
@@ -54,4 +57,4 @@ HM.CalculateStats = function(v197, v198, v199)
     }
 end
 
-return HM, CardInfoMod, CardRaritiesMod
+return HM, CardInfoMod, CardRaritiesMod, R_MS
