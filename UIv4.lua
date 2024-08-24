@@ -1826,6 +1826,8 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			Dropdown.Visible = true
 			Dropdown.Parent = TabPage
 
+			Dropdown.List.UIListLayout.SortOrder = "LayoutOrder"
+
 			Dropdown.List.Visible = false
 
 			Dropdown.Selected.Text = DropdownSettings.CurrentOption
