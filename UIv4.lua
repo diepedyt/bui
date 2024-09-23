@@ -2019,8 +2019,6 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			function DropdownSettings:Set(NewOption)
 				Dropdown.Selected.Text = NewOption
 				DropdownSettings.CurrentOption = NewOption
-				warn("NEW OPTION", NewOption)
-				warn("CURRENT OPTION", DropdownSettings.CurrentOption)
 				SaveConfiguration()
 				local Success, Response = pcall(function()
 					DropdownSettings.Callback(NewOption)
