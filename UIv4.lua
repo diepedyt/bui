@@ -397,6 +397,7 @@ local function SaveConfiguration()
 			Data[i] = PackColor(v.CurrentValue)
 		else
 			Data[i] = (v.SelectedOptions and game:GetService("HttpService"):JSONEncode(v.SelectedOptions)) or v.CurrentValue or v.CurrentKeybind or v.CurrentOption
+			print(Data[i])
 		end
 	end	
 	print("Saving")
