@@ -1959,6 +1959,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				DropdownOption.Interact.MouseButton1Click:Connect(function()
 					if Dropdown.Selected.Text ~= Option then
 						Dropdown.Selected.Text = Option
+						DropdownSettings.CurrentOption = Option
 
 						SaveConfiguration()
 						local Success, Response = pcall(function()
@@ -1968,7 +1969,6 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 							Error('Callback Error')
 							print("Rayfield | "..DropdownSettings.Name.." Callback Error " ..tostring(Response))
 						end
-						DropdownSettings.CurrentOption = Option
 						for _, droption in ipairs(Dropdown.List:GetChildren()) do
 							if droption.ClassName == "Frame" and droption.Name ~= "ZZZZZZZZZ" and droption.Name ~= "," and droption.Name ~= ",---S=()earch" and droption.Name ~= DropdownSettings.CurrentOption then
 								TweenService:Create(droption, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
