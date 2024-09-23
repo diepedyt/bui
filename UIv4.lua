@@ -1,4 +1,4 @@
-print("newxxxxxxDDDDDDDD3333zxczc3333c")
+print("vFxxxxxxxxxxxxxxxxxxx4")
 --[[
 
 Rayfield Interface Suite
@@ -389,7 +389,6 @@ local function LoadConfiguration(Configuration)
 end
 
 local function SaveConfiguration()
-	warn("called")
 	if not CEnabled then return end
 	local Data = {}
 	for i,v in pairs(RayfieldLibrary.Flags) do
@@ -397,13 +396,8 @@ local function SaveConfiguration()
 			Data[i] = PackColor(v.CurrentValue)
 		else
 			Data[i] = (v.SelectedOptions and game:GetService("HttpService"):JSONEncode(v.SelectedOptions)) or v.CurrentValue or v.CurrentKeybind or v.CurrentOption
-			if v.CurrentOption then
-				warn(v.CurrentOption)
-			end
-			--print(Data[i])
 		end
 	end	
-	print("Saving")
 	writefile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension, tostring(HttpService:JSONEncode(Data)))
 end
 
