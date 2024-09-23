@@ -1,4 +1,4 @@
-print("newDDDDDDDDDDDDDDDD33333333c")
+print("newxxxxxxDDDDDDDD33333333c")
 --[[
 
 Rayfield Interface Suite
@@ -397,7 +397,10 @@ local function SaveConfiguration()
 			Data[i] = PackColor(v.CurrentValue)
 		else
 			Data[i] = (v.SelectedOptions and game:GetService("HttpService"):JSONEncode(v.SelectedOptions)) or v.CurrentValue or v.CurrentKeybind or v.CurrentOption
-			print(Data[i])
+			if v.CurrentOption then
+				warn(v.CurrentOption)
+			end
+			--print(Data[i])
 		end
 	end	
 	print("Saving")
