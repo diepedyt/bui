@@ -1,4 +1,4 @@
-print("Lyfestyle in 2093 but smoother and hotter 9000x")
+print("Lyfestyle in 2093 but smoother and hotter 9000x while being calmer")
 --[[
 
 Rayfield Interface Suite
@@ -800,6 +800,8 @@ function Hide()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
 	TweenService:Create(Topbar.UIStroke, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
 	TweenService:Create(Main.UIStroke, TweenInfo.new(.25, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+	TweenService:Create(Main.TabListBack.Divider.BackgroundTransparency, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+	TweenService:Create(Main.TabListBack.Title.TextTransparency, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
 	for _, TopbarButton in ipairs(Topbar:GetChildren()) do
 		if TopbarButton.ClassName == "ImageButton" then
 			TweenService:Create(TopbarButton, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
@@ -854,6 +856,8 @@ function Unhide()
 	TweenService:Create(Main.Topbar.CornerRepair, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 	TweenService:Create(Main.Topbar.Title, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 	TweenService:Create(Main.UIStroke, TweenInfo.new(1, Enum.EasingStyle.Quint), {Transparency = 0.1}):Play()
+	TweenService:Create(Main.TabListBack.Divider.BackgroundTransparency, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+	TweenService:Create(Main.TabListBack.Title.TextTransparency, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 	if Minimised then
 		spawn(Maximise)
 	end
