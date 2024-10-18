@@ -1366,13 +1366,15 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 		_G.UiSizeDown = function(amount)
 			local correctSizeX = Main.Size.X.Scale - (amount * 0.12)
 			local correctSizeY = Main.Size.Y.Scale - (amount * 0.10)
-			Main.Size = UDim2.new(correctSizeX, 0, correctSizeY, 0)
+			--Main.Size = UDim2.new(correctSizeX, 0, correctSizeY, 0)
+			TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Size = UDim2.new(correctSizeX, 0, correctSizeY, 0)}):Play()
 		end
 
 		_G.UiSizeUp = function(amount)
 			local correctSizeX = Main.Size.X.Scale + (amount * 0.12)
 			local correctSizeY = Main.Size.Y.Scale + (amount * 0.10)
-			Main.Size = UDim2.new(correctSizeX, 0, correctSizeY, 0)
+			--Main.Size = UDim2.new(correctSizeX, 0, correctSizeY, 0)
+			TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Size = UDim2.new(correctSizeX, 0, correctSizeY, 0)}):Play()
 		end
 	end)
 
