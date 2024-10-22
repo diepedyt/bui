@@ -3240,7 +3240,14 @@ end
 
 function RayfieldLibrary:LoadConfiguration(config)
 	config = config or "main"
+	local oldSaveName = string.format("%s/%s%s", ConfigurationFolder, CFileName, ConfigurationExtension)
 	local saveName = string.format("%s/%s%s_%s", ConfigurationFolder, CFileName, ConfigurationExtension, config)
+	if isfile(oldSaveName) then
+		local file = readfile(oldSaveName)
+		writefile(saveName, file)
+		delfile(oldSaveName)
+	end
+
 	if CEnabled then
 		pcall(function()
 			if isfile(saveName) then
