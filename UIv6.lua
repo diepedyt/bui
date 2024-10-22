@@ -3247,21 +3247,6 @@ end
 local firstTimeLoad = true
 local defaultConfig = {}
 
-function RayfieldLibrary:GetDefaultConfig()
-	local Data = {}
-	for i,v in pairs(defaultConfig) do
-		if v.Type == "Colorpicker" then
-			Data[i] = PackColor(v.CurrentValue)
-		else
-			Data[i] = (v.SelectedOptions and game:GetService("HttpService"):JSONEncode(v.SelectedOptions)) or v.CurrentValue or v.CurrentKeybind or v.CurrentOption
-			if Data[i] == nil then
-				Data[i] = false
-			end
-		end
-	end
-	return Data
-end
-
 function RayfieldLibrary:LoadConfiguration(config)
 	if firstTimeLoad then
 		firstTimeLoad = false
@@ -3287,10 +3272,15 @@ function RayfieldLibrary:LoadConfiguration(config)
 end
 
 local HS = game:GetService("HttpService")
-function RayfieldLibrary:CreateConfig(config, data)
-	data = HS:JSONEncode(data)
+function RayfieldLibrary:CreateConfig(config, data, default)
+	local data;
+	if default then
+		data = defaultConfig
+	else
+		data = HS:JSONEncode(data)
+	end
 	warn("creating", config, data)
-_G.TEMPDATA = data
+	_G.TEMPDATA = data
 	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
 	writefile(saveName, data)
 end
