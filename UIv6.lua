@@ -1,4 +1,4 @@
-print("v6 14")
+print("v6 15")
 --[[
 
 Rayfield Interface Suite
@@ -3276,6 +3276,23 @@ function RayfieldLibrary:LoadConfiguration(config)
 	end
 end
 
+function RayfieldLibrary:GetFlagsConfig(config)
+	local Data = {}
+
+	for index, data in pairs(config) do
+		if data.Type == "Colorpicker" then
+			Data[index] = PackColor(data.CurrentValue)
+		else
+			Data[index] = (data.SelectedOptions and game:GetService("HttpService"):JSONEncode(data.SelectedOptions)) or data.CurrentValue or data.CurrentKeybind or data.CurrentOption
+			if Data[index] == nil then
+				Data[index] = false
+			end
+		end
+	end
+	
+	return Data
+end
+
 local HS = game:GetService("HttpService")
 function RayfieldLibrary:CreateConfig(config, data, default)
 	for i,v in pairs(defaultConfig) do
@@ -3283,7 +3300,7 @@ function RayfieldLibrary:CreateConfig(config, data, default)
 	end
 	local data;
 	if default then
-		data = defaultConfig
+		data = RayfieldLibrary:GetFlagsConfig(defaultConfig)
 	else
 		data = data
 	end
