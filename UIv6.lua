@@ -1,4 +1,4 @@
-print("v6")
+print("v6 1")
 --[[
 
 Rayfield Interface Suite
@@ -2748,6 +2748,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 			if Settings.ConfigurationSaving then
 				if Settings.ConfigurationSaving.Enabled and ToggleSettings.Flag then
+					WARN("TOGGLE SETTINGS:", ToggleSettings)
 					RayfieldLibrary.Flags[ToggleSettings.Flag] = ToggleSettings
 				end
 			end
