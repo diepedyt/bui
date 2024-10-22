@@ -1,4 +1,4 @@
-print("v6 16")
+print("v6 17")
 --[[
 
 Rayfield Interface Suite
@@ -3324,7 +3324,6 @@ end
 
 
 function RayfieldLibrary:CreateConfig(config, data, default)
-	local data;
 	if default then
 		data = RayfieldLibrary:GetDefaultConfig()
 	else
