@@ -3258,7 +3258,7 @@ function RayfieldLibrary:LoadConfiguration(config)
 		pcall(function()
 			if isfile(saveName) then
 				LoadConfiguration(readfile(saveName))
-				RayfieldLibrary:Notify({Title = "Configuration Loaded", Content = "The configuration file for this script has been loaded from a previous session"})
+				RayfieldLibrary:Notify({Title = "Configuration Loaded", Content = "The configuration file for this script has been loaded succesfully."})
 			end
 		end)
 	end
