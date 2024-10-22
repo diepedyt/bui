@@ -404,7 +404,7 @@ local function SaveConfiguration()
 	end	
 	local config = _G._ACTIVECONFIG
 	config = config or "main"
-	local saveName = string.format("%s/%s%s_%s", ConfigurationFolder, CFileName, ConfigurationExtension, config)
+	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
 	writefile(saveName, tostring(HttpService:JSONEncode(Data)))
 end
 
@@ -3247,7 +3247,7 @@ end
 function RayfieldLibrary:LoadConfiguration(config)
 	config = config or "main"
 	local oldSaveName = string.format("%s/%s%s", ConfigurationFolder, CFileName, ConfigurationExtension)
-	local saveName = string.format("%s/%s%s_%s", ConfigurationFolder, CFileName, ConfigurationExtension, config)
+	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
 	if isfile(oldSaveName) then
 		local file = readfile(oldSaveName)
 		writefile(saveName, file)
