@@ -1,4 +1,4 @@
-print("v6 15")
+print("v6 16")
 --[[
 
 Rayfield Interface Suite
@@ -3309,7 +3309,11 @@ function RayfieldLibrary:GetDefaultConfig()
 		elseif data.CurrentOption then
 			value = "None"
 		end
-		
+
+		if value == nil then
+			value = false
+		end
+	
 		Data[index] = value
 		print(index, value)
 	end
