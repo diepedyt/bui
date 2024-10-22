@@ -1,4 +1,4 @@
-print("v6 10")
+print("v6 11")
 --[[
 
 Rayfield Interface Suite
@@ -3277,11 +3277,13 @@ function RayfieldLibrary:CreateConfig(config, data, default)
 	if default then
 		data = defaultConfig
 	else
-		data = HS:JSONEncode(data)
+		data = data
 	end
+	data = HS:JSONEncode(data)
 	warn("creating", config, data)
 	_G.TEMPDATA = data
 	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
+	warn(saveName, data)
 	writefile(saveName, data)
 end
 
