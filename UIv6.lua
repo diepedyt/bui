@@ -3264,6 +3264,19 @@ function RayfieldLibrary:LoadConfiguration(config)
 	end
 end
 
+function RayfieldLibrary:CreateConfig(config, data)
+	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
+	writefile(saveName, data)
+end
+
+function RayfieldLibrary:GetConfig(config)
+	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
+	local file = isfile(saveName) and readfile(saveName)
+	if file then
+		return file
+	end
+end
+
 ChangeTheme(_G.Theme or _G.RayfieldTheme or "Default")
 
 return RayfieldLibrary
