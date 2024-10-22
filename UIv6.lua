@@ -1,4 +1,4 @@
-print("v6 5")
+print("v6 6")
 --[[
 
 Rayfield Interface Suite
@@ -3264,16 +3264,18 @@ function RayfieldLibrary:LoadConfiguration(config)
 	end
 end
 
+local HS = game:GetService("HttpService")
 function RayfieldLibrary:CreateConfig(config, data)
+	data = HS:JSONEncode(data)
 	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
 	writefile(saveName, data)
 end
 
 function RayfieldLibrary:GetConfig(config)
+	
 	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
 	local file = isfile(saveName) and readfile(saveName)
 	if file then
-		file = game:GetService("HttpService"):JSONEncode(file)
 		return file
 	end
 end
