@@ -2027,6 +2027,8 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			AddOptions(DropdownSettings.Options)
 
 			function DropdownSettings:Set(NewOption)
+				_G.A = NewOption
+				print("hi", NewOption)
 				Dropdown.Selected.Text = NewOption
 				DropdownSettings.CurrentOption = NewOption
 				SaveConfiguration()
