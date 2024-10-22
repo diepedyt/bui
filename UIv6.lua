@@ -1,4 +1,4 @@
-print("v6 13")
+print("v6 14")
 --[[
 
 Rayfield Interface Suite
@@ -3250,8 +3250,12 @@ local defaultConfig = {}
 function RayfieldLibrary:LoadConfiguration(config)
 	warn("Load", config)
 	if firstTimeLoad then
+	warn("first time load")
 		firstTimeLoad = false
 		defaultConfig = table.clone(RayfieldLibrary.Flags)
+	for i,v in pairs(defaultConfig) do
+		warn(i,v)
+	end
 	end
 	config = config or "main"
 	local oldSaveName = string.format("%s/%s%s", ConfigurationFolder, CFileName, ConfigurationExtension)
@@ -3274,6 +3278,9 @@ end
 
 local HS = game:GetService("HttpService")
 function RayfieldLibrary:CreateConfig(config, data, default)
+	for i,v in pairs(defaultConfig) do
+		warn(i,v)
+	end
 	local data;
 	if default then
 		data = defaultConfig
