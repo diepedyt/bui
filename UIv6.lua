@@ -3248,6 +3248,7 @@ local firstTimeLoad = true
 local defaultConfig = {}
 
 function RayfieldLibrary:LoadConfiguration(config)
+	warn("Load", config)
 	if firstTimeLoad then
 		firstTimeLoad = false
 		defaultConfig = table.clone(RayfieldLibrary.Flags)
