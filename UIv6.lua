@@ -398,7 +398,10 @@ local function SaveConfiguration()
 			Data[i] = (v.SelectedOptions and game:GetService("HttpService"):JSONEncode(v.SelectedOptions)) or v.CurrentValue or v.CurrentKeybind or v.CurrentOption
 		end
 	end	
-	writefile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension, tostring(HttpService:JSONEncode(Data)))
+	local config = _G._ACTIVECONFIG
+	config = config or "main"
+	local saveName = string.format("%s/%s%s_%s", ConfigurationFolder, CFileName, ConfigurationExtension, config)
+	writefile(saveName, tostring(HttpService:JSONEncode(Data)))
 end
 
 local neon = (function()  --Open sourced neon module
@@ -3235,11 +3238,13 @@ for _, TopbarButton in ipairs(Topbar:GetChildren()) do
 end
 
 
-function RayfieldLibrary:LoadConfiguration()
+function RayfieldLibrary:LoadConfiguration(config)
+	config = config or "main"
+	local saveName = string.format("%s/%s%s_%s", ConfigurationFolder, CFileName, ConfigurationExtension, config)
 	if CEnabled then
 		pcall(function()
-			if isfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension) then
-				LoadConfiguration(readfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension))
+			if isfile(saveName) then
+				LoadConfiguration(readfile(saveName))
 				RayfieldLibrary:Notify({Title = "Configuration Loaded", Content = "The configuration file for this script has been loaded from a previous session"})
 			end
 		end)
