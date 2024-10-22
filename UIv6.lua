@@ -2731,6 +2731,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 					TweenService:Create(Toggle.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()	
 				end
 				SaveConfiguration()
+				warn("ccurent callback settings", ToggleSettings, ToggleSettings.CurrentValue)
 				local Success, Response = pcall(function()
 					ToggleSettings.Callback(ToggleSettings.CurrentValue)
 				end)
@@ -2748,7 +2749,6 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 			if Settings.ConfigurationSaving then
 				if Settings.ConfigurationSaving.Enabled and ToggleSettings.Flag then
-					WARN("TOGGLE SETTINGS:", ToggleSettings)
 					RayfieldLibrary.Flags[ToggleSettings.Flag] = ToggleSettings
 				end
 			end
