@@ -1,4 +1,4 @@
-print("v6 2")
+print("v6 3")
 --[[
 
 Rayfield Interface Suite
@@ -396,6 +396,10 @@ local function SaveConfiguration()
 			Data[i] = PackColor(v.CurrentValue)
 		else
 			Data[i] = (v.SelectedOptions and game:GetService("HttpService"):JSONEncode(v.SelectedOptions)) or v.CurrentValue or v.CurrentKeybind or v.CurrentOption
+			if Data[i] == nil then
+				print(i,v)
+				Data[i] = false
+			end
 		end
 	end	
 	local config = _G._ACTIVECONFIG
@@ -2731,7 +2735,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 					TweenService:Create(Toggle.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()	
 				end
 				SaveConfiguration()
-				warn("ccurent callback settings", ToggleSettings, ToggleSettings.CurrentValue)
+				
 				local Success, Response = pcall(function()
 					ToggleSettings.Callback(ToggleSettings.CurrentValue)
 				end)
