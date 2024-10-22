@@ -3294,13 +3294,35 @@ function RayfieldLibrary:GetFlagsConfig(config)
 end
 
 local HS = game:GetService("HttpService")
-function RayfieldLibrary:CreateConfig(config, data, default)
-	for i,v in pairs(defaultConfig) do
-		warn(i,v)
+
+function RayfieldLibrary:GetDefaultConfig()
+	local Data = {}
+
+	local flags = RayfieldLibrary.Flags
+	for index, data in pairs(flags) do
+		local value;
+
+		if data.SelectedOptions then
+			value = HS:JSONEncode({})
+		elseif data.CurrentValue then
+			value = false
+		elseif data.CurrentOption then
+			value = "None"
+		end
+		
+		Data[index] = value
+		print(index, value)
 	end
+	
+	
+	return Data
+end
+
+
+function RayfieldLibrary:CreateConfig(config, data, default)
 	local data;
 	if default then
-		data = RayfieldLibrary:GetFlagsConfig(defaultConfig)
+		data = RayfieldLibrary:GetDefaultConfig()
 	else
 		data = data
 	end
