@@ -1,4 +1,4 @@
-print("v6 7")
+print("v6 8")
 --[[
 
 Rayfield Interface Suite
@@ -397,7 +397,6 @@ local function SaveConfiguration()
 		else
 			Data[i] = (v.SelectedOptions and game:GetService("HttpService"):JSONEncode(v.SelectedOptions)) or v.CurrentValue or v.CurrentKeybind or v.CurrentOption
 			if Data[i] == nil then
-				print(i,v)
 				Data[i] = false
 			end
 		end
@@ -3243,8 +3242,29 @@ for _, TopbarButton in ipairs(Topbar:GetChildren()) do
 	end
 end
 
+local firstTimeLoad = true
+local defaultConfig = {}
+
+function RayfieldLibrary:GetDefaultConfig()
+	local Data = {}
+	for i,v in pairs(defaultConfig) do
+		if v.Type == "Colorpicker" then
+			Data[i] = PackColor(v.CurrentValue)
+		else
+			Data[i] = (v.SelectedOptions and game:GetService("HttpService"):JSONEncode(v.SelectedOptions)) or v.CurrentValue or v.CurrentKeybind or v.CurrentOption
+			if Data[i] == nil then
+				Data[i] = false
+			end
+		end
+	end
+	return Data
+end
 
 function RayfieldLibrary:LoadConfiguration(config)
+	if firstTimeLoad then
+		firstTimeLoad = false
+		defaultConfig = table.clone(RayfieldLibrary.Flags)
+	end
 	config = config or "main"
 	local oldSaveName = string.format("%s/%s%s", ConfigurationFolder, CFileName, ConfigurationExtension)
 	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
