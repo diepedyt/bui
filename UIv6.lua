@@ -1,4 +1,4 @@
-print("v6 12")
+print("v6 13")
 --[[
 
 Rayfield Interface Suite
@@ -2061,7 +2061,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				Error(text)
 			end
 			function DropdownSettings:Refresh(NewOptions,Default)
-				Dropdown.Selected.Text = Default
+				--Dropdown.Selected.Text = Default
 				for _, option in ipairs(Dropdown.List:GetChildren()) do
 					if option.ClassName == "Frame" and option.Name ~= ',---S=()earch' and option.Name ~= "ZZZZZZZZZ" and option.Name ~= "," and option.Name ~= '---S=()earch' then
 						option:Destroy()
@@ -2416,8 +2416,8 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			end
 			function DropdownSettings:Refresh(NewOptions,Default)
 				--Dropdown.Selected.Text = Default
-				selectedOptions = (type(Default) == "table" and Default) or {Default}
-				setSelectedOptions()
+				--selectedOptions = (type(Default) == "table" and Default) or {Default}
+				--setSelectedOptions()
 				for _, option in ipairs(Dropdown.List:GetChildren()) do
 					if option.ClassName == "Frame" and not table.find(wl, option.Name) then
 						option:Destroy()
