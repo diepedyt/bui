@@ -2705,6 +2705,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			end)
 
 			function ToggleSettings:Set(NewToggleValue)
+				if NewToggleValue == ToggleSettings.CurrentValue then return end
 				if NewToggleValue then
 					ToggleSettings.CurrentValue = true
 					TweenService:Create(Toggle, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
