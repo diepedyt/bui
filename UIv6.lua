@@ -1,4 +1,4 @@
-print("v6 6")
+print("v6 7")
 --[[
 
 Rayfield Interface Suite
@@ -3267,6 +3267,8 @@ end
 local HS = game:GetService("HttpService")
 function RayfieldLibrary:CreateConfig(config, data)
 	data = HS:JSONEncode(data)
+	warn("creating", config, data)
+_G.TEMPDATA = data
 	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
 	writefile(saveName, data)
 end
