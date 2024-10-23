@@ -1,4 +1,4 @@
-print("v6 19")
+print("v6 20")
 --[[
 
 Rayfield Interface Suite
@@ -3081,69 +3081,77 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	TweenService:Create(Topbar.Hide, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
 	wait(0.3)
 	function Window:Prompt(PromptSettings)
-		local PromptUI = Prompt.Prompt
-		Prompt.Visible = true
-		Prompt.BackgroundTransparency = 1
-		PromptUI.BackgroundTransparency = 1
-		PromptUI.UIStroke.Transparency = 1
-		PromptUI.Content.TextTransparency = 1
-		PromptUI.Title.TextTransparency = 1
-		PromptUI.Sub.TextTransparency = 1
-		PromptUI.Size = UDim2.new(0,340,0,140)
-		PromptUI.Buttons.Template.Visible = false
-		PromptUI.Buttons.Template.TextLabel.TextTransparency = 1
-		PromptUI.Buttons.Template.UIStroke.Transparency = 1
-		--PromptUI.Buttons.Middle.Visible = false
-		--PromptUI.Buttons.Middle.TextLabel.TextTransparency = 1
-		--PromptUI.Buttons.Middle.UIStroke.Transparency = 1
-		
-		PromptUI.Content.Text = PromptSettings.Content
-		PromptUI.Sub.Text = PromptSettings.SubTitle or ''
-		
-		if PromptSettings.Actions then
-			for name,info in pairs(PromptSettings.Actions) do
-				local Button = PromptUI.Buttons.Template:Clone()
-				Button.TextLabel.Text = info.Name
-				Button.Interact.MouseButton1Up:Connect(function()
-					if not clicked then
-						local Success, Response = pcall(info.Callback)
-						clicked = true
-						if not Success then
-							ClosePrompt()
-							print("Rayfield | "..info.Name.." Callback Error " ..tostring(Response))
-						else
-							ClosePrompt()
+		local _,f = pcall(function()
+			local PromptUI = Prompt.Prompt
+			Prompt.Visible = true
+			Prompt.BackgroundTransparency = 1
+			PromptUI.BackgroundTransparency = 1
+			PromptUI.UIStroke.Transparency = 1
+			PromptUI.Content.TextTransparency = 1
+			PromptUI.Title.TextTransparency = 1
+			PromptUI.Sub.TextTransparency = 1
+			PromptUI.Size = UDim2.new(0,340,0,140)
+			PromptUI.Buttons.Template.Visible = false
+			PromptUI.Buttons.Template.TextLabel.TextTransparency = 1
+			PromptUI.Buttons.Template.UIStroke.Transparency = 1
+			PromptUI.Buttons.UIListLayout.HorizontalAlignment = 0
+			--PromptUI.Buttons.Middle.Visible = false
+			--PromptUI.Buttons.Middle.TextLabel.TextTransparency = 1
+			--PromptUI.Buttons.Middle.UIStroke.Transparency = 1
+			
+			PromptUI.Content.Text = PromptSettings.Content
+			PromptUI.Sub.Text = PromptSettings.SubTitle or ''
+			
+			if PromptSettings.Actions then
+				for name,info in pairs(PromptSettings.Actions) do
+					local Button = PromptUI.Buttons.Template:Clone()
+					Button.TextLabel.Text = info.Name
+					Button.Interact.MouseButton1Up:Connect(function()
+						if not clicked then
+							local Success, Response = pcall(info.Callback)
+							clicked = true
+							if not Success then
+								ClosePrompt()
+								print("Rayfield | "..info.Name.." Callback Error " ..tostring(Response))
+							else
+								ClosePrompt()
+							end
 						end
-					end
-				end)
-				Button.Name = name
-				Button.Parent = PromptUI.Buttons -- saving memory
-				Button.Size = UDim2.fromOffset(Button.TextLabel.TextBounds.X + 24, 30)
-			end
-		end
-		
-		TweenService:Create(Prompt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = .5}):Play()
-		wait(.2)
-		TweenService:Create(PromptUI, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundTransparency = 0,Size = UDim2.new(0,350,0,150)}):Play()
-		wait(0.2)
-		TweenService:Create(PromptUI.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-		TweenService:Create(PromptUI.Title, TweenInfo.new(0.45, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-		TweenService:Create(PromptUI.Content, TweenInfo.new(0.45, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-		TweenService:Create(PromptUI.Sub, TweenInfo.new(0.45, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-		wait(1)
-		if PromptSettings.Actions then
-			for _,button in pairs(PromptUI.Buttons:GetChildren()) do
-				if button.Name ~= 'Template' and button.Name ~= 'Middle' and button:IsA('Frame') then
-					button.Visible = true
-					TweenService:Create(button.UIStroke,TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-					TweenService:Create(button.TextLabel,TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-					wait(.1)
+					end)
+					Button.Name = name
+					Button.Parent = PromptUI.Buttons -- saving memory
+					Button.Size = UDim2.fromOffset(Button.TextLabel.TextBounds.X + 24, 30)
 				end
 			end
-		else
-			--TweenService:Create(PromptUI.Buttons.Middle.UIStroke,TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-			--TweenService:Create(PromptUI.Buttons.Middle.TextLabel,TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-		end
+			
+			TweenService:Create(Prompt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = .5}):Play()
+			wait(.2)
+			TweenService:Create(PromptUI, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundTransparency = 0,Size = UDim2.new(0,350,0,150)}):Play()
+			wait(0.2)
+			TweenService:Create(PromptUI.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+			TweenService:Create(PromptUI.Title, TweenInfo.new(0.45, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
+			TweenService:Create(PromptUI.Content, TweenInfo.new(0.45, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
+			TweenService:Create(PromptUI.Sub, TweenInfo.new(0.45, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
+			wait(1)
+			if PromptSettings.Actions then
+				for _,button in pairs(PromptUI.Buttons:GetChildren()) do
+					if button.Name ~= 'Template' and button.Name ~= 'Middle' and button:IsA('Frame') then
+						button.Visible = true
+						TweenService:Create(button.UIStroke,TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+						TweenService:Create(button.TextLabel,TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
+						wait(.1)
+					end
+				end
+			else
+				--TweenService:Create(PromptUI.Buttons.Middle.UIStroke,TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+				--TweenService:Create(PromptUI.Buttons.Middle.TextLabel,TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
+			end
+
+			if f then
+				ClosePrompt()
+			end
+
+		end)
 	end
 	
 	return Window
