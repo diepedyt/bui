@@ -1,4 +1,4 @@
-print("v6 18")
+print("v6 19")
 --[[
 
 Rayfield Interface Suite
@@ -3258,7 +3258,7 @@ function RayfieldLibrary:LoadConfiguration(config)
 	end
 	end
 	config = config or "main"
-	local oldSaveName = string.format("%s/%s%s", ConfigurationFolder, CFileName, ConfigurationExtension)
+	local oldSaveName = string.format("%s/%s%s", ConfigurationFolder, CFileName..game.Players.LocalPlayer.Name, ConfigurationExtension)
 	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
 	if isfile(oldSaveName) then
 		local file = readfile(oldSaveName)
