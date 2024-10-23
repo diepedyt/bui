@@ -3137,7 +3137,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 					button.Visible = true
 					TweenService:Create(button.UIStroke,TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 					TweenService:Create(button.TextLabel,TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-					wait(.8)
+					wait(.1)
 				end
 			end
 		else
