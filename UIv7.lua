@@ -227,7 +227,23 @@ local CoreGui = game:GetService("CoreGui")
 
 -- Interface Management
 
-local Rayfield =  game:GetObjects("rbxassetid://94407935006980")[1] --14412610844
+--local Rayfield =  game:GetObjects("rbxassetid://0")[1]
+
+local RayfieldURL = "https://github.com/diepedyt/RBXM_UIS/raw/refs/heads/main/RayfielUIv7.rbxm"
+local RayfieldUIFileName = "RayfielUIv7.rbxm"
+
+local Rayfield;
+while not Rayfield do
+	local response;
+	pcall(function()
+    		response = game:HttpGet(RayfieldURL)
+	end)
+	if response then
+    		writefile(RayfieldUIFileName, response)
+    		local assetUrl = getcustomasset(RayfieldUIFileName)
+    		Rayfield = game:GetObjects(assetUrl)[1]
+	end
+end
 
 --studio
 --function gethui() return Rayfield end local http_request = nil local syn = {protect_gui = false,request = false,}local http = nil function writefile(tt,t,ttt)end function isfolder(t)end function makefolder(t)end function isfile(r)end function readfile(t)end
@@ -275,6 +291,7 @@ local TabList = Main.TabList
 local SearchBar = Main.Searchbar
 local Filler = SearchBar.CanvasGroup.Filler
 local Prompt = Main.Prompt
+local CustomText = Topbar.CustomText
 
 
 Rayfield.DisplayOrder = 100
@@ -3353,6 +3370,10 @@ function RayfieldLibrary:GetConfig(config)
 	if file then
 		return file
 	end
+end
+
+function RayfieldLibrary:GetCustomText()
+	return CustomText
 end
 
 ChangeTheme(_G.Theme or _G.RayfieldTheme or "Default")
