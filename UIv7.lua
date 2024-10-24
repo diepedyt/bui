@@ -1,5 +1,5 @@
 
-print("v7 4")
+print("v7 5")
 --[[
 
 Rayfield Interface Suite
@@ -3098,7 +3098,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	wait(0.1)
 	TweenService:Create(Topbar.ChangeSize, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
 	wait(0.1)
-	TweenService:Create(Topbar.Hide, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
+	TweenService:Create(Topbar.Hide, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.1}):Play()
 	wait(0.3)
 	function Window:Prompt(PromptSettings)
 		local _,f = pcall(function()
