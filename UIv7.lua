@@ -125,7 +125,7 @@ local RayfieldLibrary = {
 			TextColor = Color3.fromRGB(240, 240, 240),
 
             SearchIcon = Color3.fromRGB(255, 227, 36),
-            XIcon = Color3.fromRGB(255, 227, 36),
+            XIcon = Color3.fromRGB(0, 0, 0),
 
             Divider = Color3.fromRGB(255,255,255),
 
