@@ -1,5 +1,5 @@
 
-print("v7 11")
+print("v7 12")
 --[[
 
 Rayfield Interface Suite
@@ -3121,8 +3121,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			--PromptUI.Buttons.Middle.Visible = false
 			--PromptUI.Buttons.Middle.TextLabel.TextTransparency = 1
 			--PromptUI.Buttons.Middle.UIStroke.Transparency = 1
-			
-			PromptUI.Content.Text = PromptSettings.Content
+
+			PromptUI.Title.Text = PromptSettings.Title or ''
+			PromptUI.Content.Text = PromptSettings.Content or ''
 			PromptUI.Sub.Text = PromptSettings.SubTitle or ''
 			
 			if PromptSettings.Actions then
