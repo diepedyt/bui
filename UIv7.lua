@@ -1,5 +1,5 @@
 
-print("v7 9")
+print("v7 10")
 --[[
 
 Rayfield Interface Suite
@@ -893,7 +893,7 @@ function Unhide()
 	end
 	for _, TopbarButton in ipairs(Topbar:GetChildren()) do
 		if TopbarButton.ClassName == "ImageButton" then
-			TweenService:Create(TopbarButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
+			TweenService:Create(TopbarButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
 		end
 	end
 	for _, tabbtn in ipairs(TabList:GetChildren()) do
