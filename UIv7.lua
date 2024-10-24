@@ -1,5 +1,5 @@
 
-print("v7 5")
+print("v7 6")
 --[[
 
 Rayfield Interface Suite
@@ -2328,7 +2328,6 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 				DropdownOption.Interact.ZIndex = 50
 				DropdownOption.Interact.MouseButton1Click:Connect(function()
-					warn("clicked sm")
 					if Dropdown.Selected.Text ~= Option or true then
 						--Dropdown.Selected.Text = Option
 
@@ -3276,14 +3275,9 @@ local firstTimeLoad = true
 local defaultConfig = {}
 
 function RayfieldLibrary:LoadConfiguration(config)
-	warn("Load", config)
 	if firstTimeLoad then
-	warn("first time load")
 		firstTimeLoad = false
 		defaultConfig = table.clone(RayfieldLibrary.Flags)
-	for i,v in pairs(defaultConfig) do
-		warn(i,v)
-	end
 	end
 	config = config or "main"
 	local oldSaveName = string.format("%s/%s%s", ConfigurationFolder, CFileName..game.Players.LocalPlayer.Name, ConfigurationExtension)
@@ -3358,10 +3352,8 @@ function RayfieldLibrary:CreateConfig(config, data, default)
 		data = data
 	end
 	data = HS:JSONEncode(data)
-	warn("creating", config, data)
 	_G.TEMPDATA = data
 	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
-	warn(saveName, data)
 	writefile(saveName, data)
 end
 
