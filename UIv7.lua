@@ -1,5 +1,5 @@
 
-print("v6 20")
+print("v7 1")
 --[[
 
 Rayfield Interface Suite
@@ -7,6 +7,8 @@ by Sirius
 
 shlex | Designing + Programming
 iRay  | Programming
+
+roge4087 | Rewrote nearly all of the uis functions
 
 ]]
 
