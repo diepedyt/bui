@@ -1,5 +1,5 @@
 
-print("v7 8")
+print("v7 9")
 --[[
 
 Rayfield Interface Suite
@@ -829,7 +829,7 @@ function Hide()
 	TweenService:Create(Main.TabListBack.Divider, TweenInfo.new(.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
 	TweenService:Create(Main.TabListBack.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
 	TweenService:Create(CustomText, TweenInfo.new(.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-	TweenService:Create(CustomText.UIStroke, TweenInfo.new(.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
+	TweenService:Create(CustomText.UIStroke, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
 	for _, TopbarButton in ipairs(Topbar:GetChildren()) do
 		if TopbarButton.ClassName == "ImageButton" then
 			TweenService:Create(TopbarButton, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
@@ -887,7 +887,7 @@ function Unhide()
 	TweenService:Create(Main.TabListBack.Divider, TweenInfo.new(.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 	TweenService:Create(Main.TabListBack.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 	TweenService:Create(CustomText, TweenInfo.new(.5, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-	TweenService:Create(CustomText.UIStroke, TweenInfo.new(.5, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
+	TweenService:Create(CustomText.UIStroke, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 	if Minimised then
 		spawn(Maximise)
 	end
@@ -3262,15 +3262,15 @@ end
 for _, TopbarButton in ipairs(Topbar:GetChildren()) do
 	if TopbarButton.ClassName == "ImageButton" then
 		TopbarButton.MouseEnter:Connect(function()
-			TweenService:Create(TopbarButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
+			TweenService:Create(TopbarButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
 		end)
 
 		TopbarButton.MouseLeave:Connect(function()
-			TweenService:Create(TopbarButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
+			TweenService:Create(TopbarButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
 		end)
 
 		TopbarButton.MouseButton1Click:Connect(function()
-			TweenService:Create(TopbarButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
+			TweenService:Create(TopbarButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
 		end)
 	end
 end
