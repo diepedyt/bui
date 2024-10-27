@@ -1,5 +1,5 @@
 
-print("v9 1")
+print("v9 2")
 --[[
 
 Rayfield Interface Suite
@@ -3144,6 +3144,8 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 									ClosePrompt()
 								end
 							end
+						else
+							pcall(info.Callback)
 						end
 					end)
 					Button.Name = name
