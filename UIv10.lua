@@ -1,5 +1,5 @@
 
-print("v10 3")
+print("v10 4")
 --[[
 
 Rayfield Interface Suite
@@ -411,6 +411,7 @@ local function LoadConfiguration(Configuration)
 end
 
 local function SaveConfiguration()
+	if not _G.NowLoaded then return end
 	if not CEnabled then return end
 	warn("updating rfld saves")
 	local Data = {}
