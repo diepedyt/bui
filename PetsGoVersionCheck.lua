@@ -1,1 +1,1 @@
-return "5", "Config Sharing, Show Status & Improve Perfomance, Auto Rejoin on Script Update, Fixed Auto Dice Functions, Fixed Auto Upgrade Free"
+return "6", "Fixed PC Config Loading on Multiple Accounts"
