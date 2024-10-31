@@ -10,7 +10,7 @@ end
 
 local module = {}
 
-module.SavedKeyFile = "BHUB_SAVEDKEY.txt"
+module.SavedKeyFile = "BHUB_SAVEDKEYv2.txt"
 module.UI_PACKAGE = game:GetObjects("rbxassetid://139906473639831")[1]
 
 function module:DestroyUI()
@@ -125,7 +125,7 @@ end
 function module:GetSavedKey()
 	local file_name = self.SavedKeyFile
 	local file = isfile(file_name) and readfile(file_name)
-	return file or "dsadsadsadsasad"
+	return file
 end
 
 module.KeyBoxInputChanged = nil -- tick
