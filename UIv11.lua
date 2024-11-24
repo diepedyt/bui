@@ -1,5 +1,5 @@
 
-print("v10 4")
+print("v11 v2")
 --[[
 
 Rayfield Interface Suite
@@ -3295,10 +3295,14 @@ function RayfieldLibrary:LoadConfiguration(config)
 	config = config or "main"
 	local oldSaveName = string.format("%s/%s%s", ConfigurationFolder, CFileName..game.Players.LocalPlayer.Name, ConfigurationExtension)
 	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
+	warn(oldSaveName)
 	if isfile(oldSaveName) then
+		print("exists")
 		local file = readfile(oldSaveName)
+		warn("writing", saveName)
 		writefile(saveName, file)
 		delfile(oldSaveName)
+		warn("deleted")
 	end
 
 	if CEnabled then
