@@ -1,1 +1,1 @@
-return "7", "Accidently left debugging mode on when i updated, removed and updated, please re-execute"
+return "8", "Fixed Auto Collect Turkey Feathers Lag"
