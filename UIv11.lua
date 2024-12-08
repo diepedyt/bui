@@ -1,5 +1,5 @@
 
-print("v11 v2")
+print("v11 v3")
 --[[
 
 Rayfield Interface Suite
@@ -1765,6 +1765,113 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			return ParagraphValue
 		end
 
+        function Tab:CreateSavingInput(InputSettings)
+			local Input = Elements.Template.Input:Clone()
+			Input.Name = InputSettings.Name
+			Input.Title.Text = InputSettings.Name..":"
+			Input.Visible = true
+			Input.Parent = TabPage
+			
+
+			Input.BackgroundTransparency = 1
+			Input.UIStroke.Transparency = 1
+			Input.Title.TextTransparency = 1
+
+			Input.InputFrame.BackgroundColor3 = SelectedTheme.InputBackground
+			Input.InputFrame.UIStroke.Color = SelectedTheme.InputStroke
+
+			TweenService:Create(Input, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+			TweenService:Create(Input.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+			TweenService:Create(Input.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
+
+			Input.InputFrame.InputBox.PlaceholderText = InputSettings.PlaceholderText
+			Input.InputFrame.Size = UDim2.new(0, Input.InputFrame.InputBox.TextBounds.X + 24, 0, 30)
+			
+			if InputSettings.Info then
+				Input.Description.Text = InputSettings.Info
+				local IsHover = false
+				local opened = false
+				local osize = Input.Size.Y.Offset
+
+				Input.MouseEnter:Connect(function(x,y)
+					IsHover = true
+					wait(0.2)
+					if IsHover then
+						opened = true
+						Input.Description.Visible = true
+						game:GetService('TweenService'):Create(Input,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Size = UDim2.new(1, -10,0, osize + Input.Description.Size.Y.Offset + 15)}):Play()
+					end
+				end)
+				Input.MouseLeave:Connect(function(x,y)
+					if IsHover then IsHover = false end
+					if opened then
+						opened = false
+						game:GetService('TweenService'):Create(Input,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Size = UDim2.new(1, -10,0, osize)}):Play()
+						delay(.4,function()
+							if not opened then Input.Description.Visible = false end
+						end)
+					end
+				end)
+			end
+			
+			if InputSettings.NumbersOnly or InputSettings.CharacterLimit then
+				Input.InputFrame.InputBox:GetPropertyChangedSignal('Text'):Connect(function()
+					if InputSettings.CharacterLimit then Input.InputFrame.InputBox.Text = Input.InputFrame.InputBox.Text:sub(1,InputSettings.CharacterLimit) end
+					if InputSettings.NumbersOnly then Input.InputFrame.InputBox.Text = Input.InputFrame.InputBox.Text:gsub('%D+', '') end
+				end)
+			end
+			
+			Input.InputFrame.InputBox.FocusLost:Connect(function(enter)
+                if not enter then return end
+                local text = Input.InputFrame.InputBox.Text
+                InputSettings:Set(text)
+				Input.InputFrame.InputBox.Text = ""
+			end)
+
+			Input.MouseEnter:Connect(function()
+				TweenService:Create(Input, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
+			end)
+
+			Input.MouseLeave:Connect(function()
+				TweenService:Create(Input, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+			end)
+
+			Input.InputFrame.InputBox:GetPropertyChangedSignal("Text"):Connect(function()
+				TweenService:Create(Input.InputFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Input.InputFrame.InputBox.TextBounds.X + 24, 0, 30)}):Play()
+			end)
+
+            function InputSettings:Set(value)
+                local vTextFunc = InputSettings.vTextFunc
+                local vText = vTextFunc and vTextFunc(value)
+                print(value, vText)
+                local Success, Response = pcall(function()
+					InputSettings.Callback(value)
+				end)
+				if not Success then
+					TweenService:Create(Input, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
+					TweenService:Create(Input.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+					Input.Title.Text = "Callback Error"
+					print("Rayfield | "..InputSettings.Name.." Callback Error " ..tostring(Response))
+					wait(0.5)
+					Input.Title.Text = InputSettings.Name
+					TweenService:Create(Input, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+					TweenService:Create(Input.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+				end
+
+                InputSettings.CurrentValue = value
+                Input.Title.Text = string.format("%s: %s", InputSettings.Name, vText or value)
+                SaveConfiguration()
+            end
+
+            if Settings.ConfigurationSaving then
+				if Settings.ConfigurationSaving.Enabled and InputSettings.Flag then
+					RayfieldLibrary.Flags[InputSettings.Flag] = InputSettings
+				end
+			end
+
+            return InputSettings
+		end
+
 		-- Input
 		function Tab:CreateInput(InputSettings)
 			local Input = Elements.Template.Input:Clone()
@@ -3295,14 +3402,10 @@ function RayfieldLibrary:LoadConfiguration(config)
 	config = config or "main"
 	local oldSaveName = string.format("%s/%s%s", ConfigurationFolder, CFileName..game.Players.LocalPlayer.Name, ConfigurationExtension)
 	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
-	warn(oldSaveName)
 	if isfile(oldSaveName) then
-		print("exists")
 		local file = readfile(oldSaveName)
-		warn("writing", saveName)
 		writefile(saveName, file)
 		delfile(oldSaveName)
-		warn("deleted")
 	end
 
 	if CEnabled then
