@@ -1,5 +1,5 @@
 
-print("v11 v4")
+print("v11 v5")
 --[[
 
 Rayfield Interface Suite
@@ -1767,6 +1767,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
         function Tab:CreateSavingInput(InputSettings)
 			local Input = Elements.Template.Input:Clone()
+            Input.Title.Position = UDim2.new(0.266, 0, 0.5, 0)
 			Input.Name = InputSettings.Name
             Input.Title.RichText = true
 			Input.Title.Text = InputSettings.Name..":"
@@ -1876,6 +1877,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 		-- Input
 		function Tab:CreateInput(InputSettings)
 			local Input = Elements.Template.Input:Clone()
+            Input.Title.Position = UDim2.new(0.266, 0, 0.5, 0)
 			Input.Name = InputSettings.Name
 			Input.Title.Text = InputSettings.Name
 			Input.Visible = true
@@ -1994,7 +1996,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			--custom shi
 			TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
 			TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
-			TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.313, 0, 0.479, 0)}):Play()      
+			TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()      
 			--
 
 			for _, ununusedoption in ipairs(Dropdown.List:GetChildren()) do
@@ -2016,7 +2018,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 					--custom shi
 					TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
 					TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
-					TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.313, 0, 0.479, 0)}):Play()     
+					TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()     
 					--
 					Debounce = true
 					TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
@@ -2036,7 +2038,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 					--custom shi
 					TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0,0.151, 0), Position = UDim2.new(0.962, 0,0.083, 0)}):Play()
 					TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0,0.075, 0), Position = UDim2.new(0.731, 0,0.08, 0)}):Play()
-					TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.299, 0,0.05, 0), Position = UDim2.new(0.186, 0,0.07, 0)}):Play()
+					TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.299, 0,0.05, 0), Position = UDim2.new(0.1835, 0,0.07, 0)}):Play()
 					--
 					TweenService:Create(Dropdown, TweenInfo.new(0.4, Enum.EasingStyle.Cubic), {Size = UDim2.new(1, -10, 0, 300)}):Play()
 					Dropdown.List.Visible = true
@@ -2128,7 +2130,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 						--custom shi
 						TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
 						TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
-						TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.313, 0, 0.479, 0)}):Play()     
+						TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()     
 						--
 						Debounce = true
 						TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
@@ -2333,7 +2335,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			--custom shi
 			TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
 			TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
-			TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.313, 0, 0.479, 0)}):Play()      
+			TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()      
 			--
 
 
@@ -2356,7 +2358,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 					--custom shi
 					TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
 					TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
-					TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.313, 0, 0.479, 0)}):Play()     
+					TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()     
 					--
 					Debounce = true
 					TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
@@ -2376,7 +2378,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 					--custom shi
 					TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0,0.151, 0), Position = UDim2.new(0.962, 0,0.083, 0)}):Play()
 					TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0,0.075, 0), Position = UDim2.new(0.731, 0,0.08, 0)}):Play()
-					TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.299, 0,0.05, 0), Position = UDim2.new(0.186, 0,0.07, 0)}):Play()
+					TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.299, 0,0.05, 0), Position = UDim2.new(0.1835, 0,0.07, 0)}):Play()
 					--
 					TweenService:Create(Dropdown, TweenInfo.new(0.4, Enum.EasingStyle.Cubic), {Size = UDim2.new(1, -10, 0, 300)}):Play()
 					Dropdown.List.Visible = true
@@ -2474,7 +2476,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 						--custom shi
 						TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
 						TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
-						TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.313, 0, 0.479, 0)}):Play()      
+						TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()      
 						--
 						TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
 						for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
