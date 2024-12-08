@@ -1,5 +1,5 @@
 
-print("v11 v5")
+print("v11 v6")
 --[[
 
 Rayfield Interface Suite
@@ -1660,6 +1660,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			local LabelValue = {}
 
 			local Label = Elements.Template.Label:Clone()
+            Label.Title.Position = UDim2.new(0.514, 0, 0.5, 0)
 			Label.Title.Text = LabelText
 			Label.Visible = true
 			Label.Parent = TabPage
