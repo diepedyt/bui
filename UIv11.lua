@@ -1,5 +1,5 @@
 
-print("v11 v7")
+print("v11 v8")
 --[[
 
 Rayfield Interface Suite
@@ -2844,6 +2844,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			end)
 
 			function ToggleSettings:Set(NewToggleValue)
+				print("new toggle val", NewToggleValue)
 				if NewToggleValue == ToggleSettings.CurrentValue then return end
 				if NewToggleValue then
 					ToggleSettings.CurrentValue = true
