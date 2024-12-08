@@ -1,5 +1,5 @@
 
-print("v11 v3")
+print("v11 v4")
 --[[
 
 Rayfield Interface Suite
@@ -1768,6 +1768,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
         function Tab:CreateSavingInput(InputSettings)
 			local Input = Elements.Template.Input:Clone()
 			Input.Name = InputSettings.Name
+            Input.Title.RichText = true
 			Input.Title.Text = InputSettings.Name..":"
 			Input.Visible = true
 			Input.Parent = TabPage
@@ -1859,7 +1860,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				end
 
                 InputSettings.CurrentValue = value
-                Input.Title.Text = string.format("%s: %s", InputSettings.Name, vText or value)
+                Input.Title.Text = string.format("%s: <b>%s</b>", InputSettings.Name, vText or value)
                 SaveConfiguration()
             end
 
