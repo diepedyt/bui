@@ -1,5 +1,5 @@
 
-print("v11 v8")
+print("v11 v9")
 --[[
 
 Rayfield Interface Suite
@@ -1825,6 +1825,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			end
 			
 			Input.InputFrame.InputBox.FocusLost:Connect(function(enter)
+					warn("dd?")
                 if not enter then return end
                 local text = Input.InputFrame.InputBox.Text
                 InputSettings:Set(text)
