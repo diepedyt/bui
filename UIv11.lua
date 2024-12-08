@@ -1,5 +1,5 @@
 
-print("v11 v9")
+print("v11 v10")
 --[[
 
 Rayfield Interface Suite
@@ -1772,6 +1772,12 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			Input.Name = InputSettings.Name
             --Input.Title.RichText = true
 			Input.Title.Text = InputSettings.Name..":"
+			if InputSettings.CurrentValue ~= "" then
+				local value = InputSettings.CurrentValue
+				local vTextFunc = InputSettings.vTextFunc
+                		local vText = vTextFunc and vTextFunc(value)
+				Input.Title.Text = string.format("%s %s", Input.Title.Text, vText or value)
+			end
 			Input.Visible = true
 			Input.Parent = TabPage
 			
