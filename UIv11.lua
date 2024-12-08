@@ -1,5 +1,5 @@
 
-print("v11 v6")
+print("v11 v7")
 --[[
 
 Rayfield Interface Suite
@@ -1770,7 +1770,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			local Input = Elements.Template.Input:Clone()
             Input.Title.Position = UDim2.new(0.266, 0, 0.5, 0)
 			Input.Name = InputSettings.Name
-            Input.Title.RichText = true
+            --Input.Title.RichText = true
 			Input.Title.Text = InputSettings.Name..":"
 			Input.Visible = true
 			Input.Parent = TabPage
@@ -1862,7 +1862,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				end
 
                 InputSettings.CurrentValue = value
-                Input.Title.Text = string.format("%s: <b>%s</b>", InputSettings.Name, vText or value)
+                Input.Title.Text = string.format("%s: %s", InputSettings.Name, vText or value)
                 SaveConfiguration()
             end
 
