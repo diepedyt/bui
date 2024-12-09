@@ -1,5 +1,5 @@
 
-print("v11 v10")
+print("v11 v11")
 --[[
 
 Rayfield Interface Suite
@@ -1851,6 +1851,14 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			end)
 
             function InputSettings:Set(value)
+
+				local DefaultValue = InputSettings.DefaultValue
+
+				warn(type(value))
+				if type(value) ~= "string" then
+					value = DefaultValue
+				end
+
                 local vTextFunc = InputSettings.vTextFunc
                 local vText = vTextFunc and vTextFunc(value)
                 print(value, vText)
@@ -1868,7 +1876,10 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 					TweenService:Create(Input.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 				end
 
+
+
                 InputSettings.CurrentValue = value
+				print(InputSettings.Name)
                 Input.Title.Text = string.format("%s: %s", InputSettings.Name, vText or value)
                 SaveConfiguration()
             end
