@@ -1,5 +1,5 @@
 
-print("v11 v13")
+print("v11 v14")
 --[[
 
 Rayfield Interface Suite
@@ -405,7 +405,7 @@ local function LoadConfiguration(Configuration)
 					if RayfieldLibrary.Flags[FlagName].Type == "Colorpicker" then
 						RayfieldLibrary.Flags[FlagName]:Set(UnpackColor(FlagValue))
 					else
-						if RayfieldLibrary.Flags[FlagName].CurrentValue or RayfieldLibrary.Flags[FlagName].CurrentKeybind or RayfieldLibrary.Flags[FlagName].CurrentOption ~= FlagValue then RayfieldLibrary.Flags[FlagName]:Set(FlagValue, nil, nil, nil, true) end
+						if RayfieldLibrary.Flags[FlagName].CurrentValue or RayfieldLibrary.Flags[FlagName].CurrentKeybind or RayfieldLibrary.Flags[FlagName].CurrentOption ~= FlagValue then RayfieldLibrary.Flags[FlagName]:Set(FlagValue, nil, nil, nil, true, true) end
 					end    
 				end)
 			else
@@ -1859,7 +1859,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				TweenService:Create(Input.InputFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Input.InputFrame.InputBox.TextBounds.X + 24, 0, 30)}):Play()
 			end)
 
-            function InputSettings:Set(value)
+            function InputSettings:Set(value, _, _, _, _, skipSave)
 
 				local DefaultValue = InputSettings.DefaultValue
 
@@ -1890,7 +1890,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
                 InputSettings.CurrentValue = value
 				print(InputSettings.Name)
                 Input.Title.Text = string.format("%s: %s", InputSettings.Name, vText or value)
-                SaveConfiguration()
+				if not skipSave then
+                	SaveConfiguration()
+				end
             end
 
             if Settings.ConfigurationSaving then
@@ -2192,12 +2194,14 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			end
 			AddOptions(DropdownSettings.Options)
 
-			function DropdownSettings:Set(NewOption)
+			function DropdownSettings:Set(NewOption, _, _, _, _, skipSave)
 				_G.A = NewOption
 				print("hi", NewOption)
 				Dropdown.Selected.Text = NewOption
 				DropdownSettings.CurrentOption = NewOption
-				SaveConfiguration()
+				if not skipSave then
+					SaveConfiguration()
+				end
 				local Success, Response = pcall(function()
 					DropdownSettings.Callback(NewOption)
 				end)
@@ -2539,7 +2543,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			end
 			AddOptions(DropdownSettings.Options)
 
-			function DropdownSettings:Set(NewOption, a, b, c, decode)
+			function DropdownSettings:Set(NewOption, a, b, c, decode, skipSave)
 				if decode then
 					local s,f = pcall(function()
 						NewOption = game:GetService("HttpService"):JSONDecode(NewOption)
@@ -2548,7 +2552,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				--Dropdown.Selected.Text = NewOption
 				--DropdownSettings.CurrentOption = NewOption
 				setSelectedOptions(nil, (type(NewOption) == "table" and NewOption) or {NewOption})
-				SaveConfiguration()
+				if not skipSave then
+					SaveConfiguration()
+				end
 				local Success, Response = pcall(function()
 					DropdownSettings.Callback(selectedOptions)
 				end)
@@ -2731,11 +2737,13 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				TweenService:Create(Keybind.KeybindFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Keybind.KeybindFrame.KeybindBox.TextBounds.X + 24, 0, 30)}):Play()
 			end)
 
-			function KeybindSettings:Set(NewKeybind)
+			function KeybindSettings:Set(NewKeybind, _, _, _, _, skipSave)
 				Keybind.KeybindFrame.KeybindBox.Text = tostring(NewKeybind)
 				KeybindSettings.CurrentKeybind = tostring(NewKeybind)
 				Keybind.KeybindFrame.KeybindBox:ReleaseFocus()
-				SaveConfiguration()
+				if not skipSave then
+					SaveConfiguration()
+				end
 			end
 			if Settings.ConfigurationSaving then
 				if Settings.ConfigurationSaving.Enabled and KeybindSettings.Flag then
@@ -2870,7 +2878,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 			end)
 
-			function ToggleSettings:Set(NewToggleValue)
+			function ToggleSettings:Set(NewToggleValue, _, _, _, _, skipSave)
 				print("new toggle val", NewToggleValue)
 				if NewToggleValue == ToggleSettings.CurrentValue then return end
 				if NewToggleValue then
@@ -2902,7 +2910,10 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 					TweenService:Create(Toggle, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
 					TweenService:Create(Toggle.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()	
 				end
-				SaveConfiguration()
+				
+				if not skipSave then
+					SaveConfiguration()
+				end
 				
 				local Success, Response = pcall(function()
 					ToggleSettings.Callback(ToggleSettings.CurrentValue)
@@ -3175,10 +3186,12 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
             end)
         
 
-			function SliderSettings:Set(NewVal)
+			function SliderSettings:Set(NewVal, _, _, _, _, skipSave)
 				TweenService:Create(Slider.Main.Progress, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Slider.Main.AbsoluteSize.X * ((NewVal + SliderSettings.Range[1]) / (SliderSettings.Range[2] - SliderSettings.Range[1])) > 5 and Slider.Main.AbsoluteSize.X * (NewVal / (SliderSettings.Range[2] - SliderSettings.Range[1])) or 5, 1, 0)}):Play()
 				Slider.Main.Information.Text = tostring(NewVal) .. " " .. SliderSettings.Suffix
-				SaveConfiguration()
+				if not skipSave then
+					SaveConfiguration()
+				end
 				local Success, Response = pcall(function()
 					SliderSettings.Callback(NewVal)
 				end)
