@@ -1,5 +1,5 @@
 
-print("v11 v11")
+print("v11 v12")
 --[[
 
 Rayfield Interface Suite
@@ -393,24 +393,31 @@ local function UnpackColor(Color)
 	return Color3.fromRGB(Color.R, Color.G, Color.B)
 end
 
+local LoadingConfiguration = false
+
 local function LoadConfiguration(Configuration)
-	local Data = HttpService:JSONDecode(Configuration)
-	table.foreach(Data, function(FlagName, FlagValue)
-		if RayfieldLibrary.Flags[FlagName] then
-			spawn(function() 
-				if RayfieldLibrary.Flags[FlagName].Type == "Colorpicker" then
-					RayfieldLibrary.Flags[FlagName]:Set(UnpackColor(FlagValue))
-				else
-					if RayfieldLibrary.Flags[FlagName].CurrentValue or RayfieldLibrary.Flags[FlagName].CurrentKeybind or RayfieldLibrary.Flags[FlagName].CurrentOption ~= FlagValue then RayfieldLibrary.Flags[FlagName]:Set(FlagValue, nil, nil, nil, true) end
-				end    
-			end)
-		else
-			--RayfieldLibrary:Notify({Title = "Flag Error", Content = "Rayfield was unable to find '"..FlagName.. "'' in the current script"})
-		end
+	LoadingConfiguration = true
+	pcall(function()
+		local Data = HttpService:JSONDecode(Configuration)
+		table.foreach(Data, function(FlagName, FlagValue)
+			if RayfieldLibrary.Flags[FlagName] then
+				spawn(function()
+					if RayfieldLibrary.Flags[FlagName].Type == "Colorpicker" then
+						RayfieldLibrary.Flags[FlagName]:Set(UnpackColor(FlagValue))
+					else
+						if RayfieldLibrary.Flags[FlagName].CurrentValue or RayfieldLibrary.Flags[FlagName].CurrentKeybind or RayfieldLibrary.Flags[FlagName].CurrentOption ~= FlagValue then RayfieldLibrary.Flags[FlagName]:Set(FlagValue, nil, nil, nil, true) end
+					end    
+				end)
+			else
+				--RayfieldLibrary:Notify({Title = "Flag Error", Content = "Rayfield was unable to find '"..FlagName.. "'' in the current script"})
+			end
+		end)
 	end)
+	LoadingConfiguration = false
 end
 
 local function SaveConfiguration()
+	if LoadingConfiguration then return end
 	if not _G.NowLoaded then return end
 	if not CEnabled then return end
 	warn("updating rfld saves")
