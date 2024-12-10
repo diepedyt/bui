@@ -1,5 +1,5 @@
 
-print("v11 v14")
+print("v11 v15")
 --[[
 
 Rayfield Interface Suite
@@ -422,7 +422,6 @@ local function SaveConfiguration()
 	if LoadingConfiguration then return end
 	if not _G.NowLoaded then return end
 	if not CEnabled then return end
-	warn("updating rfld saves")
 	local Data = {}
 	for i,v in pairs(RayfieldLibrary.Flags) do
 		if v.Type == "Colorpicker" then
@@ -1840,7 +1839,6 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			end
 			
 			Input.InputFrame.InputBox.FocusLost:Connect(function(enter)
-					warn("dd?")
                 if not enter then return end
                 local text = Input.InputFrame.InputBox.Text
                 InputSettings:Set(text)
@@ -1863,14 +1861,12 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 				local DefaultValue = InputSettings.DefaultValue
 
-				warn(type(value))
 				if type(value) ~= "string" then
 					value = DefaultValue
 				end
 
                 local vTextFunc = InputSettings.vTextFunc
                 local vText = vTextFunc and vTextFunc(value)
-                print(value, vText)
                 local Success, Response = pcall(function()
 					InputSettings.Callback(value)
 				end)
@@ -1888,7 +1884,6 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 
                 InputSettings.CurrentValue = value
-				print(InputSettings.Name)
                 Input.Title.Text = string.format("%s: %s", InputSettings.Name, vText or value)
 				if not skipSave then
                 	SaveConfiguration()
@@ -2196,7 +2191,6 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 			function DropdownSettings:Set(NewOption, _, _, _, _, skipSave)
 				_G.A = NewOption
-				print("hi", NewOption)
 				Dropdown.Selected.Text = NewOption
 				DropdownSettings.CurrentOption = NewOption
 				if not skipSave then
@@ -2826,8 +2820,6 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 			Toggle.Interact.MouseButton1Click:Connect(function()
 
-				print("toggle touched !!!")
-
 				if ToggleSettings.CurrentValue then
 					ToggleSettings.CurrentValue = false
 					TweenService:Create(Toggle, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
@@ -2879,7 +2871,6 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			end)
 
 			function ToggleSettings:Set(NewToggleValue, _, _, _, _, skipSave)
-				print("new toggle val", NewToggleValue)
 				if NewToggleValue == ToggleSettings.CurrentValue then return end
 				if NewToggleValue then
 					ToggleSettings.CurrentValue = true
@@ -3502,7 +3493,6 @@ function RayfieldLibrary:GetDefaultConfig()
 		end
 	
 		Data[index] = value
-		print(index, value)
 	end
 	
 	
