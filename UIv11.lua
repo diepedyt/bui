@@ -413,7 +413,9 @@ local function LoadConfiguration(Configuration)
 			end
 		end)
 	end)
-	LoadingConfiguration = false
+	task.delay(2, function()
+		LoadingConfiguration = false
+	end)
 end
 
 local function SaveConfiguration()
