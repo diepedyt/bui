@@ -1,1 +1,1 @@
-return "10", "Auto Treasure Chests: If you Open too Many, it doesnt open at all, Max Open at a Time is now 30"
+return "10", "KICK ALL NOW32105"
