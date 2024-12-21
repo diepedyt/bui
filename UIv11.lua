@@ -1,5 +1,5 @@
 
-print("v11 v15")
+print("v11 v16")
 --[[
 
 Rayfield Interface Suite
@@ -1488,7 +1488,6 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 		end
 		TabButton.UIStroke.Color = SelectedTheme.TabStroke
 		 --Animate
-		wait(0.1)
 		if FirstTab then
 			TabButton.BackgroundColor3 = SelectedTheme.TabBackground
 			TabButton.Image.ImageColor3 = SelectedTheme.TabTextColor
