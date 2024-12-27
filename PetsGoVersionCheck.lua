@@ -1,2 +1,2 @@
-return "10", "KICK ALL NOW32105"
+return "11", "Fixed Auto Fish"
 
