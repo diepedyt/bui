@@ -1,5 +1,5 @@
 
-print("v20 v5")
+print("v20 v10")
 --[[
 
 Rayfield Interface Suite
@@ -228,6 +228,7 @@ local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 
 -- Interface Management
+
 --[[
 local Rayfield =  game:GetService("ReplicatedStorage")["Rayfield"] --14412610844
 
@@ -1847,7 +1848,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			TweenService:Create(Input.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
 
 			Input.InputFrame.InputBox.PlaceholderText = InputSettings.PlaceholderText
-			Input.InputFrame.Size = UDim2.new(0, Input.InputFrame.InputBox.TextBounds.X + 24, 0, 30)
+			Input.InputFrame.Size = UDim2.new(0.241, 0,0.701, 0)
 
 			if InputSettings.Info then
 				Input.Description.Text = InputSettings.Info
@@ -1966,7 +1967,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			TweenService:Create(Input.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
 
 			Input.InputFrame.InputBox.PlaceholderText = InputSettings.PlaceholderText
-			Input.InputFrame.Size = UDim2.new(0, Input.InputFrame.InputBox.TextBounds.X + 24, 0, 30)
+			Input.InputFrame.Size = UDim2.new(0.241, 0,0.701, 0)
 
 			if InputSettings.Info then
 				Input.Description.Text = InputSettings.Info
