@@ -1,5 +1,5 @@
 
-print("v20 v10")
+print("v20 v50")
 --[[
 
 Rayfield Interface Suite
@@ -3319,6 +3319,12 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	TweenService:Create(gradient, TweenInfo.new(6, Enum.EasingStyle.Circular), {Rotation = 180}):Play()
 	TweenService:Create(gradient.Parent, TweenInfo.new(4, Enum.EasingStyle.Cubic), {Thickness = 3}):Play()
 	TweenService:Create(numval, TweenInfo.new(6, Enum.EasingStyle.Quint), {Value = 1}):Play()
+	task.delay(6, function()
+		gradient.Parent.Transparency = 1
+		gradient.Enabled = false
+		gradient.Parent.Color = Color3.fromRGB(25, 20, 0)
+		TweenService:Create(gradient.Parent, TweenInfo.new(3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+	end)
 	
 	--
 	
