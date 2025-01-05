@@ -1,2 +1,2 @@
-return "11", "Fixed Auto Fish"
+return "12", "Hide Underground when Mining"
 
