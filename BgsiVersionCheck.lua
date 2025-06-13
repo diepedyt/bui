@@ -1,1 +1,1 @@
-return "2", "Script Release"
+return "1", "Script Release !"
