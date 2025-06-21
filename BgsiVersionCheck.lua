@@ -1,1 +1,1 @@
-return "1", "Script Release !"
+return "2", "Voidcrystal Egg"
