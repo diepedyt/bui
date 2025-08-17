@@ -1,5 +1,5 @@
 
-print("v21 v5")
+print("v21 v6")
 --[[
 
 Rayfield Interface Suite
@@ -332,6 +332,8 @@ end
 --studio
 --function gethui() return Rayfield end local http_request = nil local syn = {protect_gui = false,request = false,}local http = nil function writefile(tt,t,ttt)end function isfolder(t)end function makefolder(t)end function isfile(r)end function readfile(t)end
 
+Rayfield.Enabled = false
+
 if gethui then
 	Rayfield.Parent = gethui()
 elseif syn.protect_gui then 
@@ -364,6 +366,7 @@ end
 
 local Camera = workspace.CurrentCamera
 local Main = Rayfield.Main
+Main.Visible = false
 local Topbar = Main.Topbar
 local TabListBack = Main.TabListBack
 local Elements = Main.Elements
@@ -382,6 +385,7 @@ TabListBack.Divider.Size = UDim2.new(0, 1, 0, 0)
 Rayfield.DisplayOrder = 100
 LoadingFrame.Version.Text = Release
 
+Rayfield.Enabled = true
 
 
 
@@ -1228,6 +1232,8 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	LoadingFrame.Version.TextTransparency = 1
 	--LoadingFrame.BG.Image = "rbxassetid://95877094556026"
 
+	Main.Visible = true
+	
 	local id = "rbxassetid://95877094556026"
 
 	task.spawn(function()
