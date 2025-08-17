@@ -1,5 +1,5 @@
 
-print("v21 v10")
+print("v21 v11")
 --[[
 
 Rayfield Interface Suite
@@ -1584,8 +1584,6 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	-- Update on content size change
 	gridLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(scrollToBottom)
 
-
-	print("abcdedf")
 	
 	------- AI CODE END
 	
