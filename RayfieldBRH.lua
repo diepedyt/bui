@@ -1,5 +1,5 @@
 
-print("v21 v3")
+print("v21 v4")
 --[[
 
 Rayfield Interface Suite
@@ -1226,6 +1226,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	LoadingFrame.Subtitle.TextTransparency = 1
 	Main.Shadow.Image.ImageTransparency = 1
 	LoadingFrame.Version.TextTransparency = 1
+	LoadingFrame.BG.Image = "rbxassetid://95877094556026"
 	LoadingFrame.BG.ImageTransparency = 1
 	LoadingFrame.Title.Text = Settings.LoadingTitle or "Rayfield Interface Suite"
 	LoadingFrame.Subtitle.Text = Settings.LoadingSubtitle or "by Sirius"
@@ -1490,7 +1491,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	TweenService:Create(LoadingFrame.Version, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 	]]
 	TweenService:Create(Main.UIStroke, TweenInfo.new(1.15, Enum.EasingStyle.Quint), {Transparency = 0.1, Color = Color3.fromRGB(255,255,255), Thickness = 7}):Play()
-	--TweenService:Create(LoadingFrame.BG, TweenInfo.new(1.3, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
+	TweenService:Create(LoadingFrame.BG, TweenInfo.new(1.3, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
 
 	task.spawn(function()
 		_G.UiSizeDown = function(amount)
