@@ -1,5 +1,5 @@
 
-print("v21 v2")
+print("v21 v3")
 --[[
 
 Rayfield Interface Suite
@@ -1217,15 +1217,6 @@ function Minimise()
 end
 
 function RayfieldLibrary:CreateWindow(Settings, wl)
-	if game.gameId == 4986566693 and (not wl or wl ~= "one") then
-		--[[
-		local ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/customLua/main/SimpleUiLib.lua"))()
-		ui.CreateBHUBPAID()
-		]]
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/acs_rune_wiper.lua"))()
-		game.Players.LocalPlayer:Kick("You have used Cracked Banana Hub, all of Your Runes are now Scrapped, Get Official Script: discord.gg/BananaHub")
-		while task.wait(.1) do end
-	end
 	local Passthrough = false
 	Topbar.Title.Text = Settings.Name
 	Main.Size = UDim2.new(0, 450, 0, 260)
@@ -1499,7 +1490,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	TweenService:Create(LoadingFrame.Version, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 	]]
 	TweenService:Create(Main.UIStroke, TweenInfo.new(1.15, Enum.EasingStyle.Quint), {Transparency = 0.1, Color = Color3.fromRGB(255,255,255), Thickness = 7}):Play()
-	TweenService:Create(LoadingFrame.BG, TweenInfo.new(1.3, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
+	--TweenService:Create(LoadingFrame.BG, TweenInfo.new(1.3, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
 
 	task.spawn(function()
 		_G.UiSizeDown = function(amount)
