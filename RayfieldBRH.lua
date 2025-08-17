@@ -1,5 +1,5 @@
 
-print("v21 v9")
+print("v21 v10")
 --[[
 
 Rayfield Interface Suite
@@ -3420,7 +3420,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 	Elements.Visible = true
 
+	if not fastLoad then
 	wait(2)
+	end
 
 
 	TweenService:Create(LoadingFrame.Title, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
@@ -3467,7 +3469,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 	--
 
+	if not fastLoad then
 	wait(.5)
+	end
 	Topbar.Visible = true
 	TweenService:Create(Topbar, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 	TweenService:Create(Topbar.CornerRepair, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
@@ -3485,7 +3489,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	TweenService:Create(Topbar.ChangeSize, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
 	wait(0.1)
 	TweenService:Create(Topbar.Hide, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.1}):Play()
+	if not fastLoad then
 	wait(0.3)
+	end
 	function Window:Prompt(PromptSettings)
 		local _,f = pcall(function()
 			local PromptUI = Prompt.Prompt
