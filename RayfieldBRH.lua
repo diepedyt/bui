@@ -1,5 +1,5 @@
 
-print("v21 v4")
+print("v21 v5")
 --[[
 
 Rayfield Interface Suite
@@ -1226,7 +1226,22 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	LoadingFrame.Subtitle.TextTransparency = 1
 	Main.Shadow.Image.ImageTransparency = 1
 	LoadingFrame.Version.TextTransparency = 1
-	LoadingFrame.BG.Image = "rbxassetid://95877094556026"
+	--LoadingFrame.BG.Image = "rbxassetid://95877094556026"
+
+	local id = "rbxassetid://95877094556026"
+
+	task.spawn(function()
+		game:GetService("ContentProvider"):PreloadAsync({Instance.new("ImageLabel")})
+		LoadingFrame.BG.Image = id
+	end)
+	
+	task.delay(5, function()
+		if LoadingFrame.BG.Image ~= id then
+			LoadingFrame.BG.Image = id
+		end
+	end)
+
+	
 	LoadingFrame.BG.ImageTransparency = 1
 	LoadingFrame.Title.Text = Settings.LoadingTitle or "Rayfield Interface Suite"
 	LoadingFrame.Subtitle.Text = Settings.LoadingSubtitle or "by Sirius"
