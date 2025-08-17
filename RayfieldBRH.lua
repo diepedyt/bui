@@ -1,5 +1,5 @@
 
-print("v21 v6")
+print("v21 v7")
 --[[
 
 Rayfield Interface Suite
@@ -1234,7 +1234,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 	Main.Visible = true
 	
-	local id = "rbxassetid://95877094556026"
+	local id = "rbxassetid://98323186589806"
 
 	task.spawn(function()
 		game:GetService("ContentProvider"):PreloadAsync({Instance.new("ImageLabel")})
