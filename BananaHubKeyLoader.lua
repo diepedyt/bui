@@ -134,9 +134,19 @@ module.KeyEntered = nil -- boolean
 function module:SetupKeyInput()
 	local ui = self:GetUI()
 	local c;
+	self.KeyEntered = false
 	c = ui.Buttons.Enter.Activated:Connect(function()
 		c:Disconnect()
 		self.KeyEntered = true
+	end)
+end
+
+function module:SetKeyError()
+	local ui = self:GetUI()
+	ui.KeyBox.TextBox.Text = ""
+	ui.Buttons.Enter.Text = "Key Error!"
+	task.delay(0.75, function()
+		ui.Buttons.Enter.Text = "Enter"
 	end)
 end
 
@@ -164,7 +174,7 @@ function module:GetFinalKey()
 	local ui = self:GetUI()
 	local TextBox = ui.KeyBox.TextBox
 	
-	local KeyBoxInput = self.KeyBoxInputChanged
+	local KeyBoxInput = false --self.KeyBoxInputChanged
 	if KeyBoxInput then
 		local timeLeft = (KeyBoxInput - os.time())
 	
@@ -210,28 +220,45 @@ function module:SetUpGetKey(key_link)
 	end)
 end
 
-function module:GetKeyInput(discord_link, key_link)
+function module:GetKeyInput(discord_link, key_link, verify_key)
+
+	local s_key = self:GetSavedKey()
+	if s_key and verify_key and verify_key(s_key) then
+		return s_key
+	end
+	
 	self:LoadUI()
 	
 	self:SetupKeyInput()
-	self:SetupAutoKey()
 	
 	self:SetUpBuyPermKey(discord_link)
 	self:SetUpGetKey(key_link)
 	
 	local key;
 	while not key do
+
 		key = self:GetFinalKey()
+		
+		if key and verify_key and not verify_key(key) then
+			key = nil
+			self:SetKeyError()
+			self:SetupKeyInput()
+		end
+
 		if not key then
 			task.wait(.1)
 		end
+
 	end
+
 	key = tostring(key)
+	key = key:gsub(" ","")
 
 	self:SaveKey(key)
 	self:UnloadUI()
 	
 	return key
+
 end
 
 return module
