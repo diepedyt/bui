@@ -6,6 +6,7 @@ script_key = module:GetKeyInput("guns.lol/BrainrotHub", "https://ads.luarmor.net
     local status;
     pcall(function()
         status = api.check_key(key)
+        print(status.code)
     end)
     return status and status.code == "KEY_VALID"
 end)
