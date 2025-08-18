@@ -252,7 +252,7 @@ function module:GetKeyInput(discord_link, key_link, verify_key)
 	end
 
 	key = tostring(key)
-	key = key:gsub(" ","")
+	key = key:gsub("%s+", "")
 
 	self:SaveKey(key)
 	self:UnloadUI()
