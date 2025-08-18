@@ -1,3 +1,4 @@
+warn("1_1")
 local RS = game:GetService("ReplicatedStorage")
 local TS = game:GetService("TweenService")
 
