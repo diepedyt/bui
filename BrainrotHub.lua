@@ -1,7 +1,7 @@
 local api = loadstring(game:HttpGet("https://sdkapi-public.luarmor.net/library.lua"))()
 local module = loadstring(game:HttpGet('https://raw.githubusercontent.com/diepedyt/bui/refs/heads/main/BananaHubKeyLoader.lua'))()
 script_key = module:GetKeyInput("guns.lol/BrainrotHub", "https://ads.luarmor.net/v/cb/glivvlBfYmsc/HWeeXOWWampAhTPU", function(key)
-    key = key:gsub(" ", "")
+    key = key:gsub("%s+", "")
     api.script_id = "c9d1ce97d284685be9191fb8090e23c5"
     local status;
     pcall(function()
