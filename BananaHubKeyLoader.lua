@@ -1,4 +1,6 @@
-warn("1_1")
+
+repeat task.wait() until game:IsLoaded()
+
 local RS = game:GetService("ReplicatedStorage")
 local TS = game:GetService("TweenService")
 
