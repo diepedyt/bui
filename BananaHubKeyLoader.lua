@@ -189,7 +189,7 @@ function module:GetFinalKey()
 	end
 	
 	if self.KeyEntered then
-		return TextBox.Text
+		return TextBox.Text:gsub("%s+", "")
 	end
 	
 end
