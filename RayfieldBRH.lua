@@ -1,5 +1,5 @@
 
-print("v21 v23")
+print("v21 v24")
 --[[
 
 Rayfield Interface Suite
@@ -123,7 +123,7 @@ local RayfieldLibrary = {
 			PlaceholderColor = Color3.fromRGB(178, 178, 178)
 		},
 		Yellow = {
-		    TextFont = Enum.Font.FredokaOne,
+		    TextFont = Enum.Font.GothamBold,
 		    TextColor = Color3.fromRGB(255, 255, 255),
 		
 		    SearchIcon = Color3.fromRGB(255, 255, 0),
