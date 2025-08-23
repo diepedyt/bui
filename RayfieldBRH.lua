@@ -1,5 +1,5 @@
 
-print("v21 v13")
+print("v21 v14")
 --[[
 
 Rayfield Interface Suite
@@ -1233,6 +1233,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	LoadingFrame.Subtitle.TextTransparency = 1
 	Main.Shadow.Image.ImageTransparency = 1
 	LoadingFrame.Version.TextTransparency = 1
+	setclipboard(LoadingFrame.BG)
 	LoadingFrame.BG.Image = Settings.PreloadImage or "rbxassetid://98323186589806"
 
 	Main.Visible = true
