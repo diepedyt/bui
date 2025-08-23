@@ -1,5 +1,5 @@
 
-print("v21 v22")
+print("v21 v23")
 --[[
 
 Rayfield Interface Suite
@@ -144,7 +144,7 @@ local RayfieldLibrary = {
 		    TabStroke = Color3.fromRGB(240, 240, 120),
 		    TabBackgroundSelected = Color3.fromRGB(255, 255, 0),
 		    TabTextColor = Color3.fromRGB(255, 255, 255),
-		    SelectedTabTextColor = Color3.fromRGB(255, 255, 0),
+		    SelectedTabTextColor = Color3.fromRGB(0, 0, 0),
 		
 		    ElementBackground = Color3.fromRGB(45, 45, 35),
 		    ElementBackgroundHover = Color3.fromRGB(55, 55, 45),
