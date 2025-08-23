@@ -1,5 +1,5 @@
 
-print("v21 v16")
+print("v21 v17")
 --[[
 
 Rayfield Interface Suite
@@ -1635,7 +1635,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 		--Create Elements Page
 		local TabPage = Elements.Template:Clone()
-		firstTabPage = TabPage
+		if not firstTabPage then
+			firstTabPage = TabPage
+		end
 		TabPage.Name = Name
 		TabPage.Visible = true
 
