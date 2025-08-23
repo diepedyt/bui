@@ -1,5 +1,5 @@
 
-print("v21 v15")
+print("v21 v16")
 --[[
 
 Rayfield Interface Suite
@@ -1598,10 +1598,15 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 		scrollEnabled = true
 	end
 	
+	local firstTabPage;
 	function Window:ResetTabListPosition()
 		scrollingFrame.CanvasPosition = Vector2.new(0, 0)
+		if firstTabPage then
+			warn("jumped")
+			Elements.UIPageLayout:JumpTo(firstTabPage)
+		end
 	end
-	
+
 	function Window:CreateTab(Name,Image)
 		local SDone = false
 		local TabButton = TabList.Template:Clone()
@@ -1630,6 +1635,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 		--Create Elements Page
 		local TabPage = Elements.Template:Clone()
+		firstTabPage = TabPage
 		TabPage.Name = Name
 		TabPage.Visible = true
 
