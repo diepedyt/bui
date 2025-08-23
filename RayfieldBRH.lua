@@ -1,5 +1,5 @@
 
-print("v21 v12")
+print("v21 v13")
 --[[
 
 Rayfield Interface Suite
@@ -123,7 +123,7 @@ local RayfieldLibrary = {
 			PlaceholderColor = Color3.fromRGB(178, 178, 178)
 		},
 		Yellow = {
-			TextFont = Enum.Font.Gotham, -- Default will use the various font faces used across Rayfield
+			TextFont = Enum.Font.GothamBold, -- Default will use the various font faces used across Rayfield
 			TextColor = Color3.fromRGB(240, 240, 240),
 			
 				SearchIcon = Color3.fromRGB(255, 255, 80), -- bright yellow
