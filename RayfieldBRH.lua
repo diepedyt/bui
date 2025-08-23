@@ -1233,12 +1233,13 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	LoadingFrame.Subtitle.TextTransparency = 1
 	Main.Shadow.Image.ImageTransparency = 1
 	LoadingFrame.Version.TextTransparency = 1
-	--LoadingFrame.BG.Image = "rbxassetid://95877094556026"
+	LoadingFrame.BG.Image = Settings.PreloadImage or "rbxassetid://98323186589806"
 
 	Main.Visible = true
 	
-	local id = "rbxassetid://98323186589806"
+	--local id = "rbxassetid://98323186589806"
 
+	--[[
 	task.spawn(function()
 		game:GetService("ContentProvider"):PreloadAsync({Instance.new("ImageLabel")})
 		LoadingFrame.BG.Image = id
@@ -1249,6 +1250,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			LoadingFrame.BG.Image = id
 		end
 	end)
+	]]
 
 	
 	LoadingFrame.BG.ImageTransparency = 1
