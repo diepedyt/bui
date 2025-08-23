@@ -144,7 +144,7 @@ local RayfieldLibrary = {
 				TabStroke = Color3.fromRGB(200, 200, 100),
 				TabBackgroundSelected = Color3.fromRGB(255, 235, 90), -- pure yellow highlight
 				TabTextColor = Color3.fromRGB(230, 230, 230),
-				SelectedTabTextColor = Color3.fromRGB(255, 255, 120),
+				SelectedTabTextColor = Color3.fromRGB(255, 140, 0),
 			
 				ElementBackground = Color3.fromRGB(35, 35, 35),
 				ElementBackgroundHover = Color3.fromRGB(45, 45, 45),
