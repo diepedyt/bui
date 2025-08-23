@@ -126,7 +126,7 @@ local RayfieldLibrary = {
 		    TextFont = Enum.Font.FredokaOne, -- Default will use the various font faces used across Rayfield
 		    TextColor = Color3.fromRGB(240, 240, 240),
 		
-		    SearchIcon = Color3.fromRGB(255, 255, 120),
+		    SearchIcon = Color3.fromRGB(255, 255, 50),
 		    XIcon = Color3.fromRGB(240, 240, 240),
 		
 		    Divider = Color3.fromRGB(255, 255, 255),
@@ -135,38 +135,38 @@ local RayfieldLibrary = {
 		
 		    Background = Color3.fromRGB(25, 25, 20),
 		    Topbar = Color3.fromRGB(90, 90, 65),
-		    Shadow = Color3.fromRGB(255, 255, 0),
+		    Shadow = Color3.fromRGB(255, 255, 40),
 		
-		    NotificationBackground = Color3.fromRGB(140, 140, 70),
+		    NotificationBackground = Color3.fromRGB(180, 180, 70),
 		    NotificationActionsBackground = Color3.fromRGB(15, 15, 15),
 		
-		    TabBackground = Color3.fromRGB(130, 130, 100),
-		    TabStroke = Color3.fromRGB(170, 170, 140),
-		    TabBackgroundSelected = Color3.fromRGB(190, 190, 60),
+		    TabBackground = Color3.fromRGB(130, 130, 90),
+		    TabStroke = Color3.fromRGB(200, 200, 120),
+		    TabBackgroundSelected = Color3.fromRGB(220, 220, 60),
 		    TabTextColor = Color3.fromRGB(240, 240, 240),
-		    SelectedTabTextColor = Color3.fromRGB(255, 255, 0),
+		    SelectedTabTextColor = Color3.fromRGB(255, 255, 60),
 		
 		    ElementBackground = Color3.fromRGB(45, 45, 35),
 		    ElementBackgroundHover = Color3.fromRGB(55, 55, 45),
 		    SecondaryElementBackground = Color3.fromRGB(30, 30, 25), -- For labels and paragraphs
-		    ElementStroke = Color3.fromRGB(70, 70, 55),
-		    SecondaryElementStroke = Color3.fromRGB(55, 55, 45), -- For labels and paragraphs
+		    ElementStroke = Color3.fromRGB(90, 90, 55),
+		    SecondaryElementStroke = Color3.fromRGB(70, 70, 45), -- For labels and paragraphs
 		
-		    SliderBackground = Color3.fromRGB(150, 150, 50),
-		    SliderProgress = Color3.fromRGB(190, 190, 50),
-		    SliderStroke = Color3.fromRGB(200, 200, 60),
+		    SliderBackground = Color3.fromRGB(200, 200, 60),
+		    SliderProgress = Color3.fromRGB(235, 235, 70),
+		    SliderStroke = Color3.fromRGB(255, 255, 80),
 		
 		    ToggleBackground = Color3.fromRGB(35, 35, 30),
 		    ToggleEnabled = Color3.fromRGB(255, 255, 80),
 		    ToggleDisabled = Color3.fromRGB(195, 52, 52),
-		    ToggleEnabledStroke = Color3.fromRGB(200, 200, 90),
+		    ToggleEnabledStroke = Color3.fromRGB(255, 255, 100),
 		    ToggleDisabledStroke = Color3.fromRGB(90, 32, 32),
-		    ToggleEnabledOuterStroke = Color3.fromRGB(255, 255, 0),
-		    ToggleDisabledOuterStroke = Color3.fromRGB(255, 255, 0),
+		    ToggleEnabledOuterStroke = Color3.fromRGB(255, 255, 50),
+		    ToggleDisabledOuterStroke = Color3.fromRGB(255, 255, 50),
 		
 		    InputBackground = Color3.fromRGB(35, 35, 30),
-		    InputStroke = Color3.fromRGB(85, 85, 70),
-		    PlaceholderColor = Color3.fromRGB(200, 200, 178)
+		    InputStroke = Color3.fromRGB(100, 100, 70),
+		    PlaceholderColor = Color3.fromRGB(230, 230, 180)
 		},
 		Verny = {
 			TextFont = "Default", -- Default will use the various font faces used across Rayfield
