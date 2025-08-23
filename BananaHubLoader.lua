@@ -1,3 +1,4 @@
+_G.FreeExecute = true
 local api = loadstring(game:HttpGet("https://sdkapi-public.luarmor.net/library.lua"))()
 local module = loadstring(game:HttpGet('https://raw.githubusercontent.com/diepedyt/bui/refs/heads/main/BananaHubKeyLoader.lua'))()
 script_key = module:GetKeyInput("discord.gg/BananaHub", "https://ads.luarmor.net/get_key?for=Banana_Hub-hWOdrVMDQVrL", function(key)
