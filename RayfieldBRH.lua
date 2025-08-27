@@ -1,5 +1,5 @@
 
-print("v21 v24")
+print("v21 v25")
 --[[
 
 Rayfield Interface Suite
@@ -1871,6 +1871,10 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				Label.Title.Text = NewLabel
 			end
 
+			function LabelValue:GetLabel()
+				return Label
+			end
+				
 			return LabelValue
 		end
 
