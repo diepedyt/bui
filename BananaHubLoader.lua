@@ -1,5 +1,8 @@
 repeat task.wait() until game:IsLoaded()
 
+loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
+
+--[[
 local ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/customLua/main/SimpleUiLib.lua"))()
 ui.CreateBHUBPAID("")
 
@@ -22,3 +25,4 @@ task.spawn(function()
         task.wait(600)
     end
 end)
+]]
