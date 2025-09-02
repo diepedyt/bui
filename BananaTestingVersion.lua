@@ -1,5 +1,12 @@
 repeat task.wait() until game:IsLoaded()
 
+if _G.syb then
+    game.Players.LocalPlayer:Kick("Dont Exec Twice")
+    while task.wait() do end
+else
+    _G.syb = true
+end
+
 -- testing branch, not on main script
 
 if game.gameId == 7882829745 then
