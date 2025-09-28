@@ -1,5 +1,5 @@
 
-print("v22 v4")
+print("v22 v5")
 --[[
 
 Rayfield Interface Suite
@@ -123,7 +123,7 @@ local RayfieldLibrary = {
 			PlaceholderColor = Color3.fromRGB(178, 178, 178)
 		},
 		Yellow = {
-		    TextFont = "Default",
+		    TextFont = Enum.Font.BuilderSansBold,
 		    TextColor = Color3.fromRGB(240, 240, 240),
 		
 		    SearchIcon = Color3.fromRGB(255, 235, 80),
