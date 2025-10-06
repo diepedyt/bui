@@ -1,11 +1,13 @@
 repeat task.wait(.12345) until game:IsLoaded()
 
 if  game.gameId == 7882829745 then
-    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
-
     --[[
+    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
+    ]]
+
     local ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/customLua/main/SimpleUiLib.lua"))()
-    ui.CreateBHUBPAID("Anime Eternal")
+    --ui.CreateBHUBPAID("Anime Eternal")
+    ui.CreateBHUBPAID("Anime Eternal", "AE [V4.2] test is done! It’s paid now. Thanks — your testing helped a lot!")
     
     local vu = game:GetService("VirtualUser")
     game:GetService("Players").LocalPlayer.Idled:connect(function()
@@ -26,13 +28,13 @@ if  game.gameId == 7882829745 then
             task.wait(600)
         end
     end)
-    ]]
     
 else
     
-    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
-
     --[[
+    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
+    ]]
+
     local ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/customLua/main/SimpleUiLib.lua"))()
     ui.CreateBHUBPAID("")
     
@@ -55,7 +57,6 @@ else
             task.wait(600)
         end
     end)
-    ]]
     
 end
 
