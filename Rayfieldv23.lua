@@ -1,5 +1,5 @@
 
-print("v23 v2")
+print("v23 v3")
 --[[
 
 Rayfield Interface Suite
@@ -2638,7 +2638,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 						end
 					end
 					task.wait(.1)
-					Dropdown.List[',---S=()earch']:CaptureFocus()
+					Dropdown.List[',---S=()earch'].Input:CaptureFocus()
 				end
 			end)
 
