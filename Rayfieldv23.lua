@@ -1,5 +1,5 @@
 
-print("v23 v1")
+print("v23 v2")
 --[[
 
 Rayfield Interface Suite
@@ -2637,6 +2637,8 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 							TweenService:Create(DropdownOpt.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 						end
 					end
+					task.wait(.1)
+					Dropdown.List[',---S=()earch']:CaptureFocus()
 				end
 			end)
 
@@ -3603,7 +3605,6 @@ Topbar.ChangeSize.MouseButton1Click:Connect(function()
 		Minimise()
 	end
 end)
-Topbar.Search.Visible = true
 Topbar.Search.MouseButton1Click:Connect(function()
 	if Debounce or Minimised then return end
 	if SearchHided then
