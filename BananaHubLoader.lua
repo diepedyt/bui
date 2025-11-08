@@ -1,4 +1,4 @@
-repeat task.wait(.123456) until game:IsLoaded()
+repeat task.wait(.12345) until game:IsLoaded()
 
 
 --[[
