@@ -1,5 +1,5 @@
 
-print("v24 v6")
+print("v24 v7")
 --[[
 
 Rayfield Interface Suite
@@ -3155,6 +3155,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			end
 
 			function ToggleSettings:Set(NewToggleValue, _, _, _, _, skipSave)
+				if ToggleSettings.PremiumTag then return end
 				if NewToggleValue == ToggleSettings.CurrentValue then return end
 				if NewToggleValue then
 					ToggleSettings.CurrentValue = true
