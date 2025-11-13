@@ -1,5 +1,5 @@
 
-print("v23 v3")
+print("v24 v2")
 --[[
 
 Rayfield Interface Suite
@@ -8,7 +8,7 @@ by Sirius
 shlex | Designing + Programming
 iRay  | Programming
 
-roge4087 | Rewrote nearly all of the uis functions
+roge4087 | rewrote basically the entire ui atp
 
 ]]
 
