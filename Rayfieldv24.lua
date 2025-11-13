@@ -1,5 +1,5 @@
 
-print("v24 v2")
+print("v24 v3")
 --[[
 
 Rayfield Interface Suite
@@ -375,6 +375,7 @@ local Topbar = Main.Topbar
 local TabListBack = Main.TabListBack
 local Elements = Main.Elements
 local PremiumTag = Main.Premium
+PremiumTag.BackgroundTransparency = 0.9
 local LoadingFrame = Main.LoadingFrame
 local TabList = Main.TabList
 local SearchBar = Main.Searchbar
