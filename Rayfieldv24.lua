@@ -8,7 +8,7 @@ by Sirius
 shlex | Designing + Programming
 iRay  | Programming
 
-roge4087 | Rewrote nearly all of the uis functions
+roge4087 | reworked basically the entire ui atp
 
 ]]
 
