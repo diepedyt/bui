@@ -1,5 +1,5 @@
 
-print("v24 v7")
+print("v24 v8")
 --[[
 
 Rayfield Interface Suite
@@ -375,7 +375,9 @@ local Topbar = Main.Topbar
 local TabListBack = Main.TabListBack
 local Elements = Main.Elements
 local PremiumTag = Main.Premium
-PremiumTag.BackgroundTransparency = 0.75
+PremiumTag.Zindex = 5
+PremiumTag.TextLabel.Zindex = 10
+PremiumTag.BackgroundTransparency = 0.65
 PremiumTag.TextLabel.Text = "⭐ Premium Only"
 local LoadingFrame = Main.LoadingFrame
 local TabList = Main.TabList
