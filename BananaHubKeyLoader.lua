@@ -263,4 +263,8 @@ function module:GetKeyInput(discord_link, key_link, verify_key)
 
 end
 
+function module:SetSavedKeyFile(file_name)
+    module.SavedKeyFile = file_name..".txt"
+end
+
 return module
