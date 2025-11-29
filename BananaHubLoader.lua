@@ -1,46 +1,44 @@
 repeat task.wait(.12345) until game:IsLoaded()
 
-if game.gameId == 7332711118 then
-    local api = loadstring(game:HttpGet("https://sdkapi-public.luarmor.net/library.lua"))()
-    local module = loadstring(game:HttpGet('https://raw.githubusercontent.com/diepedyt/bui/refs/heads/main/BananaHubKeyLoader.lua'))()
-    module:SetSavedKeyFile("BananaHub"..game.gameId..game.Players.LocalPlayer.UserId)
-    script_key = module:GetKeyInput("discord.gg/BananaHub", "https://ads.luarmor.net/get_key?for=Banana_Hub-DGYwAaLjBuvk", function(key)
-        api.script_id = "180154ec7abc246752b60603a7adc12d"
-        local status;
-        pcall(function()
-            status = api.check_key(key)
-            print(status.code)
-        end)
-        setclipboard(game:GetService("HttpService"):JSONEncode(status))
-        return status and status.code == "KEY_VALID"
+local api = loadstring(game:HttpGet("https://sdkapi-public.luarmor.net/library.lua"))()
+local module = loadstring(game:HttpGet('https://raw.githubusercontent.com/diepedyt/bui/refs/heads/main/BananaHubKeyLoader.lua'))()
+module:SetSavedKeyFile("BananaHub"..game.gameId..game.Players.LocalPlayer.UserId)
+script_key = module:GetKeyInput("discord.gg/BananaHub", "https://ads.luarmor.net/get_key?for=Banana_Hub-DGYwAaLjBuvk", function(key)
+    api.script_id = "180154ec7abc246752b60603a7adc12d"
+    local status;
+    pcall(function()
+        status = api.check_key(key)
+        print(status.code)
     end)
-    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
-else
-    local ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/customLua/main/SimpleUiLib.lua"))()
-    ui.CreateBHUBPAID("")
-    
-    local vu = game:GetService("VirtualUser")
-    game:GetService("Players").LocalPlayer.Idled:connect(function()
-        vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-        task.wait(1)
-        vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-    end)
-    
-    task.spawn(function()
-        local VirtualInputManager = game:GetService("VirtualInputManager")
-        local X, Y = 111, 960
-        while task.wait() do
-            --VirtualInputManager:SendMouseButtonEvent(X, Y, 0, true, game, 1)
-            --VirtualInputManager:SendMouseButtonEvent(X, Y, 0, false, game, 1)
-            VirtualInputManager:SendKeyEvent(true, "Space", false, game)
-            task.wait(.2)
-            VirtualInputManager:SendKeyEvent(false, "Space", false, game)
-            task.wait(600)
-        end
-    end)
-end
+    setclipboard(game:GetService("HttpService"):JSONEncode(status))
+    return status and status.code == "KEY_VALID"
+end)
+loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
 
+--[[
+local ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/customLua/main/SimpleUiLib.lua"))()
+ui.CreateBHUBPAID("")
 
+local vu = game:GetService("VirtualUser")
+game:GetService("Players").LocalPlayer.Idled:connect(function()
+    vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    task.wait(1)
+    vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+end)
+
+task.spawn(function()
+    local VirtualInputManager = game:GetService("VirtualInputManager")
+    local X, Y = 111, 960
+    while task.wait() do
+        --VirtualInputManager:SendMouseButtonEvent(X, Y, 0, true, game, 1)
+        --VirtualInputManager:SendMouseButtonEvent(X, Y, 0, false, game, 1)
+        VirtualInputManager:SendKeyEvent(true, "Space", false, game)
+        task.wait(.2)
+        VirtualInputManager:SendKeyEvent(false, "Space", false, game)
+        task.wait(600)
+    end
+end)
+]]
 
 
 
