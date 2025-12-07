@@ -3,7 +3,7 @@ repeat task.wait(.12345) until game:IsLoaded()
 local module = loadstring(game:HttpGet('https://raw.githubusercontent.com/diepedyt/bui/refs/heads/main/BananaHubKeyLoader.lua'))()
 module:SetSavedKeyFile("BananaHub"..game.gameId..game.Players.LocalPlayer.UserId)
 script_key = module:GetKeyInput("discord.gg/BananaHub", "https://raw.githubusercontent.com/diepedyt/bui/refs/heads/main/HowToFreeKey.txt", function(key)
-    return key == "BananaKey321"
+    return key == "BananaKey321" or key == "BananaSuper"
 end)
 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
 
