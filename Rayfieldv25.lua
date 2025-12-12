@@ -1,5 +1,5 @@
 
-print("v25 v3")
+print("v25 v4")
 --[[
 
 Rayfield Interface Suite
@@ -167,6 +167,52 @@ local RayfieldLibrary = {
 		    InputBackground = Color3.fromRGB(31, 31, 31),
 		    InputStroke = Color3.fromRGB(66, 66, 66),
 		    PlaceholderColor = Color3.fromRGB(221, 221, 181),
+		},
+		Banana = {
+		    TextFont = Enum.Font.GothamBold,
+		    TextColor = Color3.fromRGB(250, 246, 210), -- slight banana-tint white
+		
+		    SearchIcon = Color3.fromRGB(255, 228, 90), -- warmer yellow
+		    XIcon = Color3.fromRGB(60, 55, 25),
+		
+		    Divider = Color3.fromRGB(255, 247, 180),
+		
+		    LoadingBackground = Color3.fromRGB(255, 230, 95),
+		
+		    Background = Color3.fromRGB(22, 22, 22), -- deeper than Yellow
+		    Topbar = Color3.fromRGB(120, 105, 40),   -- banana stem brown
+		    Shadow = Color3.fromRGB(255, 200, 60),   -- softer gold
+		
+		    NotificationBackground = Color3.fromRGB(205, 180, 75),
+		    NotificationActionsBackground = Color3.fromRGB(12, 12, 12),
+		
+		    TabBackground = Color3.fromRGB(115, 105, 55),
+		    TabStroke = Color3.fromRGB(165, 150, 70),
+		    TabBackgroundSelected = Color3.fromRGB(170, 145, 55),
+		    TabTextColor = Color3.fromRGB(250, 246, 210),
+		    SelectedTabTextColor = Color3.fromRGB(255, 255, 140),
+		
+		    ElementBackground = Color3.fromRGB(40, 40, 40),
+		    ElementBackgroundHover = Color3.fromRGB(48, 48, 48),
+		    SecondaryElementBackground = Color3.fromRGB(28, 28, 28),
+		    ElementStroke = Color3.fromRGB(52, 52, 52),
+		    SecondaryElementStroke = Color3.fromRGB(42, 42, 42),
+		
+		    SliderBackground = Color3.fromRGB(215, 190, 70),
+		    SliderProgress = Color3.fromRGB(255, 230, 95),
+		    SliderStroke = Color3.fromRGB(255, 215, 75),
+		
+		    ToggleBackground = Color3.fromRGB(32, 32, 32),
+		    ToggleEnabled = Color3.fromRGB(255, 230, 95),
+		    ToggleDisabled = Color3.fromRGB(185, 55, 55),
+		    ToggleEnabledStroke = Color3.fromRGB(145, 130, 60),
+		    ToggleDisabledStroke = Color3.fromRGB(78, 25, 25),
+		    ToggleEnabledOuterStroke = Color3.fromRGB(255, 230, 95),
+		    ToggleDisabledOuterStroke = Color3.fromRGB(255, 230, 95),
+		
+		    InputBackground = Color3.fromRGB(32, 32, 32),
+		    InputStroke = Color3.fromRGB(70, 70, 70),
+		    PlaceholderColor = Color3.fromRGB(230, 220, 160),
 		},
 		AmberSteel = {
 		    TextFont = Enum.Font.GothamBold,
