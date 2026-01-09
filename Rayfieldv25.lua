@@ -1705,7 +1705,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	function Window:ResetTabListPosition()
 		scrollingFrame.CanvasPosition = Vector2.new(0, 0)
 		if firstTabPage then
-			warn("jumped")
+			--warn("jumped")
 			Elements.UIPageLayout:JumpTo(firstTabPage)
 		end
 	end
