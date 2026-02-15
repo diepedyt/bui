@@ -1,5 +1,4 @@
-
-----print("v27 v2)
+print("v27 v5")
 --[[
 
 Rayfield Interface Suite
@@ -514,15 +513,18 @@ local function LoadConfiguration(Configuration)
 end
 
 local function SaveConfiguration()
+	warn("save configuariton called")
 	if LoadingConfiguration then return end
 	if not _G.NowLoaded then return end
 	if not CEnabled then return end
+	warn("--2")
 	local Data = {}
 	for i,v in pairs(RayfieldLibrary.Flags) do
 		if v.Type == "Colorpicker" then
 			Data[i] = PackColor(v.CurrentValue)
 		else
-            if v.DontSaveCurrentValue and v.PreviousValue then
+            if v.DontSaveCurrentValue and v.PreviousValue ~= nil then
+				warn("ok dont save config we are goign to set to", v.PreviousValue)
                 Data[i] = v.PreviousValue
             else
 			    Data[i] = (v.SelectedOptions and game:GetService("HttpService"):JSONEncode(v.SelectedOptions)) or v.CurrentValue or v.CurrentKeybind or v.CurrentOption
@@ -531,11 +533,13 @@ local function SaveConfiguration()
 				Data[i] = false
 			end
 		end
-	end	
+	end
+	warn("--3")
 	local config = _G._ACTIVECONFIG
 	config = config or "main"
 	local saveName = string.format("%s/%s%s%s", ConfigurationFolder, CFileName, config, ConfigurationExtension)
 	writefile(saveName, tostring(HttpService:JSONEncode(Data)))
+	warn("--4")
 end
 
 local neon = (function()  --Open sourced neon module
@@ -3109,6 +3113,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 				Toggle.Interact.MouseButton1Click:Connect(function()
 
+					ToggleSettings.PreviousValue = nil
+                    ToggleSettings.DontSaveCurrentValue = nil
+
 					if ToggleSettings.CurrentValue then
 						ToggleSettings.CurrentValue = false
 						TweenService:Create(Toggle, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
@@ -3166,7 +3173,12 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				if NewToggleValue == ToggleSettings.CurrentValue then return end
 
                 if dontSave then
-                    ToggleSettings.PreviousValue = (ToggleSettings.PreviousValue or ToggleSettings.CurrentValue) -- if dont saved multiple times
+					warn("SET DONT SAVE")
+					if ToggleSettings.PreviousValue ~= nil then
+						ToggleSettings.PreviousValue = ToggleSettings.PreviousValue
+					else
+						ToggleSettings.PreviousValue = (ToggleSettings.CurrentValue or false)
+					end
                     ToggleSettings.DontSaveCurrentValue = true
                 else
                     ToggleSettings.PreviousValue = nil
