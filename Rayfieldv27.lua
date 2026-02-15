@@ -3166,7 +3166,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				if NewToggleValue == ToggleSettings.CurrentValue then return end
 
                 if dontSave then
-                    ToggleSettings.PreviousValue = ToggleSettings.CurrentValue
+                    ToggleSettings.PreviousValue = (ToggleSettings.PreviousValue or ToggleSettings.CurrentValue) -- if dont saved multiple times
                     ToggleSettings.DontSaveCurrentValue = true
                 else
                     ToggleSettings.PreviousValue = nil
