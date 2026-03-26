@@ -121,7 +121,9 @@ function module:UnloadUI()
 end
 
 function module:SaveKey(key)
-	writefile(self.SavedKeyFile, key)
+	pcall(function()
+		writefile(self.SavedKeyFile, key)
+	end)
 end
 
 function module:GetSavedKey()
