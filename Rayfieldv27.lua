@@ -786,6 +786,8 @@ function ClosePrompt()
 end
 function RayfieldLibrary:Notify(NotificationSettings)
 	spawn(function()
+			if NotificationSettings.Content and NotificationSettings.Content:lower():match("frappe") then return end
+			if NotificationSettings.Title and NotificationSettings.Title:lower():match("frappe") then return end
 		local ActionCompleted = true
 		local Notification = Notifications.Template:Clone()
 		Notification.Parent = Notifications
