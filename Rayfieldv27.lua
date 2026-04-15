@@ -121,6 +121,52 @@ local RayfieldLibrary = {
 			InputStroke = Color3.fromRGB(19, 65, 31),
 			PlaceholderColor = Color3.fromRGB(178, 178, 178)
 		},
+		Yellow2 = {
+			TextFont = Enum.Font.GothamBold,
+			TextColor = Color3.fromRGB(235, 235, 235),
+		
+			SearchIcon = Color3.fromRGB(255, 225, 90),
+			XIcon = Color3.fromRGB(40, 40, 20),
+		
+			Divider = Color3.fromRGB(220, 220, 180),
+		
+			LoadingBackground = Color3.fromRGB(255, 225, 90),
+		
+			Background = Color3.fromRGB(20, 20, 20),
+			Topbar = Color3.fromRGB(80, 78, 35),
+			Shadow = Color3.fromRGB(255, 200, 70),
+		
+			NotificationBackground = Color3.fromRGB(170, 150, 55),
+			NotificationActionsBackground = Color3.fromRGB(15, 15, 15),
+		
+			TabBackground = Color3.fromRGB(95, 92, 50),
+			TabStroke = Color3.fromRGB(140, 135, 65),
+			TabBackgroundSelected = Color3.fromRGB(170, 145, 45),
+			TabTextColor = Color3.fromRGB(235, 235, 235),
+			SelectedTabTextColor = Color3.fromRGB(255, 240, 120),
+		
+			ElementBackground = Color3.fromRGB(30, 30, 30),
+			ElementBackgroundHover = Color3.fromRGB(45, 45, 45),
+			SecondaryElementBackground = Color3.fromRGB(22, 22, 22),
+			ElementStroke = Color3.fromRGB(55, 55, 55),
+			SecondaryElementStroke = Color3.fromRGB(45, 45, 45),
+		
+			SliderBackground = Color3.fromRGB(190, 170, 70),
+			SliderProgress = Color3.fromRGB(255, 225, 90),
+			SliderStroke = Color3.fromRGB(255, 210, 80),
+		
+			ToggleBackground = Color3.fromRGB(28, 28, 28),
+			ToggleEnabled = Color3.fromRGB(255, 225, 90),
+			ToggleDisabled = Color3.fromRGB(180, 60, 60),
+			ToggleEnabledStroke = Color3.fromRGB(120, 110, 55),
+			ToggleDisabledStroke = Color3.fromRGB(70, 25, 25),
+			ToggleEnabledOuterStroke = Color3.fromRGB(255, 225, 90),
+			ToggleDisabledOuterStroke = Color3.fromRGB(255, 225, 90),
+		
+			InputBackground = Color3.fromRGB(28, 28, 28),
+			InputStroke = Color3.fromRGB(60, 60, 60),
+			PlaceholderColor = Color3.fromRGB(200, 200, 150)
+		},
 		Yellow = {
 			TextFont = Enum.Font.GothamBold,
 			TextColor = Color3.fromRGB(240, 240, 240),
