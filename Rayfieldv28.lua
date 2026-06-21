@@ -1734,15 +1734,17 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 		if customUIStrokeGradient then
 
+            TabButton.UIStroke.Color = Color3.fromRGB(255, 255, 255)
+
 			local uiGradient = Instance.new("UIGradient")
 			uiGradient.Color = ColorSequence.new({
-				ColorSequenceKeypoint.new(0, customUIStrokeGradient),
-				ColorSequenceKeypoint.new(1, SelectedTheme.TabStroke)
+				ColorSequenceKeypoint.new(0, customUIStrokeGradient[1]),
+				ColorSequenceKeypoint.new(1, customUIStrokeGradient[2])
 			})
 			uiGradient.Offset = Vector2.new(-55, 0)
 			uiGradient.Parent = TabButton.UIStroke
 			
-			local c3Hex = customUIStrokeGradient:ToHex()
+			local c3Hex = customUIStrokeGradient[1]:ToHex()
 			
 			local curStrokes = (addedUiGradientStrokes[c3Hex] or 0)
 			addedUiGradientStrokes[c3Hex] = (curStrokes+1)
