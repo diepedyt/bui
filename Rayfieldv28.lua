@@ -1743,9 +1743,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			addedUiGradientStrokes[c3Hex] = (curStrokes+1)
 			
 			
-			local defOffset = (-0.1)
+			local defOffset = 0
 			for i = 1, curStrokes do
-				defOffset = defOffset - 0.15
+				defOffset = defOffset - 0.05
 			end
 	
 			TweenService:Create(uiGradient, TweenInfo.new(0.85, Enum.EasingStyle.Quint), {Offset = Vector2.new(defOffset, 0)}):Play()
