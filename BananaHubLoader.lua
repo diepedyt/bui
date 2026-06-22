@@ -7,14 +7,14 @@ script_key = module:GetKeyInput("discord.gg/BananaHub", "https://raw.githubuserc
 	return key == "BananaNice"
 end)
 
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
+--loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
 
 
 
 
---[[
-local ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/customLua/main/SimpleUiLib.lua"))()
-ui.CreateBHUBPAID("")
+
+local simpleLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/refs/heads/main/SimpleUILibV2.lua"))()
+simpleLib.CreateBHUBPAID()
 
 local vu = game:GetService("VirtualUser")
 game:GetService("Players").LocalPlayer.Idled:connect(function()
@@ -35,6 +35,6 @@ task.spawn(function()
         task.wait(600)
     end
 end)
-]]
+
 
 --loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
