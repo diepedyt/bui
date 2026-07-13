@@ -345,7 +345,7 @@ ui.CreateBHUBPAID = function(opts, legacyCustomText)
 
 	local cfg = {
 		title      = opts.title      or "Free Weekend Trial Over",
-		priceLine  = opts.priceLine  or "Unlock Full Access — 30 Days for $7",
+		priceLine  = opts.priceLine  or "Unlock Full Access — A Key is Only $7",
 		discord    = opts.discord    or "Grab your key: discord.gg/BananaHub",
 		invite     = opts.invite     or "discord.gg/BananaHub",
 		footer     = opts.footer     or "by Banana Hub @ Roge Studios  •  10M+ Lifetime Executions  •  1M+ Unique Users",
