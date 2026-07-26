@@ -1,4 +1,4 @@
---print("v29 v1")
+--print("v29 v2")
 --[[
 
 Rayfield Interface Suite
@@ -417,6 +417,52 @@ if isCurrent() then
 			Interface.Parent = nil
 		end
 	end
+end
+
+-- Potassium raises its own admin-detection prompt as a full screen gui above everything else, over
+-- and over, and its Ignore button does not stop it coming back. It belongs to the executor rather
+-- than to any script, so there is no flag to read and it has to be recognised by the text it shows.
+-- Matched loosely because the wording carries the game's name, and unparented rather than destroyed
+-- so whatever created it does not error walking its own children.
+local function isForeignPrompt(Object)
+	if not Object:IsA("TextLabel") and not Object:IsA("TextButton") then return false end
+
+	local Text = string.lower(Object.Text)
+	return string.find(Text, "joined your session", 1, true) ~= nil
+		or (string.find(Text, "administrator", 1, true) ~= nil and string.find(Text, "disconnect", 1, true) ~= nil)
+end
+
+local function clearForeignPrompt(Object)
+	if not isForeignPrompt(Object) then return end
+
+	local Root = Object
+	while Root.Parent and not Root:IsA("ScreenGui") do
+		Root = Root.Parent
+	end
+
+	if Root ~= Rayfield and Root:IsA("ScreenGui") then
+		Root.Parent = nil
+	end
+end
+
+local PromptContainers = {CoreGui}
+if gethui then table.insert(PromptContainers, gethui()) end
+local PlayerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
+if PlayerGui then table.insert(PromptContainers, PlayerGui) end
+
+for _, Container in ipairs(PromptContainers) do
+	-- CoreGui is not readable on every executor, and the connection is worth nothing if the sweep
+	-- that precedes it throws.
+	pcall(function()
+		for _, Object in ipairs(Container:GetDescendants()) do
+			clearForeignPrompt(Object)
+		end
+
+		Container.DescendantAdded:Connect(function(Object)
+			-- Deferred because the text is usually assigned after the label is parented in.
+			task.defer(clearForeignPrompt, Object)
+		end)
+	end)
 end
 
 
@@ -1991,6 +2037,46 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 		end
 	end
 
+	local tabSelectors = {}
+	local tabPages = {}
+
+	-- Both scrolls measure an offset within the scrolling frame rather than a position on screen,
+	-- so a page the UIPageLayout has parked off to the side measures the same as the visible one
+	-- and neither jump has to wait out the page animation. ElementName is the element's display
+	-- text, which every constructor also writes to the frame's Name.
+	function Window:SelectTab(TabName, ElementName)
+		local Selector = tabSelectors[TabName]
+		if not Selector then return end
+
+		task.spawn(Selector)
+
+		local TabButton = TabList:FindFirstChild(TabName)
+		if TabButton then
+			updateCanvas()
+			local ButtonOffset = TabButton.AbsolutePosition.Y - TabList.AbsolutePosition.Y + TabList.CanvasPosition.Y
+			local Limit = math.max(0, TabList.CanvasSize.Y.Offset - TabList.AbsoluteWindowSize.Y)
+			local Target = math.clamp(ButtonOffset - (TabList.AbsoluteWindowSize.Y - TabButton.AbsoluteSize.Y) / 2, 0, Limit)
+			TweenService:Create(TabList, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {CanvasPosition = Vector2.new(0, Target)}):Play()
+		end
+
+		local TabPage = tabPages[TabName]
+		local Element = ElementName and TabPage and TabPage:FindFirstChild(ElementName)
+		if not Element then return end
+
+		local ElementOffset = Element.AbsolutePosition.Y - TabPage.AbsolutePosition.Y + TabPage.CanvasPosition.Y
+		TweenService:Create(TabPage, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {CanvasPosition = Vector2.new(0, math.max(0, ElementOffset - 10))}):Play()
+
+		task.spawn(function()
+			local Background = Element.BackgroundColor3
+			for _ = 1, 2 do
+				TweenService:Create(Element, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
+				task.wait(0.35)
+				TweenService:Create(Element, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = Background}):Play()
+				task.wait(0.35)
+			end
+		end)
+	end
+
     local addedUiGradientStrokes = {}
 
     local tabPlaceholderSecond = TabList.Placeholder:Clone()
@@ -2045,6 +2131,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 		end
 
 		TabPage.Parent = Elements
+		tabPages[Name] = TabPage
 		if not FirstTab then
 			Elements.UIPageLayout.Animated = false
 			Elements.UIPageLayout:JumpTo(TabPage)
@@ -2117,7 +2204,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 		end
 
 
-		TabButton.Interact.MouseButton1Click:Connect(function()
+		local function selectThisTab()
 			if Minimised then return end
 			TabButton:SetAttribute("Selected", true)
 			TweenService:Create(TabButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
@@ -2153,7 +2240,10 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				--TweenService:Create(Elements, TweenInfo.new(0.8, Enum.EasingStyle.Quint), {Size = UDim2.new(0.662, 0,0.857, 0)}):Play()
 			end
 
-		end)
+		end
+		tabSelectors[Name] = selectThisTab
+
+		TabButton.Interact.MouseButton1Click:Connect(selectThisTab)
 
 		-- Every element row answers the pointer but the tabs did not, so the column read as
 		-- static until something was actually clicked. The selected tab is already painted
