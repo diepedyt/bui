@@ -480,11 +480,15 @@ PremiumTag.ZIndex = 5
 PremiumTag.TextLabel.ZIndex = 10
 PremiumTag.BackgroundTransparency = 0.65
 PremiumTag.TextLabel.Text = "⭐ Premium Only"
--- PremiumTag setting: true = permanent lock; number = unix unlock time (countdown + Discord).
+-- PremiumTag setting: true = permanent lock; number = unlock stamp (countdown + Discord).
+-- Countdown uses GetServerTimeNow to match AnimeAstral FeatureLocks (not os.time).
 local PremiumDiscordInvite = "discord.gg/BananaHub"
+local function premiumLockNow()
+	return workspace:GetServerTimeNow()
+end
 local function premiumOverlayText(premiumSetting)
 	if type(premiumSetting) == "number" then
-		local left = math.max(0, premiumSetting - os.time())
+		local left = math.max(0, premiumSetting - premiumLockNow())
 		local hours = math.floor(left / 3600)
 		local mins = math.floor((left % 3600) / 60)
 		return string.format("Premium · unlocks in %dh %02dm\n%s", hours, mins, PremiumDiscordInvite)
@@ -504,7 +508,7 @@ local function attachPremiumOverlay(parent, premiumSetting)
 	if type(premiumSetting) == "number" then
 		local unlockAt = premiumSetting
 		task.spawn(function()
-			while tag.Parent and unlockAt > os.time() do
+			while tag.Parent and unlockAt > premiumLockNow() do
 				if label then
 					label.Text = premiumOverlayText(unlockAt)
 				end
@@ -519,8 +523,9 @@ local function attachPremiumOverlay(parent, premiumSetting)
 	if interact and interact:IsA("GuiButton") then
 		interact.MouseButton1Click:Connect(function()
 			local content
-			if type(premiumSetting) == "number" and premiumSetting > os.time() then
-				local left = math.max(0, premiumSetting - os.time())
+			local now = premiumLockNow()
+			if type(premiumSetting) == "number" and premiumSetting > now then
+				local left = math.max(0, premiumSetting - now)
 				local hours = math.floor(left / 3600)
 				local mins = math.floor((left % 3600) / 60)
 				content = string.format("Premium needed until unlock (%dh %02dm). Join %s", hours, mins, PremiumDiscordInvite)
@@ -2431,7 +2436,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			Label.BackgroundTransparency = 1
 			Label.UIStroke.Transparency = 1
 			Label.Title.TextTransparency = 1
-
+																																								
 			Label.BackgroundColor3 = SelectedTheme.SecondaryElementBackground
 			Label.UIStroke.Color = SelectedTheme.SecondaryElementStroke
 
