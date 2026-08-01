@@ -1,4 +1,4 @@
---print("v28 v1")
+--print("v29 v2")
 --[[
 
 Rayfield Interface Suite
@@ -356,6 +356,18 @@ end
 ]]
 --
 
+-- Which execution owns the screen. Testers and devs re-execute even though a user only gets one
+-- go, and that used to be decided by whichever copy's asset finished downloading first, because
+-- the load below yields: a slow first execution would arrive after a fast second one, disable and
+-- rename the window that was already animating, then claim the shared _G entry points for a
+-- window nobody could see. The generation is claimed before that yield, so the newest execution
+-- to *start* always wins and an older one stands down instead of fighting it for the screen.
+_G.RayfieldGeneration = (_G.RayfieldGeneration or 0) + 1
+local Generation = _G.RayfieldGeneration
+local function isCurrent()
+	return _G.RayfieldGeneration == Generation
+end
+
 local Rayfield =  game:GetObjects(_G.ASSETID_123)[1]
 
 --[[
@@ -381,32 +393,76 @@ end
 
 Rayfield.Enabled = false
 
+-- A superseded execution is never parented, so it cannot disturb the window that owns the screen.
+-- Its script carries on building into an orphaned tree, which is invisible and harmless.
+if isCurrent() then
+	if gethui then
+		Rayfield.Parent = gethui()
+	elseif syn.protect_gui then 
+		syn.protect_gui(Rayfield)
+		Rayfield.Parent = CoreGui
+	elseif CoreGui:FindFirstChild("RobloxGui") then
+		Rayfield.Parent = CoreGui:FindFirstChild("RobloxGui")
+	else
+		Rayfield.Parent = CoreGui
+	end
 
-if gethui then
-	Rayfield.Parent = gethui()
-elseif syn.protect_gui then 
-	syn.protect_gui(Rayfield)
-	Rayfield.Parent = CoreGui
-elseif CoreGui:FindFirstChild("RobloxGui") then
-	Rayfield.Parent = CoreGui:FindFirstChild("RobloxGui")
-else
-	Rayfield.Parent = CoreGui
+	-- Taken out of the interface rather than disabled and renamed, which left a copy sitting there
+	-- for the rest of the session with its intro, its input listeners and its reopen poll still
+	-- running. Unparented and not destroyed: Destroy detaches every descendant as well, so the
+	-- execution that owns this window would error on its next child lookup and its error reporter
+	-- would fire on each one. Out here it renders nowhere and is collected with its execution.
+	for _, Interface in ipairs(Rayfield.Parent:GetChildren()) do
+		if Interface ~= Rayfield and (Interface.Name == Rayfield.Name or Interface.Name == "Rayfield-Old") then
+			Interface.Parent = nil
+		end
+	end
 end
 
-if gethui then
-	for _, Interface in ipairs(gethui():GetChildren()) do
-		if Interface.Name == Rayfield.Name and Interface ~= Rayfield then
-			Interface.Enabled = false
-			Interface.Name = "Rayfield-Old"
-		end
+-- Potassium raises its own admin-detection prompt as a full screen gui above everything else, over
+-- and over, and its Ignore button does not stop it coming back. It belongs to the executor rather
+-- than to any script, so there is no flag to read and it has to be recognised by the text it shows.
+-- Matched loosely because the wording carries the game's name, and unparented rather than destroyed
+-- so whatever created it does not error walking its own children.
+local function isForeignPrompt(Object)
+	if not Object:IsA("TextLabel") and not Object:IsA("TextButton") then return false end
+
+	local Text = string.lower(Object.Text)
+	return string.find(Text, "joined your session", 1, true) ~= nil
+		or (string.find(Text, "administrator", 1, true) ~= nil and string.find(Text, "disconnect", 1, true) ~= nil)
+end
+
+local function clearForeignPrompt(Object)
+	if not isForeignPrompt(Object) then return end
+
+	local Root = Object
+	while Root.Parent and not Root:IsA("ScreenGui") do
+		Root = Root.Parent
 	end
-else
-	for _, Interface in ipairs(CoreGui:GetChildren()) do
-		if Interface.Name == Rayfield.Name and Interface ~= Rayfield then
-			Interface.Enabled = false
-			Interface.Name = "Rayfield-Old"
-		end
+
+	if Root ~= Rayfield and Root:IsA("ScreenGui") then
+		Root.Parent = nil
 	end
+end
+
+local PromptContainers = {CoreGui}
+if gethui then table.insert(PromptContainers, gethui()) end
+local PlayerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
+if PlayerGui then table.insert(PromptContainers, PlayerGui) end
+
+for _, Container in ipairs(PromptContainers) do
+	-- CoreGui is not readable on every executor, and the connection is worth nothing if the sweep
+	-- that precedes it throws.
+	pcall(function()
+		for _, Object in ipairs(Container:GetDescendants()) do
+			clearForeignPrompt(Object)
+		end
+
+		Container.DescendantAdded:Connect(function(Object)
+			-- Deferred because the text is usually assigned after the label is parented in.
+			task.defer(clearForeignPrompt, Object)
+		end)
+	end)
 end
 
 
@@ -424,6 +480,60 @@ PremiumTag.ZIndex = 5
 PremiumTag.TextLabel.ZIndex = 10
 PremiumTag.BackgroundTransparency = 0.65
 PremiumTag.TextLabel.Text = "⭐ Premium Only"
+-- PremiumTag setting: true = permanent lock; number = unix unlock time (countdown + Discord).
+local PremiumDiscordInvite = "discord.gg/BananaHub"
+local function premiumOverlayText(premiumSetting)
+	if type(premiumSetting) == "number" then
+		local left = math.max(0, premiumSetting - os.time())
+		local hours = math.floor(left / 3600)
+		local mins = math.floor((left % 3600) / 60)
+		return string.format("Premium · unlocks in %dh %02dm\n%s", hours, mins, PremiumDiscordInvite)
+	end
+	return "⭐ Premium Only\n"..PremiumDiscordInvite
+end
+local function attachPremiumOverlay(parent, premiumSetting)
+	if not premiumSetting then return nil end
+	local tag = PremiumTag:Clone()
+	tag.Visible = true
+	tag.Parent = parent
+	local label = tag:FindFirstChild("TextLabel")
+	if label then
+		label.TextWrapped = true
+		label.Text = premiumOverlayText(premiumSetting)
+	end
+	if type(premiumSetting) == "number" then
+		local unlockAt = premiumSetting
+		task.spawn(function()
+			while tag.Parent and unlockAt > os.time() do
+				if label then
+					label.Text = premiumOverlayText(unlockAt)
+				end
+				task.wait(1)
+			end
+			if tag.Parent and label then
+				label.Text = "Unlocked — re-execute script\n"..PremiumDiscordInvite
+			end
+		end)
+	end
+	local interact = parent:FindFirstChild("Interact")
+	if interact and interact:IsA("GuiButton") then
+		interact.MouseButton1Click:Connect(function()
+			local content
+			if type(premiumSetting) == "number" and premiumSetting > os.time() then
+				local left = math.max(0, premiumSetting - os.time())
+				local hours = math.floor(left / 3600)
+				local mins = math.floor((left % 3600) / 60)
+				content = string.format("Premium needed until unlock (%dh %02dm). Join %s", hours, mins, PremiumDiscordInvite)
+			elseif type(premiumSetting) == "number" then
+				content = "This feature is free now — re-execute the script to use it. "..PremiumDiscordInvite
+			else
+				content = "Premium only. Join "..PremiumDiscordInvite
+			end
+			RayfieldLibrary:Notify({Title = "Premium Feature", Content = content, Duration = 6})
+		end)
+	end
+	return tag
+end
 local LoadingFrame = Main.LoadingFrame
 local TabList = Main.TabList
 local SearchBar = Main.Searchbar
@@ -431,10 +541,295 @@ local Filler = SearchBar.CanvasGroup.Filler
 local Prompt = Main.Prompt
 local CustomText = Topbar.CustomText
 
+
+--Window Chrome
+
+-- Where each topbar control sits when nothing is happening to it, read off the asset
+-- before any animation has touched it. The icons rest at different weights on purpose
+-- (the X carries the row, the rest sit back), and unhide used to fade every one of them to
+-- fully opaque, so the hierarchy was lost after the first hide. Hover states grow and
+-- brighten from here, and unhide puts everything back, which also matters because a
+-- window hidden while the cursor is on the X never gets its MouseLeave.
+local TopbarButtonRest = {}
+for _, TopbarButton in ipairs(Topbar:GetChildren()) do
+	if TopbarButton.ClassName == "ImageButton" then
+		TopbarButtonRest[TopbarButton] = {ImageTransparency = TopbarButton.ImageTransparency, Size = TopbarButton.Size}
+	end
+end
+
+-- Chrome controls are sized in a mix of scale and offset, so a hover or press grows them
+-- by a factor rather than a fixed size.
+local function scaleSize(Size, Factor)
+	return UDim2.new(Size.X.Scale * Factor, Size.X.Offset * Factor, Size.Y.Scale * Factor, Size.Y.Offset * Factor)
+end
+
+
+--Element Sizing
+
+-- Every element root carries a UIAspectRatioConstraint driven by width, so its rendered
+-- height is (column width / AspectRatio) and any Size.Y.Offset on the root is ignored.
+-- Heights are therefore expressed in rows: one row is ElementRowAspect, and anything
+-- taller divides it. The template ships three different ratios for what are all single
+-- rows, so they are normalised here rather than in each constructor.
+--
+-- The panel widths the asset ships with are left alone. Height is width over aspect, so
+-- widening the element column makes every element taller unless every aspect below is
+-- scaled by the same factor.
+local ElementRowAspect = 11.847293853759766
+local ElementRowTitle = 0.33
+local ElementRowControl = 0.701
+local ElementRowInfoRows = 1.5
+local ElementRowGutter = 0.0256
+local DropdownOpenAspect = ElementRowAspect / 5.5
+
+-- The list sits inside the open panel, so a row measured across the list comes out at 0.944
+-- of a page row. The asset ships every option and the search box at a full row, which is why
+-- an open dropdown reads as a stack of elements rather than a list of choices.
+local DropdownListRow = ElementRowAspect * 0.944
+local DropdownOptionAspect = DropdownListRow / 0.73
+local DropdownSearchAspect = DropdownListRow / 0.77
+
+for _, Template in ipairs({Elements.Template.Button, Elements.Template.Label, Elements.Template.Toggle, Elements.Template.Input, Elements.Template.Keybind, Elements.Template.Slider}) do
+	Template.UIAspectRatioConstraint.AspectRatio = ElementRowAspect
+	Template.Title.Size = UDim2.new(Template.Title.Size.X.Scale, 0, ElementRowTitle, 0)
+end
+
+Elements.Template.BigLabel.UIAspectRatioConstraint.AspectRatio = ElementRowAspect
+Elements.Template.Space.UIAspectRatioConstraint.AspectRatio = ElementRowAspect / 1.25
+
+Elements.Template.Input.InputFrame.Size = UDim2.new(0.241, 0, ElementRowControl, 0)
+Elements.Template.Keybind.KeybindFrame.Size = UDim2.new(0.073, 0, ElementRowControl, 0)
+Elements.Template.Slider.Main.Size = UDim2.new(0.480, 0, ElementRowControl, 0)
+
+local DropdownList = Elements.Template.Dropdown.List
+for _, Row in ipairs({DropdownList.Template, DropdownList["Select All"], DropdownList["Reset List"]}) do
+	Row.UIAspectRatioConstraint.AspectRatio = DropdownOptionAspect
+end
+DropdownList[",---S=()earch"].UIAspectRatioConstraint.AspectRatio = DropdownSearchAspect
+
+-- The list ends with five spacers, which leaves most of a panel of empty scroll under the last
+-- option. One is enough to lift it clear of the panel's bottom edge.
+local DropdownTrail = 0
+for _, Row in ipairs(DropdownList:GetChildren()) do
+	if Row:IsA("Frame") and Row.LayoutOrder == 9999 then
+		DropdownTrail = DropdownTrail + 1
+		Row.UIAspectRatioConstraint.AspectRatio = DropdownOptionAspect
+		Row.Visible = DropdownTrail == 1
+	end
+end
+
+-- The template leaves every control a different distance from the row's right edge
+-- (9px on a toggle switch, 11px on a slider, 16px on an input box), so scrolling a page
+-- shows a ragged right column. Solving for the right edge rather than the position keeps
+-- the gutter once an input or keybind grows to fit its own text.
+local function pinRight(Control)
+	Control.Position = UDim2.new(1 - ElementRowGutter - (1 - Control.AnchorPoint.X) * Control.Size.X.Scale, Control.Position.X.Offset, Control.Position.Y.Scale, Control.Position.Y.Offset)
+end
+
+pinRight(Elements.Template.Button.ElementIndicator)
+pinRight(Elements.Template.Toggle.Switch)
+pinRight(Elements.Template.Input.InputFrame)
+pinRight(Elements.Template.Keybind.KeybindFrame)
+pinRight(Elements.Template.Slider.Main)
+
+-- SectionTitle is the one element that spans the page edge to edge while every other
+-- root is inset 5px a side, so without the extra inset a heading starts left of the rows
+-- it heads.
+local SectionTitleInset = 0.0425
+Elements.Template.SectionTitle.Title.Position = UDim2.new(SectionTitleInset, 0, Elements.Template.SectionTitle.Title.Position.Y.Scale, 0)
+Elements.Template.SectionTitle.Title.Size = UDim2.new(1 - SectionTitleInset * 2, 0, Elements.Template.SectionTitle.Title.Size.Y.Scale, 0)
+
+for _, Template in ipairs({Elements.Template.Button, Elements.Template.Toggle, Elements.Template.Input, Elements.Template.Keybind, Elements.Template.Slider}) do
+	Template.Description.AnchorPoint = Vector2.new(0, 0)
+	Template.Description.Position = UDim2.new(0.035, 0, 0.7, 0)
+	Template.Description.Size = UDim2.new(0.93, 0, 0.26, 0)
+	Template.Description.TextWrapped = true
+end
+
+-- Hovering an element with Info grows it to ElementRowInfoRows to make room for the
+-- description. Its children are positioned in scale, so dividing their Y scale by the
+-- same factor holds them in the original row band instead of letting them drift down.
+local function connectInfoDescription(Element)
+	local Band = {}
+	for _, Child in ipairs(Element:GetChildren()) do
+		if Child:IsA("GuiObject") and Child ~= Element.Description then
+			Band[Child] = {Child.Position, Child.Size}
+		end
+	end
+
+	local IsHover = false
+	local opened = false
+	local Info = TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+
+	local function Expand(Rows)
+		TweenService:Create(Element.UIAspectRatioConstraint, Info, {AspectRatio = ElementRowAspect / Rows}):Play()
+		for Child, Original in pairs(Band) do
+			local Position, Size = Original[1], Original[2]
+			TweenService:Create(Child, Info, {
+				Position = UDim2.new(Position.X.Scale, Position.X.Offset, Position.Y.Scale / Rows, Position.Y.Offset),
+				Size = UDim2.new(Size.X.Scale, Size.X.Offset, Size.Y.Scale / Rows, Size.Y.Offset)
+			}):Play()
+		end
+	end
+
+	Element.MouseEnter:Connect(function()
+		IsHover = true
+		wait(0.2)
+		if IsHover then
+			opened = true
+			Element.Description.Visible = true
+			Expand(ElementRowInfoRows)
+		end
+	end)
+	Element.MouseLeave:Connect(function()
+		if IsHover then IsHover = false end
+		if opened then
+			opened = false
+			Expand(1)
+			delay(.4, function()
+				if not opened then Element.Description.Visible = false end
+			end)
+		end
+	end)
+end
+
+-- An open dropdown is five and a half rows tall, so one near the bottom of a page opens into
+-- the part of the page that is clipped away and had to be scrolled to before it could be read.
+-- The page is nudged up by whatever hangs past its bottom edge instead. The tween is delayed
+-- past the panel's own growth because the page's canvas only reaches its new height once the
+-- panel has finished growing, and a scroll is clamped to the canvas as it plays.
+local function revealDropdown(Dropdown)
+	local Page = Dropdown.Parent
+	local Overflow = Dropdown.AbsolutePosition.Y + Dropdown.AbsoluteSize.X / DropdownOpenAspect - Page.AbsolutePosition.Y - Page.AbsoluteSize.Y
+	if Overflow <= 0 then return end
+	TweenService:Create(Page, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0, false, 0.15), {CanvasPosition = Vector2.new(0, Page.CanvasPosition.Y + Overflow + 10)}):Play()
+end
+
+
+--Tab Sizing
+
+-- Tabs are laid out by a UIGridLayout whose cell height is a scale of the tab list. The
+-- 10000px cell width is how the asset forces one tab per row; the tab's own aspect
+-- constraint is what turns the cell height into its width. TabRowTitle is tuned so tab
+-- text lands on the same height as an element row title.
+--
+-- TabRowAspect is only the width a tab starts at. Once the last tab has been idle a
+-- moment, fitTabsToTitles tweens every tab down to the width its longest title actually
+-- needs. All the paddings are fractions of the tab height, so the starting width, the
+-- fitted width and the icon and title positions derived from them all scale together.
+local TabRowHeight = 0.0935
+local TabRowGap = 0.0262
+local TabRowAspect = 6.25
+local TabRowTitle = 0.4035
+local TabFitPad = 0.4
+local TabFitIcon = 0.585
+local TabFitGap = 0.25
+local TabFitFloor = 0.8
+local tabFitQueued = 0
+local tabFitAspect = TabRowAspect
+
+local TabTextLeft = (TabFitPad + TabFitIcon + TabFitGap) / TabRowAspect
+local TabTextWidth = 1 - TabTextLeft - TabFitPad / TabRowAspect
+
+TabList.UIGridLayout.CellSize = UDim2.new(0, 10000, TabRowHeight, 0)
+TabList.UIGridLayout.CellPadding = UDim2.new(0, 0, TabRowGap, 0)
+TabList.Template.UIAspectRatioConstraint.AspectRatio = TabRowAspect
+TabList.Template.UICorner.CornerRadius = UDim.new(0.2, 0)
+TabList.Template.UIStroke.Thickness = 1
+TabList.Template.Image.Position = UDim2.new(TabFitPad / TabRowAspect, 0, 0.5, 0)
+TabList.Template.Title.Size = UDim2.new(TabTextWidth, 0, TabRowTitle, 0)
+TabList.Template.Title.Position = UDim2.new(TabTextLeft + TabTextWidth / 2, 0, 0.5, 0)
+
+local function isTabButton(Child)
+	return Child:IsA("Frame") and Child.Name ~= "Template" and Child.Name ~= "Placeholder"
+end
+
+-- The fitted width belongs to the column rather than to one tab: every measurement it is
+-- built from is a fraction of the tab height, so it reduces to an aspect ratio any tab can
+-- be given. With a TweenInfo a tab animates down to it; without one it is set outright,
+-- which is how a tab created after the column has already been fitted avoids appearing at
+-- the full width and being shrunk a moment later.
+local function applyTabFit(TabButton, Fit)
+	local textLeft = (TabFitPad + TabFitIcon + TabFitGap) / tabFitAspect
+	local textWidth = 1 - textLeft - TabFitPad / tabFitAspect
+	local ImagePosition = UDim2.new(TabFitPad / tabFitAspect, 0, 0.5, 0)
+	local TitleSize = UDim2.new(textWidth, 0, TabRowTitle, 0)
+	local TitlePosition = UDim2.new(textLeft + textWidth / 2, 0, 0.5, 0)
+
+	if Fit then
+		TweenService:Create(TabButton.UIAspectRatioConstraint, Fit, {AspectRatio = tabFitAspect}):Play()
+		TweenService:Create(TabButton.Image, Fit, {Position = ImagePosition}):Play()
+		TweenService:Create(TabButton.Title, Fit, {Size = TitleSize, Position = TitlePosition}):Play()
+	else
+		TabButton.UIAspectRatioConstraint.AspectRatio = tabFitAspect
+		TabButton.Image.Position = ImagePosition
+		TabButton.Title.Size = TitleSize
+		TabButton.Title.Position = TitlePosition
+	end
+end
+
+-- A fit is clamped to TabFitFloor of the column, and with the title lengths a hub actually
+-- uses that floor is what it lands on: AnimeAstral's longest tab needs 167px of a 237px
+-- floor. So the width a tab will settle at is known from the column alone, before a single
+-- title has been measured, and seeding the first tab with it means the usual case never
+-- animates at all. A hub whose titles need more than the floor still gets one widening
+-- from fitTabsToTitles once that title exists.
+local function seedTabFit()
+	if tabFitAspect ~= TabRowAspect then return end
+	local height = TabRowHeight * TabList.AbsoluteSize.Y
+	if height == 0 or TabList.AbsoluteSize.X == 0 then return end
+	tabFitAspect = math.min(TabList.AbsoluteSize.X * TabFitFloor / height, TabRowAspect)
+end
+
+local function fitTabsToTitles()
+	local widest, height = 0, 0
+	for _, TabButton in ipairs(TabList:GetChildren()) do
+		if isTabButton(TabButton) then
+			widest = math.max(widest, TabButton.Title.TextBounds.X)
+			height = TabButton.AbsoluteSize.Y
+		end
+	end
+	if widest == 0 or height == 0 or TabList.AbsoluteSize.X == 0 then return end
+
+	local textLeft = height * (TabFitPad + TabFitIcon + TabFitGap)
+	local width = math.clamp(textLeft + widest + 3 + height * TabFitPad, TabList.AbsoluteSize.X * TabFitFloor, height * TabRowAspect)
+
+	-- A hub builds its tabs across its whole load and the debounce below only resolves when
+	-- the script yields, so this runs several times before the last tab exists. Replaying
+	-- the shrink each time reads as the column resizing itself over and over, so only a fit
+	-- that actually changes the width animates. The tolerance absorbs the window still
+	-- growing into place under FastLoad, which moves the measurements by a pixel without
+	-- changing the shape.
+	if math.abs(width / height - tabFitAspect) < 0.05 then return end
+	tabFitAspect = width / height
+
+	local fit = TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+	for _, TabButton in ipairs(TabList:GetChildren()) do
+		if isTabButton(TabButton) then
+			applyTabFit(TabButton, fit)
+		end
+	end
+end
+
+local function queueTabFit()
+	tabFitQueued = tabFitQueued + 1
+	local queued = tabFitQueued
+	task.delay(0.35, function()
+		if queued == tabFitQueued then fitTabsToTitles() end
+	end)
+end
+
+
 TabListBack.BackgroundTransparency = 1
 TabList.Placeholder.Title.TextTransparency = 1
 TabListBack.BackgroundTransparency = 1
 TabListBack.Divider.Size = UDim2.new(0, 1, 0, 0)
+
+-- Both dividers are a 1px hairline in the theme's Divider colour, which is pure white in
+-- every theme but Yellow2. Drawn opaque they read as a seam rather than a separator.
+local DividerTransparency = 0.82
+
+TabList.ScrollBarThickness = 5
 
 Rayfield.DisplayOrder = 100
 LoadingFrame.Version.Text = Release
@@ -978,7 +1373,7 @@ end
 
 function Hide()
 	Debounce = true
-	RayfieldLibrary:Notify({Title = "Interface Hidden", Content = "The interface has been hidden, you can unhide the interface by tapping Tab", Duration = 7})
+	RayfieldLibrary:Notify({Title = "Interface Hidden", Content = "Tap Tab or the floating icon to bring the interface back.", Duration = 7})
 	--TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 470, 0, 400)}):Play()
 	--TweenService:Create(Main.Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 470, 0, 45)}):Play()
 	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
@@ -1045,11 +1440,11 @@ function Unhide()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
 	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 	TweenService:Create(Main.Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-	TweenService:Create(Main.Topbar.Divider, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+	TweenService:Create(Main.Topbar.Divider, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = DividerTransparency}):Play()
 	TweenService:Create(Main.Topbar.CornerRepair, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 	TweenService:Create(Main.Topbar.Title, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 	TweenService:Create(Main.UIStroke, TweenInfo.new(1, Enum.EasingStyle.Quint), {Transparency = 0.1}):Play()
-	TweenService:Create(Main.TabListBack.Divider, TweenInfo.new(.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+	TweenService:Create(Main.TabListBack.Divider, TweenInfo.new(.5, Enum.EasingStyle.Quint), {BackgroundTransparency = DividerTransparency}):Play()
 	TweenService:Create(Main.TabList.Placeholder.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 	TweenService:Create(CustomText, TweenInfo.new(.5, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 	TweenService:Create(CustomText.UIStroke, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
@@ -1059,7 +1454,9 @@ function Unhide()
 	end
 	for _, TopbarButton in ipairs(Topbar:GetChildren()) do
 		if TopbarButton.ClassName == "ImageButton" then
-			TweenService:Create(TopbarButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
+			local Goal = table.clone(TopbarButtonRest[TopbarButton])
+			if TopbarButton == Topbar.Hide then Goal.ImageColor3 = SelectedTheme.XIcon end
+			TweenService:Create(TopbarButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), Goal):Play()
 		end
 	end
 	for _, tabbtn in ipairs(TabList:GetChildren()) do
@@ -1174,7 +1571,7 @@ function Maximise()
 	TweenService:Create(Topbar.UIStroke, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
 	TweenService:Create(Topbar.CornerRepair, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-	TweenService:Create(Topbar.Divider, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+	TweenService:Create(Topbar.Divider, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = DividerTransparency}):Play()
 	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(.5, 0,0.5, 0)}):Play()
 	TweenService:Create(Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 45)}):Play()
 	TabList.Visible = true
@@ -1285,6 +1682,13 @@ function Minimise()
 	Debounce = false
 end
 
+-- Intro timing: the waits in here are deliberate, not leftovers. Shortening them measurably cost
+-- sales, which is the labor illusion (Buell & Norton, Management Science 57(9), 2011): a wait that
+-- shows effort is valued more highly than an instant result, even when the result is identical.
+-- Their limit was a decline past roughly 30s, so a few seconds is well inside it. A blind wait is
+-- the weak version of the effect, so the card breathes and the window assembles a piece at a time
+-- rather than sitting frozen. Rejoins pass FastLoad (ScriptManager:QueueFastLoad) and skip all of
+-- it, so this only ever runs on a first manual execution, which is exactly the deciding moment.
 function RayfieldLibrary:CreateWindow(Settings, wl)
 
 	local fastLoad = Settings.FastLoad
@@ -1319,6 +1723,14 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 
 	LoadingFrame.BG.ImageTransparency = 1
+
+	-- The loading card is the rounded window at its smallest, but the artwork is a plain
+	-- ImageLabel inside a parent that does not clip, so it squared the window's corners off
+	-- for the whole intro. Matching Main's radius keeps the card the same shape it opens into.
+	local LoadingCorner = LoadingFrame.BG:FindFirstChildOfClass("UICorner") or Instance.new("UICorner")
+	LoadingCorner.CornerRadius = Main.UICorner.CornerRadius
+	LoadingCorner.Parent = LoadingFrame.BG
+
 	LoadingFrame.Title.Text = Settings.LoadingTitle or "Rayfield Interface Suite"
 	LoadingFrame.Subtitle.Text = Settings.LoadingSubtitle or "by Sirius"
 	if Settings.LoadingTitle ~= "Rayfield Interface Suite" then
@@ -1579,13 +1991,13 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	Rayfield.Enabled = true
 	Main.UIStroke.Transparency = 1
 	if not fastLoad then
-		wait(0.5)
+		wait(0.45)
 	end
+	-- The card, its shadow, its artwork and its border all arrive on one beat. They used to be
+	-- split across a blocking wait with the artwork taking nearly twice as long as the card it
+	-- sits in, so an empty panel appeared first and filled itself in afterwards.
 	TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.55}):Play()
-	if not fastLoad then
-		wait(0.1)
-	end
+	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.8, Enum.EasingStyle.Quint), {ImageTransparency = 0.55}):Play()
 	--[[
 	TweenService:Create(LoadingFrame.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 	wait(0.05)
@@ -1593,10 +2005,18 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	wait(0.05)
 	TweenService:Create(LoadingFrame.Version, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 	]]
-	TweenService:Create(Main.UIStroke, TweenInfo.new(1.15, Enum.EasingStyle.Quint), {Transparency = 0.1, Color = Color3.fromRGB(255,255,255), Thickness = 7}):Play()
-	TweenService:Create(LoadingFrame.BG, TweenInfo.new(1.3, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
+	TweenService:Create(Main.UIStroke, TweenInfo.new(1, Enum.EasingStyle.Quint), {Transparency = 0.1, Color = Color3.fromRGB(255,255,255), Thickness = 7}):Play()
+	TweenService:Create(LoadingFrame.BG, TweenInfo.new(0.75, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0, false, 0.08), {ImageTransparency = 0}):Play()
+
+	-- The card is held on screen long enough to be read, so the border sweeps rather than freezes:
+	-- a wait showing nothing happening reads as a hang. Rotation is the one thing on the card that
+	-- nothing else animates yet, and -180 to 180 is a full turn, so repeating it never jumps.
+	-- Anything sharing a property with the tweens above would seize it the moment it played.
+	local LoadingSweep = TweenService:Create(Main.UIStroke.UIGradient, TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {Rotation = 180})
+	LoadingSweep:Play()
 
 	task.spawn(function()
+		if not isCurrent() then return end
 		_G.UiSizeDown = function(amount)
 			local correctSizeX = Main.Size.X.Scale - (amount * 0.12)
 			local correctSizeY = Main.Size.Y.Scale - (amount * 0.10)
@@ -1671,6 +2091,46 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 		end
 	end
 
+	local tabSelectors = {}
+	local tabPages = {}
+
+	-- Both scrolls measure an offset within the scrolling frame rather than a position on screen,
+	-- so a page the UIPageLayout has parked off to the side measures the same as the visible one
+	-- and neither jump has to wait out the page animation. ElementName is the element's display
+	-- text, which every constructor also writes to the frame's Name.
+	function Window:SelectTab(TabName, ElementName)
+		local Selector = tabSelectors[TabName]
+		if not Selector then return end
+
+		task.spawn(Selector)
+
+		local TabButton = TabList:FindFirstChild(TabName)
+		if TabButton then
+			updateCanvas()
+			local ButtonOffset = TabButton.AbsolutePosition.Y - TabList.AbsolutePosition.Y + TabList.CanvasPosition.Y
+			local Limit = math.max(0, TabList.CanvasSize.Y.Offset - TabList.AbsoluteWindowSize.Y)
+			local Target = math.clamp(ButtonOffset - (TabList.AbsoluteWindowSize.Y - TabButton.AbsoluteSize.Y) / 2, 0, Limit)
+			TweenService:Create(TabList, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {CanvasPosition = Vector2.new(0, Target)}):Play()
+		end
+
+		local TabPage = tabPages[TabName]
+		local Element = ElementName and TabPage and TabPage:FindFirstChild(ElementName)
+		if not Element then return end
+
+		local ElementOffset = Element.AbsolutePosition.Y - TabPage.AbsolutePosition.Y + TabPage.CanvasPosition.Y
+		TweenService:Create(TabPage, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {CanvasPosition = Vector2.new(0, math.max(0, ElementOffset - 10))}):Play()
+
+		task.spawn(function()
+			local Background = Element.BackgroundColor3
+			for _ = 1, 2 do
+				TweenService:Create(Element, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
+				task.wait(0.35)
+				TweenService:Create(Element, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = Background}):Play()
+				task.wait(0.35)
+			end
+		end)
+	end
+
     local addedUiGradientStrokes = {}
 
     local tabPlaceholderSecond = TabList.Placeholder:Clone()
@@ -1689,7 +2149,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 		if Image then
 			TabButton.Title.AnchorPoint = Vector2.new(0.5, 0.5)
-			TabButton.Title.Position = UDim2.new(0.575, 0,0.512, 0)
+			TabButton.Title.Position = UDim2.new(TabTextLeft + TabTextWidth / 2, 0, 0.5, 0)
 			TabButton.Image.Image = "rbxassetid://"..Image
 			TabButton.Image.Visible = true
 			TabButton.Title.TextXAlignment = Enum.TextXAlignment.Left
@@ -1703,6 +2163,10 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 		TabButton.UIStroke.Transparency = 1
 
 		TabButton.Visible = true
+
+		seedTabFit()
+		applyTabFit(TabButton)
+		queueTabFit()
 
 		--Create Elements Page
 		local TabPage = Elements.Template:Clone()
@@ -1721,6 +2185,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 		end
 
 		TabPage.Parent = Elements
+		tabPages[Name] = TabPage
 		if not FirstTab then
 			Elements.UIPageLayout.Animated = false
 			Elements.UIPageLayout:JumpTo(TabPage)
@@ -1761,10 +2226,13 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 		--Animate
 
-		local customDelay = #TabList:GetChildren()
-		customDelay = customDelay + 0.15
+		-- Staggers each tab's entrance. This is added to tween durations rather than used
+		-- as a delay, so it has to stay bounded: unclamped, a 29 tab hub leaves the last
+		-- tabs animating their text and corners for half a minute after load.
+		local customDelay = math.min(#TabList:GetChildren() * 0.03, 0.5)
 
 		if FirstTab then
+			TabButton:SetAttribute("Selected", false)
 			TabButton.BackgroundColor3 = SelectedTheme.TabBackground
 			TabButton.Image.ImageColor3 = SelectedTheme.TabTextColor
 			TabButton.Title.TextColor3 = SelectedTheme.TabTextColor
@@ -1777,6 +2245,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			TweenService:Create(TabButton.Shadow, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 0.7}):Play()
 		else
 			FirstTab = Name
+			TabButton:SetAttribute("Selected", true)
 			TabButton.BackgroundColor3 = SelectedTheme.TabBackgroundSelected
 			TabButton.Image.ImageColor3 = SelectedTheme.SelectedTabTextColor
 			TabButton.Title.TextColor3 = SelectedTheme.SelectedTabTextColor
@@ -1789,8 +2258,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 		end
 
 
-		TabButton.Interact.MouseButton1Click:Connect(function()
+		local function selectThisTab()
 			if Minimised then return end
+			TabButton:SetAttribute("Selected", true)
 			TweenService:Create(TabButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 			TweenService:Create(TabButton.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
 			TweenService:Create(TabButton.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
@@ -1802,6 +2272,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 			for _, OtherTabButton in ipairs(TabList:GetChildren()) do
 				if OtherTabButton.Name ~= "Template" and OtherTabButton.ClassName == "Frame" and OtherTabButton ~= TabButton and OtherTabButton.Name ~= "Placeholder" then
+					OtherTabButton:SetAttribute("Selected", false)
 					TweenService:Create(OtherTabButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.TabBackground}):Play()
 					TweenService:Create(OtherTabButton.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextColor3 = SelectedTheme.TabTextColor}):Play()
 					TweenService:Create(OtherTabButton.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageColor3 = SelectedTheme.TabTextColor}):Play()
@@ -1813,9 +2284,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				end
 			end
 			if Elements.UIPageLayout.CurrentPage ~= TabPage then
-				TweenService:Create(TabButton.UICorner, TweenInfo.new(0.3 + customDelay, Enum.EasingStyle.Quint), {CornerRadius = UDim.new(0.8, 0)}):Play()
-				task.delay(0.25, function()
-					TweenService:Create(TabButton.UICorner, TweenInfo.new(0.2 + customDelay, Enum.EasingStyle.Quint), {CornerRadius = UDim.new(0.2, 0)}):Play()
+				TweenService:Create(TabButton.UICorner, TweenInfo.new(0.15, Enum.EasingStyle.Quint), {CornerRadius = UDim.new(0.4, 0)}):Play()
+				task.delay(0.15, function()
+					TweenService:Create(TabButton.UICorner, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {CornerRadius = UDim.new(0.2, 0)}):Play()
 				end)
 				--TweenService:Create(Elements, TweenInfo.new(1, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 460,0, 330)}):Play()
 				Elements.UIPageLayout:JumpTo(TabPage)
@@ -1823,6 +2294,25 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				--TweenService:Create(Elements, TweenInfo.new(0.8, Enum.EasingStyle.Quint), {Size = UDim2.new(0.662, 0,0.857, 0)}):Play()
 			end
 
+		end
+		tabSelectors[Name] = selectThisTab
+
+		TabButton.Interact.MouseButton1Click:Connect(selectThisTab)
+
+		-- Every element row answers the pointer but the tabs did not, so the column read as
+		-- static until something was actually clicked. The selected tab is already painted
+		-- by the click handler, so only the unselected ones lift.
+		local function hoverTab(Hovering)
+			if Minimised or TabButton:GetAttribute("Selected") then return end
+			TweenService:Create(TabButton, TweenInfo.new(0.25, Enum.EasingStyle.Quint), {BackgroundTransparency = Hovering and 0.5 or 0.7}):Play()
+		end
+
+		TabButton.MouseEnter:Connect(function()
+			hoverTab(true)
+		end)
+
+		TabButton.MouseLeave:Connect(function()
+			hoverTab(false)
 		end)
 
 		local Tab = {}
@@ -1848,29 +2338,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 			if ButtonSettings.Info then
 				Button.Description.Text = ButtonSettings.Info
-				local IsHover = false
-				local opened = false
-				local osize = Button.Size.Y.Offset
-
-				Button.MouseEnter:Connect(function(x,y)
-					IsHover = true
-					wait(0.2)
-					if IsHover then
-						opened = true
-						Button.Description.Visible = true
-						game:GetService('TweenService'):Create(Button,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Size = UDim2.new(1, -10,0, osize + Button.Description.Size.Y.Offset + 15)}):Play()
-					end
-				end)
-				Button.MouseLeave:Connect(function(x,y)
-					if IsHover then IsHover = false end
-					if opened then
-						opened = false
-						game:GetService('TweenService'):Create(Button,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Size = UDim2.new(1, -10,0, osize)}):Play()
-						delay(.4,function()
-							if not opened then Button.Description.Visible = false end
-						end)
-					end
-				end)
+				connectInfoDescription(Button)
 			end
 
 			Button.Interact.MouseButton1Click:Connect(function()
@@ -1952,9 +2420,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			local Label = Elements.Template.Label:Clone()
 			
 			if premiumTag then
-				local premiumTag = PremiumTag:Clone()
-				premiumTag.Visible = true
-				premiumTag.Parent = Label
+				attachPremiumOverlay(Label, premiumTag)
 			end
 			
 			Label.Title.Position = UDim2.new(0.514, 0, 0.5, 0)
@@ -1991,9 +2457,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			local Label = Elements.Template.BigLabel:Clone()
 			
 			if premiumTag then
-				local premiumTag = PremiumTag:Clone()
-				premiumTag.Visible = true
-				premiumTag.Parent = Label
+				attachPremiumOverlay(Label, premiumTag)
 			end
 			
 			Label.Title.Text = LabelText
@@ -2049,7 +2513,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			Paragraph.Visible = true
 			Paragraph.Parent = TabPage
 
-			Paragraph.Content.Size = UDim2.new(0, 438, 0, Paragraph.Content.TextBounds.Y)
+			Paragraph.Content.Size = UDim2.new(0.946, 0, 0.738, 0)
 			--Paragraph.Content.Position = UDim2.new(1, -10, 0,76)
 			Paragraph.Size = UDim2.new(1, -10, 0, Paragraph.Content.TextBounds.Y + 40)
 
@@ -2078,9 +2542,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			local Input = Elements.Template.Input:Clone()
 			
 			if InputSettings.PremiumTag then
-				local premiumTag = PremiumTag:Clone()
-				premiumTag.Visible = true
-				premiumTag.Parent = Input
+				attachPremiumOverlay(Input, InputSettings.PremiumTag)
 				Input.InputFrame.InputBox.Active = false
 				Input.InputFrame.InputBox.Selectable = false
 				Input.InputFrame.InputBox.TextEditable = false
@@ -2112,34 +2574,45 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			TweenService:Create(Input.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
 
 			Input.InputFrame.InputBox.PlaceholderText = InputSettings.PlaceholderText
-			local originalInputFrameSize = UDim2.new(0.130, 0, 0.701, 0)
+			local originalInputFrameSize = UDim2.new(0.130, 0, ElementRowControl, 0)
 			Input.InputFrame.Size = originalInputFrameSize
+
+			-- Nothing here is committed until Enter, and the box kept whatever was typed after
+			-- that, so a value that was never applied sat there looking applied and the field read
+			-- as broken. The hint sits beside the box while it is being edited and rides its left
+			-- edge, since the box grows leftwards as it fills. It keeps the ZIndex it is cloned
+			-- with: the ScreenGui is ZIndexBehavior.Global, so anything below the row's own ZIndex
+			-- renders behind the row's opaque background instead of on it.
+			local HintGap = 0.014
+			local HintFloor = 0.68
+			local Hint = Input.Description:Clone()
+			Hint.Name = "EnterHint"
+			Hint.Text = "press enter to save"
+			Hint.TextXAlignment = Enum.TextXAlignment.Right
+			Hint.TextWrapped = false
+			Hint.AnchorPoint = Vector2.new(1, 0.5)
+			Hint.Size = UDim2.new(0.34, 0, ElementRowTitle, 0)
+			Hint.TextTransparency = 1
+			Hint.Visible = true
+			Hint.Parent = Input
+
+			local HintShown = false
+			local HintWidth = originalInputFrameSize.X.Scale
+			local function moveHint(Duration)
+				-- Past the floor the box has eaten the gap between itself and the row title, so
+				-- there is nowhere left for the hint to sit and it steps aside.
+				local Room = 1 - ElementRowGutter - HintWidth - HintGap
+				TweenService:Create(Hint, TweenInfo.new(Duration, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					Position = UDim2.new(Room, 0, Hint.Position.Y.Scale, 0),
+					TextTransparency = (HintShown and Room > HintFloor) and 0.35 or 1
+				}):Play()
+			end
+
+			Hint.Position = UDim2.new(1 - ElementRowGutter - HintWidth - HintGap, 0, 0.5, 0)
 
 			if InputSettings.Info then
 				Input.Description.Text = InputSettings.Info
-				local IsHover = false
-				local opened = false
-				local osize = Input.Size.Y.Offset
-
-				Input.MouseEnter:Connect(function(x,y)
-					IsHover = true
-					wait(0.2)
-					if IsHover then
-						opened = true
-						Input.Description.Visible = true
-						--game:GetService('TweenService'):Create(Input,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Size = UDim2.new(1, -10,0, osize + Input.Description.Size.Y.Offset + 15)}):Play()
-					end
-				end)
-				Input.MouseLeave:Connect(function(x,y)
-					if IsHover then IsHover = false end
-					if opened then
-						opened = false
-						--game:GetService('TweenService'):Create(Input,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Size = UDim2.new(1, -10,0, osize)}):Play()
-						delay(.4,function()
-							if not opened then Input.Description.Visible = false end
-						end)
-					end
-				end)
+				connectInfoDescription(Input)
 			end
 			
 			if not InputSettings.PremiumTag then
@@ -2150,8 +2623,17 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 					end)
 				end
 
+				Input.InputFrame.InputBox.Focused:Connect(function()
+					HintShown = true
+					moveHint(0.25)
+				end)
+
 				Input.InputFrame.InputBox.FocusLost:Connect(function(enter)
-					if not enter then return end
+					HintShown = false
+					moveHint(0.3)
+					-- Clearing what was not committed is the whole point: the title keeps showing
+					-- the value that is actually set, so an abandoned edit cannot pass for one.
+					if not enter then Input.InputFrame.InputBox.Text = "" return end
 					local text = Input.InputFrame.InputBox.Text
 					InputSettings:Set(text)
 					Input.InputFrame.InputBox.Text = ""
@@ -2171,7 +2653,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				lastCalled = rId
 				local Text = Input.InputFrame.InputBox.Text
 				--TweenService:Create(Input.InputFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Input.InputFrame.InputBox.TextBounds.X + 24, 0, 30)}):Play()
-				local newSize = UDim2.new(originalInputFrameSize.X.Scale + (#Text * 0.01), 0, 0.701, 0)
+				local newSize = UDim2.new(originalInputFrameSize.X.Scale + (#Text * 0.01), 0, ElementRowControl, 0)
+				HintWidth = newSize.X.Scale
+				moveHint(0.55)
 				TweenService:Create(Input.InputFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(newSize.X.Scale, 0, newSize.Y.Scale - 0.1, 0)}):Play()
 				task.wait(0.25)
 				if lastCalled == rId then
@@ -2244,33 +2728,11 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			TweenService:Create(Input.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
 
 			Input.InputFrame.InputBox.PlaceholderText = InputSettings.PlaceholderText
-			Input.InputFrame.Size = UDim2.new(0.241, 0,0.701, 0)
+			Input.InputFrame.Size = UDim2.new(0.241, 0, ElementRowControl, 0)
 
 			if InputSettings.Info then
 				Input.Description.Text = InputSettings.Info
-				local IsHover = false
-				local opened = false
-				local osize = Input.Size.Y.Offset
-
-				Input.MouseEnter:Connect(function(x,y)
-					IsHover = true
-					wait(0.2)
-					if IsHover then
-						opened = true
-						Input.Description.Visible = true
-						game:GetService('TweenService'):Create(Input,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Size = UDim2.new(1, -10,0, osize + Input.Description.Size.Y.Offset + 15)}):Play()
-					end
-				end)
-				Input.MouseLeave:Connect(function(x,y)
-					if IsHover then IsHover = false end
-					if opened then
-						opened = false
-						game:GetService('TweenService'):Create(Input,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Size = UDim2.new(1, -10,0, osize)}):Play()
-						delay(.4,function()
-							if not opened then Input.Description.Visible = false end
-						end)
-					end
-				end)
+				connectInfoDescription(Input)
 			end
 
 			if InputSettings.NumbersOnly or InputSettings.CharacterLimit then
@@ -2309,7 +2771,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			end)
 
 			Input.InputFrame.InputBox:GetPropertyChangedSignal("Text"):Connect(function()
-				TweenService:Create(Input.InputFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Input.InputFrame.InputBox.TextBounds.X + 24, 0, 30)}):Play()
+				TweenService:Create(Input.InputFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Input.InputFrame.InputBox.TextBounds.X + 24, ElementRowControl, 0)}):Play()
 			end)
 		end
 
@@ -2318,9 +2780,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			local Dropdown = Elements.Template.Dropdown:Clone()
 			
 			if DropdownSettings.PremiumTag then
-				local premiumTag = PremiumTag:Clone()
-				premiumTag.Visible = true
-				premiumTag.Parent = Dropdown
+				attachPremiumOverlay(Dropdown, DropdownSettings.PremiumTag)
 			end
 			
 			if string.find(DropdownSettings.Name,"closed") then
@@ -2329,7 +2789,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				Dropdown.Name = DropdownSettings.Name
 			end
 			Dropdown.Title.Text = DropdownSettings.Name
-			Dropdown.UIAspectRatioConstraint.AspectRatio = 10.5
+			Dropdown.UIAspectRatioConstraint.AspectRatio = ElementRowAspect
 			Dropdown.Visible = true
 			Dropdown.Parent = TabPage
 
@@ -2350,9 +2810,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			TweenService:Create(Dropdown.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
 
 			--custom shi
-			TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
-			TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
-			TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()      
+			TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.9394, 0, 0.479, 0)}):Play()
+			TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.7194, 0, 0.479, 0)}):Play()
+			TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, ElementRowTitle, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()      
 			--
 
 			for _, ununusedoption in ipairs(Dropdown.List:GetChildren()) do
@@ -2373,13 +2833,13 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 					if Debounce then return end
 					if Dropdown.List.Visible then
 						--custom shi
-						TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
-						TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
-						TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()     
+						TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.9394, 0, 0.479, 0)}):Play()
+						TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.7194, 0, 0.479, 0)}):Play()
+						TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.563, 0, ElementRowTitle, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()     
 						--
 						Debounce = true
 						Dropdown.UICorner.CornerRadius = UDim.new(0.2,0)
-						TweenService:Create(Dropdown.UIAspectRatioConstraint, TweenInfo.new(0.5, Enum.EasingStyle.Cubic), {AspectRatio = 10.5}):Play()
+						TweenService:Create(Dropdown.UIAspectRatioConstraint, TweenInfo.new(0.5, Enum.EasingStyle.Cubic), {AspectRatio = ElementRowAspect}):Play()
 						TweenService:Create(Dropdown, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
 						for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
 							if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "ZZZZZZZZZ" and DropdownOpt.Name ~= "," and DropdownOpt.Name ~= ",---S=()earch" then
@@ -2401,8 +2861,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 						--
 						--Dropdown.UIAspectRatioConstraint.AspectRatio = 2.3
 						Dropdown.UICorner.CornerRadius = UDim.new(0.06,0)
-						TweenService:Create(Dropdown.UIAspectRatioConstraint, TweenInfo.new(0.15, Enum.EasingStyle.Cubic), {AspectRatio = 1.85}):Play()
+						TweenService:Create(Dropdown.UIAspectRatioConstraint, TweenInfo.new(0.15, Enum.EasingStyle.Cubic), {AspectRatio = DropdownOpenAspect}):Play()
 						TweenService:Create(Dropdown, TweenInfo.new(0.15, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.966, 0,0.664, 0)}):Play()
+						revealDropdown(Dropdown)
 						task.wait(.05)
 						Dropdown.List.Visible = true
 						TweenService:Create(Dropdown.List, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 0.7}):Play()
@@ -2493,13 +2954,13 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 						wait(0.1)
 
 						--custom shi
-						TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
-						TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
-						TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()     
+						TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.9394, 0, 0.479, 0)}):Play()
+						TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.7194, 0, 0.479, 0)}):Play()
+						TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.563, 0, ElementRowTitle, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()     
 						--
 						Debounce = true
 						Dropdown.UICorner.CornerRadius = UDim.new(0.2,0)
-						TweenService:Create(Dropdown.UIAspectRatioConstraint, TweenInfo.new(0.5, Enum.EasingStyle.Cubic), {AspectRatio = 10.5}):Play()
+						TweenService:Create(Dropdown.UIAspectRatioConstraint, TweenInfo.new(0.5, Enum.EasingStyle.Cubic), {AspectRatio = ElementRowAspect}):Play()
 						TweenService:Create(Dropdown, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
 						for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
 							if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "ZZZZZZZZZ" and DropdownOpt.Name ~= "," and DropdownOpt.Name ~= ",---S=()earch" then
@@ -2599,9 +3060,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			local Dropdown = Elements.Template.Dropdown:Clone()
 			
 			if DropdownSettings.PremiumTag then
-				local premiumTag = PremiumTag:Clone()
-				premiumTag.Visible = true
-				premiumTag.Parent = Dropdown
+				attachPremiumOverlay(Dropdown, DropdownSettings.PremiumTag)
 			end
 			
 			if string.find(DropdownSettings.Name,"closed") then
@@ -2610,7 +3069,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				Dropdown.Name = DropdownSettings.Name
 			end
 			Dropdown.Title.Text = DropdownSettings.Name
-			Dropdown.UIAspectRatioConstraint.AspectRatio = 10.5
+			Dropdown.UIAspectRatioConstraint.AspectRatio = ElementRowAspect
 			Dropdown.Visible = true
 			Dropdown.Parent = TabPage
 
@@ -2713,9 +3172,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			TweenService:Create(Dropdown.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
 
 			--custom shi
-			TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
-			TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
-			TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()      
+			TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.9394, 0, 0.479, 0)}):Play()
+			TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.7194, 0, 0.479, 0)}):Play()
+			TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, ElementRowTitle, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()      
 			--
 
 
@@ -2737,15 +3196,15 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 					if Debounce then return end
 					if Dropdown.List.Visible then
 						--custom shi
-						TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
-						TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
-						TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()     
+						TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.9394, 0, 0.479, 0)}):Play()
+						TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.7194, 0, 0.479, 0)}):Play()
+						TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.563, 0, ElementRowTitle, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()     
 						--
 						Debounce = true
 
 						--Dropdown.UIAspectRatioConstraint.AspectRatio = 10.5
 						Dropdown.UICorner.CornerRadius = UDim.new(0.2,0)
-						TweenService:Create(Dropdown.UIAspectRatioConstraint, TweenInfo.new(0.5, Enum.EasingStyle.Cubic), {AspectRatio = 10.5}):Play()
+						TweenService:Create(Dropdown.UIAspectRatioConstraint, TweenInfo.new(0.5, Enum.EasingStyle.Cubic), {AspectRatio = ElementRowAspect}):Play()
 						TweenService:Create(Dropdown, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
 						for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
 							if DropdownOpt.ClassName == "Frame" and not table.find(wl, DropdownOpt.Name) then
@@ -2768,8 +3227,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 						--print(Dropdown.UIAspectRatioConstraint.AspectRatio)
 						--Dropdown.UIAspectRatioConstraint.AspectRatio = 2.3
 						Dropdown.UICorner.CornerRadius = UDim.new(0.06,0)
-						TweenService:Create(Dropdown.UIAspectRatioConstraint, TweenInfo.new(0.15, Enum.EasingStyle.Cubic), {AspectRatio = 1.85}):Play()
+						TweenService:Create(Dropdown.UIAspectRatioConstraint, TweenInfo.new(0.15, Enum.EasingStyle.Cubic), {AspectRatio = DropdownOpenAspect}):Play()
 						TweenService:Create(Dropdown, TweenInfo.new(0.15, Enum.EasingStyle.Cubic), {Size = UDim2.new(0.966, 0,0.664, 0)}):Play()
+						revealDropdown(Dropdown)
 						task.wait(.05)
 						Dropdown.List.Visible = true
 						TweenService:Create(Dropdown.List, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 0.7}):Play()
@@ -2867,9 +3327,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 						wait(0.1)
 						--[[hide
 						--custom shi
-						TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.962, 0, 0.479, 0)}):Play()
-						TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.742, 0, 0.479, 0)}):Play()
-						TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, 0.325, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()      
+						TweenService:Create(Dropdown.Toggle, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.07, 0, 0.636, 0), Position = UDim2.new(0.9394, 0, 0.479, 0)}):Play()
+						TweenService:Create(Dropdown.Selected, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.366, 0, 0.318, 0), Position = UDim2.new(0.7194, 0, 0.479, 0)}):Play()
+						TweenService:Create(Dropdown.Title, TweenInfo.new(.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.563, 0, ElementRowTitle, 0), Position = UDim2.new(0.316, 0, 0.479, 0)}):Play()      
 						--
 						TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
 						for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
@@ -2997,33 +3457,11 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 			if KeybindSettings.Info then
 				Keybind.Description.Text = KeybindSettings.Info
-				local IsHover = false
-				local opened = false
-				local osize = Keybind.Size.Y.Offset
-
-				Keybind.MouseEnter:Connect(function(x,y)
-					IsHover = true
-					wait(0.2)
-					if IsHover then
-						opened = true
-						Keybind.Description.Visible = true
-						game:GetService('TweenService'):Create(Keybind,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Size = UDim2.new(1, -10,0, osize + Keybind.Description.Size.Y.Offset + 15)}):Play()
-					end
-				end)
-				Keybind.MouseLeave:Connect(function(x,y)
-					if IsHover then IsHover = false end
-					if opened then
-						opened = false
-						game:GetService('TweenService'):Create(Keybind,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Size = UDim2.new(1, -10,0, osize)}):Play()
-						delay(.4,function()
-							if not opened then Keybind.Description.Visible = false end
-						end)
-					end
-				end)
+				connectInfoDescription(Keybind)
 			end
 
 			Keybind.KeybindFrame.KeybindBox.Text = KeybindSettings.CurrentKeybind
-			Keybind.KeybindFrame.Size = UDim2.new(0, Keybind.KeybindFrame.KeybindBox.TextBounds.X + 24, 0, 30)
+			Keybind.KeybindFrame.Size = UDim2.new(0, Keybind.KeybindFrame.KeybindBox.TextBounds.X + 24, ElementRowControl, 0)
 
 			Keybind.KeybindFrame.KeybindBox.Focused:Connect(function()
 				CheckingForKey = true
@@ -3095,7 +3533,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			end)
 
 			Keybind.KeybindFrame.KeybindBox:GetPropertyChangedSignal("Text"):Connect(function()
-				TweenService:Create(Keybind.KeybindFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Keybind.KeybindFrame.KeybindBox.TextBounds.X + 24, 0, 30)}):Play()
+				TweenService:Create(Keybind.KeybindFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Keybind.KeybindFrame.KeybindBox.TextBounds.X + 24, ElementRowControl, 0)}):Play()
 			end)
 
 			function KeybindSettings:Set(NewKeybind, _, _, _, _, skipSave)
@@ -3122,9 +3560,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			local Toggle = Elements.Template.Toggle:Clone()
 			
 			if ToggleSettings.PremiumTag then
-				local premiumTag = PremiumTag:Clone()
-				premiumTag.Visible = true
-				premiumTag.Parent = Toggle
+				attachPremiumOverlay(Toggle, ToggleSettings.PremiumTag)
 			end
 			
 			Toggle.Name = ToggleSettings.Name
@@ -3148,29 +3584,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 			if ToggleSettings.Info then
 				Toggle.Description.Text = ToggleSettings.Info
-				local IsHover = false
-				local opened = false
-				local osize = Toggle.Size.Y.Offset
-
-				Toggle.MouseEnter:Connect(function(x,y)
-					IsHover = true
-					wait(0.2)
-					if IsHover then
-						opened = true
-						Toggle.Description.Visible = true
-						game:GetService('TweenService'):Create(Toggle,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Size = UDim2.new(1, -10,0, osize + Toggle.Description.Size.Y.Offset + 15)}):Play()
-					end
-				end)
-				Toggle.MouseLeave:Connect(function(x,y)
-					if IsHover then IsHover = false end
-					if opened then
-						opened = false
-						game:GetService('TweenService'):Create(Toggle,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Size = UDim2.new(1, -10,0, osize)}):Play()
-						delay(.4,function()
-							if not opened then Toggle.Description.Visible = false end
-						end)
-					end
-				end)
+				connectInfoDescription(Toggle)
 			end
 
 			if not ToggleSettings.CurrentValue then
@@ -3442,29 +3856,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 			if SliderSettings.Info then
 				Slider.Description.Text = SliderSettings.Info
-				local IsHover = false
-				local opened = false
-				local osize = Slider.Size.Y.Offset
-
-				Slider.MouseEnter:Connect(function()
-					IsHover = true
-					wait(0.2)
-					if IsHover then
-						opened = true
-						Slider.Description.Visible = true
-						game:GetService('TweenService'):Create(Slider, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(1, -10, 0, osize + Slider.Description.Size.Y.Offset + 15)}):Play()
-					end
-				end)
-				Slider.MouseLeave:Connect(function()
-					if IsHover then IsHover = false end
-					if opened then
-						opened = false
-						game:GetService('TweenService'):Create(Slider, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(1, -10, 0, osize)}):Play()
-						delay(.4, function()
-							if not opened then Slider.Description.Visible = false end
-						end)
-					end
-				end)
+				connectInfoDescription(Slider)
 			end
 
 			Slider.Main.BackgroundColor3 = SelectedTheme.SliderBackground
@@ -3609,22 +4001,36 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 
 	Elements.Visible = true
 
+	-- How long the splash is held. It carries the branding and the Discord link, so this is the
+	-- one moment the artwork is ever read, and shortening it measurably cost sales. Deliberately
+	-- longer than it needs to be: see the intro timing note above CreateWindow.
 	if not fastLoad then
-		wait(2)
+		wait(3)
 	end
 
+	-- Handed back to the signature sweep below, which expects to start from the asset's angle.
+	LoadingSweep:Cancel()
+	Main.UIStroke.UIGradient.Rotation = -180
 
-	TweenService:Create(LoadingFrame.Title, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-	TweenService:Create(LoadingFrame.Subtitle, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-	TweenService:Create(LoadingFrame.Version, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-	TweenService:Create(LoadingFrame.BG, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
-	wait(0.2)
-	--TweenService:Create(Main.UIStroke, TweenInfo.new(7, Enum.EasingStyle.Cubic), {Transparency = 1, Thickness = 0}):Play()
+	-- The card used to fade out on its own, hold still for a fifth of a second, and only then
+	-- start growing, which read as three separate steps. Fading the card against the growth
+	-- reads as it opening into the window instead.
+	local IntroFade = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+	local IntroOpen = TweenInfo.new(1.15, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 
-	TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.Background}):Play()
-	task.wait(.03)
-	TweenService:Create(Main, TweenInfo.new(1.5, Enum.EasingStyle.Quint), {Size = UDim2.new(.5, 0,0.5, 0)}):Play()
-	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
+	TweenService:Create(LoadingFrame.Title, IntroFade, {TextTransparency = 1}):Play()
+	TweenService:Create(LoadingFrame.Subtitle, IntroFade, {TextTransparency = 1}):Play()
+	TweenService:Create(LoadingFrame.Version, IntroFade, {TextTransparency = 1}):Play()
+	TweenService:Create(LoadingFrame.BG, IntroFade, {ImageTransparency = 1}):Play()
+	TweenService:Create(Main, IntroFade, {BackgroundColor3 = SelectedTheme.Background}):Play()
+
+	TweenService:Create(Main, IntroOpen, {Size = UDim2.new(.5, 0,0.5, 0)}):Play()
+	TweenService:Create(Main.Shadow.Image, IntroOpen, {ImageTransparency = 0.4}):Play()
+
+	-- LoadingFrame covers the whole window at ZIndex 30, so it comes out once it is clear.
+	task.delay(0.5, function()
+		LoadingFrame.Visible = false
+	end)
 
 	Topbar.BackgroundTransparency = 1
 	Topbar.Divider.Size = UDim2.new(0, 0, 0, 1)
@@ -3652,34 +4058,37 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	task.delay(6, function()
 		gradient.Parent.Transparency = 1
 		gradient.Enabled = false
-		gradient.Parent.Color = Color3.fromRGB(25, 20, 0)
+		-- What the border settles to once the intro sweep is done. Mixing the theme's glow
+		-- colour most of the way into its background leaves a rim that reads as an edge in
+		-- every theme instead of the fixed near-black this used to be.
+		gradient.Parent.Color = SelectedTheme.Shadow:Lerp(SelectedTheme.Background, 0.82)
 		TweenService:Create(gradient.Parent, TweenInfo.new(3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 	end)
 
 	--
 
-	if not fastLoad then
-		wait(.5)
-	end
 	Topbar.Visible = true
-	TweenService:Create(Topbar, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-	TweenService:Create(Topbar.CornerRepair, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-	wait(0.1)
-	TweenService:Create(Topbar.Divider, TweenInfo.new(1.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, 0, 0, 1), BackgroundColor3 = SelectedTheme.Divider}):Play()
-	wait(0.1)
-	task.delay(.3, function()
-		TweenService:Create(TabListBack.Divider, TweenInfo.new(3, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 1, 1, 0), BackgroundColor3 = SelectedTheme.Divider}):Play()
-		TweenService:Create(TabList.Placeholder.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-	end)
-	TweenService:Create(Topbar.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-	wait(0.1)
-	TweenService:Create(Topbar.Theme, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
-	wait(0.1)
-	TweenService:Create(Topbar.ChangeSize, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
-	wait(0.1)
-	TweenService:Create(Topbar.Hide, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.1}):Play()
+
+	-- The topbar arrived through a chain of blocking waits, so each step landed a frame or two
+	-- late of where it was asked to and the cascade drifted past the window's own growth. The
+	-- order is the same, carried by each tween's own delay so it stays locked to the opening.
+	local function IntroStep(Duration, Delay)
+		return TweenInfo.new(Duration, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0, false, Delay)
+	end
+
+	TweenService:Create(Topbar, IntroStep(0.6, 0.28), {BackgroundTransparency = 0}):Play()
+	TweenService:Create(Topbar.CornerRepair, IntroStep(0.6, 0.28), {BackgroundTransparency = 0}):Play()
+	TweenService:Create(Topbar.Title, IntroStep(0.6, 0.34), {TextTransparency = 0}):Play()
+	TweenService:Create(Topbar.Divider, IntroStep(1, 0.4), {Size = UDim2.new(1, 0, 0, 1), BackgroundColor3 = SelectedTheme.Divider, BackgroundTransparency = DividerTransparency}):Play()
+	TweenService:Create(TabListBack.Divider, IntroStep(1.6, 0.5), {Size = UDim2.new(0, 1, 1, 0), BackgroundColor3 = SelectedTheme.Divider, BackgroundTransparency = DividerTransparency}):Play()
+	TweenService:Create(TabList.Placeholder.Title, IntroStep(0.35, 0.5), {TextTransparency = 0}):Play()
+	TweenService:Create(Topbar.Theme, IntroStep(0.6, 0.5), {ImageTransparency = 0.8}):Play()
+	TweenService:Create(Topbar.ChangeSize, IntroStep(0.6, 0.58), {ImageTransparency = 0.8}):Play()
+	TweenService:Create(Topbar.Hide, IntroStep(0.6, 0.66), {ImageTransparency = 0.1}):Play()
+
+	-- Held until the cascade is done so the hub's own load does not stutter the opening.
 	if not fastLoad then
-		wait(0.3)
+		wait(1.35)
 	end
 	function Window:Prompt(PromptSettings)
 		local _,f = pcall(function()
@@ -3802,7 +4211,12 @@ Topbar.Hide.MouseButton1Click:Connect(function()
 	end
 end)
 
-UserInputService.InputBegan:Connect(function(input, processed)
+local UIDisabled = false
+local RayfieldConnections = {}
+local bhubToggleRef = nil
+
+table.insert(RayfieldConnections, UserInputService.InputBegan:Connect(function(input, processed)
+	if UIDisabled or not isCurrent() then return end
 	if (input.KeyCode == Enum.KeyCode.Tab and processed) then
 		if Debounce then return end
 		if Hidden then
@@ -3814,46 +4228,236 @@ UserInputService.InputBegan:Connect(function(input, processed)
 			Hide()
 		end
 	end
-end)
+end))
 
 if Rayfield:FindFirstChild("bhubToggle") then
 	local bhubToggle = Rayfield.bhubToggle
+	bhubToggleRef = bhubToggle
 
-	_G.ShowUI = function()
-		Hidden = false
-		Unhide()
+	-- Only the execution that owns the screen may own the entry points. A stale one reaching here
+	-- late used to repoint them at its own invisible window, which is what made the live window
+	-- stop responding to its own topbar.
+	if isCurrent() then
+		_G.ShowUI = function()
+			if UIDisabled then return end
+			Hidden = false
+			Unhide()
+		end
+
+		_G.HideUI = function()
+			if UIDisabled then return end
+			Hidden = true
+			Hide()
+		end
 	end
 
-	_G.HideUI = function()
-		Hidden = true
-		Hide()
+	-- The button was anchored to its top left corner, so growing it or popping it in slid
+	-- the whole thing sideways. Re-anchoring to its centre keeps it where it was authored.
+	bhubToggle.AnchorPoint = Vector2.new(0.5, 0.5)
+	bhubToggle.Position = UDim2.new(bhubToggle.Position.X.Scale + bhubToggle.Size.X.Scale / 2, 0, bhubToggle.Position.Y.Scale + bhubToggle.Size.Y.Scale / 2, 0)
+
+	-- A flat yellow square floating over the game has no edge of its own. The window and
+	-- topbar both carry a stroke, so the button gets one too.
+	local ToggleStrokeTransparency = 0.45
+	local ToggleStroke = Instance.new("UIStroke")
+	ToggleStroke.Color = SelectedTheme.Background
+	ToggleStroke.Thickness = 2
+	ToggleStroke.Transparency = ToggleStrokeTransparency
+	ToggleStroke.Parent = bhubToggle
+
+	local ToggleRestSize = bhubToggle.Size
+	local ToggleInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+	local ToggleShown = false
+
+	bhubToggle.Size = scaleSize(ToggleRestSize, 0.5)
+	bhubToggle.BackgroundTransparency = 1
+	bhubToggle.button.ImageTransparency = 1
+	ToggleStroke.Transparency = 1
+
+	-- It used to appear and vanish on a frame, mid way through the window's own half second
+	-- fade. Popping it in on the same beat is what makes the two read as one action.
+	local function showToggle(Shown)
+		if Shown == ToggleShown then return end
+		ToggleShown = Shown
+		if Shown then bhubToggle.Visible = true end
+		local Motion = Shown and TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out) or TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+		TweenService:Create(bhubToggle, Motion, {Size = Shown and ToggleRestSize or scaleSize(ToggleRestSize, 0.5), BackgroundTransparency = Shown and 0 or 1}):Play()
+		TweenService:Create(bhubToggle.button, ToggleInfo, {ImageTransparency = Shown and 0 or 1}):Play()
+		TweenService:Create(ToggleStroke, ToggleInfo, {Transparency = Shown and ToggleStrokeTransparency or 1}):Play()
+		if not Shown then
+			task.delay(0.3, function()
+				if not ToggleShown then bhubToggle.Visible = false end
+			end)
+		end
 	end
 
-	bhubToggle.button.MouseButton1Click:Connect(function()
-		_G.ShowUI()
+	-- These carry the background with them even though only the size changes. Sharing Size with
+	-- the pop above means a hover landing while the button is still appearing takes that tween
+	-- over, and the background would be stranded at whatever transparency it had got to.
+	bhubToggle.button.MouseEnter:Connect(function()
+		if ToggleShown then TweenService:Create(bhubToggle, ToggleInfo, {Size = scaleSize(ToggleRestSize, 1.08), BackgroundTransparency = 0}):Play() end
 	end)
 
+	bhubToggle.button.MouseLeave:Connect(function()
+		if ToggleShown then TweenService:Create(bhubToggle, ToggleInfo, {Size = ToggleRestSize, BackgroundTransparency = 0}):Play() end
+	end)
+
+	bhubToggle.button.MouseButton1Down:Connect(function()
+		if ToggleShown then TweenService:Create(bhubToggle, TweenInfo.new(0.1, Enum.EasingStyle.Quint), {Size = scaleSize(ToggleRestSize, 0.94), BackgroundTransparency = 0}):Play() end
+	end)
+
+	-- The button sits over whatever the game draws there, so it has to be movable. Dragging
+	-- it must not also count as a click or nudging it aside reopens the interface, hence the
+	-- small threshold before a press becomes a drag.
+	local DragOrigin, DragFrom, DragMoved
+	bhubToggle.button.InputBegan:Connect(function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+			DragOrigin, DragFrom, DragMoved = Input.Position, bhubToggle.Position, false
+		end
+	end)
+
+	table.insert(RayfieldConnections, UserInputService.InputChanged:Connect(function(Input)
+		if not DragOrigin then return end
+		if Input.UserInputType ~= Enum.UserInputType.MouseMovement and Input.UserInputType ~= Enum.UserInputType.Touch then return end
+		local Delta = Input.Position - DragOrigin
+		if not DragMoved and Delta.Magnitude < 6 then return end
+		DragMoved = true
+		bhubToggle.Position = UDim2.new(DragFrom.X.Scale, DragFrom.X.Offset + Delta.X, DragFrom.Y.Scale, DragFrom.Y.Offset + Delta.Y)
+	end))
+
+	table.insert(RayfieldConnections, UserInputService.InputEnded:Connect(function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+			if DragOrigin and ToggleShown then
+				TweenService:Create(bhubToggle, ToggleInfo, {Size = ToggleRestSize, BackgroundTransparency = 0}):Play()
+			end
+			DragOrigin = nil
+		end
+	end))
+
+	table.insert(RayfieldConnections, bhubToggle.button.MouseButton1Click:Connect(function()
+		if DragMoved then return end
+		_G.ShowUI()
+	end))
+
 	task.spawn(function()
-		while task.wait(.5) do
+		while task.wait(.1) do
+			if UIDisabled then break end
+			if not isCurrent() then
+				-- Nothing else lets these go. They are listeners on UserInputService rather than
+				-- on the window, so a superseded execution would keep them, and the window they
+				-- close over, alive for the rest of the session.
+				for _, connection in ipairs(RayfieldConnections) do
+					pcall(function() connection:Disconnect() end)
+				end
+				RayfieldConnections = {}
+				break
+			end
 			pcall(function()
-				bhubToggle.Visible = Hidden
+				showToggle(Hidden)
 			end)
 		end
 	end)
 end
 
+local DisableUI = function()
+	if UIDisabled then return end
+	UIDisabled = true
+
+	-- Turn everything off: set all toggle flags to false and fire their callbacks.
+	-- Toggles are identified by a boolean CurrentValue (sliders/inputs use numbers/strings).
+	for _, flag in pairs(RayfieldLibrary.Flags) do
+		pcall(function()
+			if type(flag.CurrentValue) == "boolean" and flag.CurrentValue and type(flag.Set) == "function" then
+				flag:Set(false)
+			end
+		end)
+	end
+
+	-- Make the UI unopenable by disabling re-open listeners and entry points
+	for _, connection in ipairs(RayfieldConnections) do
+		pcall(function() connection:Disconnect() end)
+	end
+	RayfieldConnections = {}
+
+	_G.ShowUI = function() end
+	_G.HideUI = function() end
+
+	-- Hide and completely delete the UI
+	pcall(function() Hidden = true Hide() end)
+	pcall(function() Rayfield:Destroy() end)
+end
+
+-- Soft destroy: hide the UI and remove the reopen button, make it unopenable,
+-- but DO NOT turn off toggles/features and DO NOT delete the UI (keeps running in the background).
+local SoftDestroy = function()
+	if UIDisabled then return end
+	UIDisabled = true
+
+	-- Disable every entry point that could re-open the UI
+	for _, connection in ipairs(RayfieldConnections) do
+		pcall(function() connection:Disconnect() end)
+	end
+	RayfieldConnections = {}
+
+	_G.ShowUI = function() end
+	_G.HideUI = function() end
+
+	-- Make sure the reopen button is gone
+	if bhubToggleRef then
+		pcall(function() bhubToggleRef.Visible = false end)
+	end
+
+	-- Hide the UI without destroying it (features keep running)
+	pcall(function() Hidden = true Hide() end)
+end
+
+-- Same reason as the show/hide entry points: a superseded execution must not hand the hub a
+-- teardown that only tears down its own invisible window.
+if isCurrent() then
+	_G.DisableUI = DisableUI
+	_G.SoftDestroy = SoftDestroy
+end
+
+-- The topbar controls had no feedback at all, so nothing on the window told you they were
+-- clickable. Hover lifts an icon to full weight and grows it a little, pressing dips it,
+-- and the X warms to red on the way in, which is what a close control looks like
+-- everywhere else. Leaving restores the theme's own X colour so a theme change still wins.
+local TopbarHoverGrow = 1.08
+local TopbarPressShrink = 0.94
+local XIconHover = Color3.fromRGB(228, 88, 76)
+
 for _, TopbarButton in ipairs(Topbar:GetChildren()) do
 	if TopbarButton.ClassName == "ImageButton" then
+		local Rest = TopbarButtonRest[TopbarButton]
+		local IsHide = TopbarButton == Topbar.Hide
+		local Info = TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+
+		-- MouseButton1Click fires before MouseButton1Up, so releasing the X started the hide
+		-- and then this put the icon straight back to full weight, leaving it sitting there
+		-- until the window went invisible. Hide, unhide and minimise own the chrome while
+		-- they run, so hover keeps out of their way.
+		local function hover(Hovering)
+			if Debounce or Hidden then return end
+			local Goal = {ImageTransparency = Hovering and 0 or Rest.ImageTransparency, Size = Hovering and scaleSize(Rest.Size, TopbarHoverGrow) or Rest.Size}
+			if IsHide then Goal.ImageColor3 = Hovering and XIconHover or SelectedTheme.XIcon end
+			TweenService:Create(TopbarButton, Info, Goal):Play()
+		end
+
 		TopbarButton.MouseEnter:Connect(function()
-			--TweenService:Create(TopbarButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
+			hover(true)
 		end)
 
 		TopbarButton.MouseLeave:Connect(function()
-			--TweenService:Create(TopbarButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
+			hover(false)
 		end)
 
-		TopbarButton.MouseButton1Click:Connect(function()
-			--TweenService:Create(TopbarButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
+		TopbarButton.MouseButton1Down:Connect(function()
+			if Debounce or Hidden then return end
+			TweenService:Create(TopbarButton, TweenInfo.new(0.1, Enum.EasingStyle.Quint), {ImageTransparency = 0, Size = scaleSize(Rest.Size, TopbarPressShrink)}):Play()
+		end)
+
+		TopbarButton.MouseButton1Up:Connect(function()
+			hover(true)
 		end)
 	end
 end

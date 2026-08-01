@@ -480,6 +480,60 @@ PremiumTag.ZIndex = 5
 PremiumTag.TextLabel.ZIndex = 10
 PremiumTag.BackgroundTransparency = 0.65
 PremiumTag.TextLabel.Text = "⭐ Premium Only"
+-- PremiumTag setting: true = permanent lock; number = unix unlock time (countdown + Discord).
+local PremiumDiscordInvite = "discord.gg/BananaHub"
+local function premiumOverlayText(premiumSetting)
+	if type(premiumSetting) == "number" then
+		local left = math.max(0, premiumSetting - os.time())
+		local hours = math.floor(left / 3600)
+		local mins = math.floor((left % 3600) / 60)
+		return string.format("Premium · unlocks in %dh %02dm\n%s", hours, mins, PremiumDiscordInvite)
+	end
+	return "⭐ Premium Only\n"..PremiumDiscordInvite
+end
+local function attachPremiumOverlay(parent, premiumSetting)
+	if not premiumSetting then return nil end
+	local tag = PremiumTag:Clone()
+	tag.Visible = true
+	tag.Parent = parent
+	local label = tag:FindFirstChild("TextLabel")
+	if label then
+		label.TextWrapped = true
+		label.Text = premiumOverlayText(premiumSetting)
+	end
+	if type(premiumSetting) == "number" then
+		local unlockAt = premiumSetting
+		task.spawn(function()
+			while tag.Parent and unlockAt > os.time() do
+				if label then
+					label.Text = premiumOverlayText(unlockAt)
+				end
+				task.wait(1)
+			end
+			if tag.Parent and label then
+				label.Text = "Unlocked — re-execute script\n"..PremiumDiscordInvite
+			end
+		end)
+	end
+	local interact = parent:FindFirstChild("Interact")
+	if interact and interact:IsA("GuiButton") then
+		interact.MouseButton1Click:Connect(function()
+			local content
+			if type(premiumSetting) == "number" and premiumSetting > os.time() then
+				local left = math.max(0, premiumSetting - os.time())
+				local hours = math.floor(left / 3600)
+				local mins = math.floor((left % 3600) / 60)
+				content = string.format("Premium needed until unlock (%dh %02dm). Join %s", hours, mins, PremiumDiscordInvite)
+			elseif type(premiumSetting) == "number" then
+				content = "This feature is free now — re-execute the script to use it. "..PremiumDiscordInvite
+			else
+				content = "Premium only. Join "..PremiumDiscordInvite
+			end
+			RayfieldLibrary:Notify({Title = "Premium Feature", Content = content, Duration = 6})
+		end)
+	end
+	return tag
+end
 local LoadingFrame = Main.LoadingFrame
 local TabList = Main.TabList
 local SearchBar = Main.Searchbar
@@ -2366,9 +2420,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			local Label = Elements.Template.Label:Clone()
 			
 			if premiumTag then
-				local premiumTag = PremiumTag:Clone()
-				premiumTag.Visible = true
-				premiumTag.Parent = Label
+				attachPremiumOverlay(Label, premiumTag)
 			end
 			
 			Label.Title.Position = UDim2.new(0.514, 0, 0.5, 0)
@@ -2405,9 +2457,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			local Label = Elements.Template.BigLabel:Clone()
 			
 			if premiumTag then
-				local premiumTag = PremiumTag:Clone()
-				premiumTag.Visible = true
-				premiumTag.Parent = Label
+				attachPremiumOverlay(Label, premiumTag)
 			end
 			
 			Label.Title.Text = LabelText
@@ -2492,9 +2542,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			local Input = Elements.Template.Input:Clone()
 			
 			if InputSettings.PremiumTag then
-				local premiumTag = PremiumTag:Clone()
-				premiumTag.Visible = true
-				premiumTag.Parent = Input
+				attachPremiumOverlay(Input, InputSettings.PremiumTag)
 				Input.InputFrame.InputBox.Active = false
 				Input.InputFrame.InputBox.Selectable = false
 				Input.InputFrame.InputBox.TextEditable = false
@@ -2732,9 +2780,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			local Dropdown = Elements.Template.Dropdown:Clone()
 			
 			if DropdownSettings.PremiumTag then
-				local premiumTag = PremiumTag:Clone()
-				premiumTag.Visible = true
-				premiumTag.Parent = Dropdown
+				attachPremiumOverlay(Dropdown, DropdownSettings.PremiumTag)
 			end
 			
 			if string.find(DropdownSettings.Name,"closed") then
@@ -3014,9 +3060,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			local Dropdown = Elements.Template.Dropdown:Clone()
 			
 			if DropdownSettings.PremiumTag then
-				local premiumTag = PremiumTag:Clone()
-				premiumTag.Visible = true
-				premiumTag.Parent = Dropdown
+				attachPremiumOverlay(Dropdown, DropdownSettings.PremiumTag)
 			end
 			
 			if string.find(DropdownSettings.Name,"closed") then
@@ -3516,9 +3560,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			local Toggle = Elements.Template.Toggle:Clone()
 			
 			if ToggleSettings.PremiumTag then
-				local premiumTag = PremiumTag:Clone()
-				premiumTag.Visible = true
-				premiumTag.Parent = Toggle
+				attachPremiumOverlay(Toggle, ToggleSettings.PremiumTag)
 			end
 			
 			Toggle.Name = ToggleSettings.Name
