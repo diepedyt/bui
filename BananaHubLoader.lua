@@ -1,6 +1,6 @@
 repeat task.wait(.12345) until game:IsLoaded()
 
-
+--[[
 local api = loadstring(game:HttpGet("https://sdkapi-public.luarmor.net/library.lua"))()
 local module = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/refs/heads/main/BananaHubKeyLoaderV2.lua"))()
 module:SetSavedKeyFile("BananaHub"..game.gameId..game.Players.LocalPlayer.UserId)
@@ -13,6 +13,7 @@ script_key = module:GetKeyInput("discord.gg/BananaHub", "https://raw.githubuserc
     return status and status.code == "KEY_VALID"
 end)
 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
+]]
 
 --[[
 local module = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/refs/heads/main/BananaHubKeyLoaderV2.lua"))()
@@ -26,7 +27,7 @@ loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc24
 
 
 
---[[
+
 local simpleLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/refs/heads/main/SimpleUILibV2.lua"))()
 simpleLib.CreateBHUBPAID()
 
@@ -49,6 +50,6 @@ task.spawn(function()
         task.wait(600)
     end
 end)
-]]
+
 
 --loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
