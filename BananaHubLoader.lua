@@ -22,15 +22,15 @@ script_key = module:GetKeyInput("discord.gg/BananaHub", "https://raw.githubuserc
 	return key == "BananaNice"
 end)
 
-]]
 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
+]]
 
 
 
---[[
+
 local simpleLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/refs/heads/main/SimpleUILibV2.lua"))()
 simpleLib.CreateBHUBPAID()
-]]
+
 local vu = game:GetService("VirtualUser")
 game:GetService("Players").LocalPlayer.Idled:connect(function()
     vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
