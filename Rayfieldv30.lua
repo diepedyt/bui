@@ -11,9 +11,8 @@ roge4087 | rewrote basically the entire ui atp
 
 ]]
 
-function custom_match(s, pattern)
-	pattern = pattern:gsub("%%", "%%%%")
-	return string.match(s, pattern)
+local function custom_match(s, pattern)
+	return string.find(s, pattern, 1, true)
 end
 
 
@@ -362,13 +361,51 @@ end
 -- rename the window that was already animating, then claim the shared _G entry points for a
 -- window nobody could see. The generation is claimed before that yield, so the newest execution
 -- to *start* always wins and an older one stands down instead of fighting it for the screen.
-_G.RayfieldGeneration = (_G.RayfieldGeneration or 0) + 1
-local Generation = _G.RayfieldGeneration
+-- _G.RayfieldBackgroundTest loads a second tree for harnesses and must not increment that
+-- counter or unparent the window that already owns the screen.
+local BackgroundTest = _G.RayfieldBackgroundTest == true
+if not BackgroundTest then
+	_G.RayfieldGeneration = (_G.RayfieldGeneration or 0) + 1
+end
+local Generation = BackgroundTest and -1 or _G.RayfieldGeneration
 local function isCurrent()
 	return _G.RayfieldGeneration == Generation
 end
 
+local preservedInterfaces = {}
+if BackgroundTest then
+	pcall(function()
+		for _, child in ipairs(gethui():GetChildren()) do
+			if child.Name == "Rayfield" or child.Name == "Rayfield-Old" then
+				table.insert(preservedInterfaces, {gui = child, parent = child.Parent, enabled = child.Enabled})
+			end
+		end
+	end)
+end
+
 local Rayfield =  game:GetObjects(_G.ASSETID_123)[1]
+if BackgroundTest then
+	Rayfield.Name = "Rayfield-BackgroundTest"
+	Rayfield.Parent = nil
+end
+
+local function restorePreservedInterfaces()
+	if not BackgroundTest then
+		return
+	end
+	for _, row in ipairs(preservedInterfaces) do
+		pcall(function()
+			local parent = row.parent or (gethui and gethui())
+			if row.gui and parent and row.gui.Parent ~= parent then
+				row.gui.Parent = parent
+			end
+			if row.gui and row.enabled ~= nil then
+				row.gui.Enabled = row.enabled
+			end
+		end)
+	end
+end
+restorePreservedInterfaces()
 
 --[[
 local RayfieldURL = "https://github.com/diepedyt/RBXM_UIS/raw/refs/heads/main/RayfielUIv7v2.rbxm"
@@ -395,7 +432,27 @@ Rayfield.Enabled = false
 
 -- A superseded execution is never parented, so it cannot disturb the window that owns the screen.
 -- Its script carries on building into an orphaned tree, which is invisible and harmless.
-if isCurrent() then
+-- A background test stays orphaned on purpose: parenting it into gethui makes the executor
+-- treat the live window as a duplicate, and parenting it into PlayerGui runs the asset's
+-- LocalScripts.
+if BackgroundTest then
+	Rayfield.Name = "Rayfield-BackgroundTest"
+	Rayfield.Parent = nil
+	local TestToggle = Rayfield:FindFirstChild("bhubToggle")
+	if TestToggle then
+		TestToggle.Visible = false
+	end
+	restorePreservedInterfaces()
+	task.defer(restorePreservedInterfaces)
+	task.spawn(function()
+		local stop = tick() + 3
+		while _G.RayfieldBackgroundTest and tick() < stop do
+			restorePreservedInterfaces()
+			task.wait(0.1)
+		end
+		restorePreservedInterfaces()
+	end)
+elseif isCurrent() then
 	if gethui then
 		Rayfield.Parent = gethui()
 	elseif syn.protect_gui then 
@@ -450,19 +507,21 @@ if gethui then table.insert(PromptContainers, gethui()) end
 local PlayerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
 if PlayerGui then table.insert(PromptContainers, PlayerGui) end
 
-for _, Container in ipairs(PromptContainers) do
-	-- CoreGui is not readable on every executor, and the connection is worth nothing if the sweep
-	-- that precedes it throws.
-	pcall(function()
-		for _, Object in ipairs(Container:GetDescendants()) do
-			clearForeignPrompt(Object)
-		end
+if not BackgroundTest then
+	for _, Container in ipairs(PromptContainers) do
+		-- CoreGui is not readable on every executor, and the connection is worth nothing if the sweep
+		-- that precedes it throws.
+		pcall(function()
+			for _, Object in ipairs(Container:GetDescendants()) do
+				clearForeignPrompt(Object)
+			end
 
-		Container.DescendantAdded:Connect(function(Object)
-			-- Deferred because the text is usually assigned after the label is parented in.
-			task.defer(clearForeignPrompt, Object)
+			Container.DescendantAdded:Connect(function(Object)
+				-- Deferred because the text is usually assigned after the label is parented in.
+				task.defer(clearForeignPrompt, Object)
+			end)
 		end)
-	end)
+	end
 end
 
 
@@ -656,11 +715,25 @@ local LoadingFrame = Main.LoadingFrame
 local TabList = Main.TabList
 local SearchBar = Main.Searchbar
 local Filler = SearchBar.CanvasGroup.Filler
+local SearchInput = SearchBar.Input
+local SearchTitle
+local SearchInputFrame
 local Prompt = Main.Prompt
 local CustomText = Topbar.CustomText
 
 
 --Window Chrome
+
+-- Only Search and Hide sit on the bar. Theme and ChangeSize stay as the asset
+-- ships them (hidden, parked off-window). Search uses Hide's scale language
+-- (24/42) so a resize keeps the same icon-to-icon ratio.
+local TopbarIconScaleX = Topbar.Hide.Size.X.Scale * (24 / 42)
+local TopbarIconScaleY = Topbar.Hide.Size.Y.Scale * (24 / 42)
+Topbar.Search.Size = UDim2.new(TopbarIconScaleX, 0, TopbarIconScaleY, 0)
+Topbar.Search.AnchorPoint = Vector2.new(0.5, 0.5)
+Topbar.Search.Position = UDim2.new(Topbar.Search.Position.X.Scale, 0, Topbar.Hide.Position.Y.Scale, 0)
+Topbar.Theme.Visible = false
+Topbar.ChangeSize.Visible = false
 
 -- Where each topbar control sits when nothing is happening to it, read off the asset
 -- before any animation has touched it. The icons rest at different weights on purpose
@@ -673,6 +746,12 @@ for _, TopbarButton in ipairs(Topbar:GetChildren()) do
 	if TopbarButton.ClassName == "ImageButton" then
 		TopbarButtonRest[TopbarButton] = {ImageTransparency = TopbarButton.ImageTransparency, Size = TopbarButton.Size}
 	end
+end
+-- Search ships hidden in the asset. It is a first-class topbar control, so it rests at
+-- 0.8 rather than staying invisible after Unhide.
+Topbar.Search.Visible = true
+if TopbarButtonRest[Topbar.Search] then
+	TopbarButtonRest[Topbar.Search].ImageTransparency = 0.8
 end
 
 -- Chrome controls are sized in a mix of scale and offset, so a hover or press grows them
@@ -749,6 +828,60 @@ pinRight(Elements.Template.Toggle.Switch)
 pinRight(Elements.Template.Input.InputFrame)
 pinRight(Elements.Template.Keybind.KeybindFrame)
 pinRight(Elements.Template.Slider.Main)
+
+-- Searchbar is one element row in the element column, not the old 480x40 Size tween.
+-- Clone the working row constraint rather than creating a new one while the tree is unparented.
+local SearchBarAspect = SearchBar:FindFirstChildOfClass("UIAspectRatioConstraint")
+if not SearchBarAspect then
+	SearchBarAspect = Elements.Template.Button.UIAspectRatioConstraint:Clone()
+	SearchBarAspect.Parent = SearchBar
+end
+SearchBarAspect.AspectRatio = ElementRowAspect
+SearchBar.Size = UDim2.new(Elements.Size.X.Scale, -10, Topbar.Size.Y.Scale * (52.8 / 47), 0)
+SearchBar.AnchorPoint = Vector2.new(0.5, 0)
+SearchBar.Position = UDim2.new(Elements.Position.X.Scale, 0, SearchBar.Position.Y.Scale, 0)
+SearchBar.Visible = false
+
+SearchTitle = SearchBar:FindFirstChild("Title")
+if SearchTitle then
+	SearchTitle.Visible = false
+end
+SearchInputFrame = SearchBar:FindFirstChild("InputFrame")
+if SearchInputFrame then
+	SearchInputFrame.Visible = false
+end
+
+SearchBar.Icon.Visible = true
+SearchBar.Icon.AnchorPoint = Vector2.new(0, 0.5)
+SearchBar.Icon.Position = UDim2.new(0.03, 0, 0.5, 0)
+SearchBar.Icon.Size = UDim2.new(20 / 480, 0, 20 / 40, 0)
+SearchBar.Icon.ZIndex = SearchBar.ZIndex + 1
+
+SearchBar.Clear.Visible = true
+SearchBar.Clear.AnchorPoint = Vector2.new(1, 0.5)
+SearchBar.Clear.Position = UDim2.new(0.98, 0, 0.5, 0)
+SearchBar.Clear.Size = UDim2.new(21 / 480, 0, 21 / 40, 0)
+SearchBar.Clear.ZIndex = SearchBar.ZIndex + 1
+
+SearchBar.Filter.Visible = false
+SearchBar.Filter.ZIndex = SearchBar.ZIndex + 1
+
+SearchInput.Parent = SearchBar
+SearchInput.AnchorPoint = Vector2.new(0, 0.5)
+SearchInput.Position = UDim2.new(0.095, 0, 0.5, 0)
+SearchInput.Size = UDim2.new(0.98 - 21 / 480 - 0.095, 0, 1, 0)
+SearchInput.TextXAlignment = Enum.TextXAlignment.Left
+SearchInput.TextScaled = false
+SearchInput.TextSize = 15
+SearchInput.TextWrapped = false
+SearchInput.Visible = false
+SearchInput.ZIndex = SearchBar.ZIndex + 2
+
+SearchBar.CanvasGroup.Visible = false
+Filler.Visible = false
+Filler.Active = false
+Filler.Size = UDim2.new(0, 1, 0, 1)
+Filler.BackgroundTransparency = 1
 
 -- SectionTitle is the one element that spans the page edge to edge while every other
 -- root is inset 5px a side, so without the extra inset a heading starts left of the rows
@@ -949,7 +1082,7 @@ local DividerTransparency = 0.82
 
 TabList.ScrollBarThickness = 5
 
-Rayfield.DisplayOrder = 100
+Rayfield.DisplayOrder = BackgroundTest and 0 or 100
 LoadingFrame.Version.Text = Release
 
 Rayfield.Enabled = true
@@ -973,7 +1106,7 @@ Topbar.Search.ImageColor3 = SelectedTheme.SearchIcon
 Topbar.Hide.ImageColor3 = SelectedTheme.XIcon
 
 
-function ChangeTheme(ThemeName)
+local function ChangeTheme(ThemeName)
 	SelectedTheme = RayfieldLibrary.Theme[ThemeName]
 	for _, obj in ipairs(Rayfield:GetDescendants()) do
 		if obj.ClassName == "TextLabel" or obj.ClassName == "TextBox" or obj.ClassName == "TextButton" then
@@ -991,6 +1124,18 @@ function ChangeTheme(ThemeName)
 
 	Rayfield.Main.Topbar.Hide.ImageColor3 = SelectedTheme.XIcon
 	Rayfield.Main.Topbar.Search.ImageColor3 = SelectedTheme.SearchIcon
+	SearchBar.BackgroundColor3 = SelectedTheme.ElementBackground
+	SearchBar.UIStroke.Color = SelectedTheme.ElementStroke
+	SearchInput.PlaceholderColor3 = SelectedTheme.PlaceholderColor
+	if SearchInputFrame then
+		SearchInputFrame.BackgroundColor3 = SelectedTheme.InputBackground
+		if SearchInputFrame:FindFirstChild("UIStroke") then
+			SearchInputFrame.UIStroke.Color = SelectedTheme.InputStroke
+		end
+	end
+	if SearchTitle then
+		SearchTitle.TextColor3 = SelectedTheme.TextColor
+	end
 
 	for _, TabPage in ipairs(Elements:GetChildren()) do
 		for _, Element in ipairs(TabPage:GetChildren()) do
@@ -1005,7 +1150,7 @@ function ChangeTheme(ThemeName)
 	end
 
 end
-function ColorDragger()
+local function ColorDragger()
 
 end
 local function AddDraggingFunctionality(DragPoint, Main)
@@ -1322,7 +1467,7 @@ local neon = (function()  --Open sourced neon module
 
 
 end)()
-function ClosePrompt()
+local function ClosePrompt()
 	local PromptUI = Prompt.Prompt
 	clicked = false
 	TweenService:Create(Prompt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
@@ -1489,7 +1634,7 @@ function RayfieldLibrary:Notify(NotificationSettings)
 	end)
 end
 
-function Hide()
+local function Hide()
 	Debounce = true
 	RayfieldLibrary:Notify({Title = "Interface Hidden", Content = "Tap Tab or the floating icon to bring the interface back.", Duration = 7})
 	--TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 470, 0, 400)}):Play()
@@ -1549,7 +1694,7 @@ function Hide()
 	Debounce = false
 end
 
-function Unhide()
+local function Unhide()
 	Debounce = true
 	--Main.Position = UDim2.new(0.5, 0, 0.5, 0)
 	Main.Visible = true
@@ -1623,65 +1768,393 @@ function Unhide()
 	Debounce = false
 end
 
-function CloseSearch()
+local searchNavigate
+local searchArmed
+local CloseSearch, OpenSearch
+local SearchHitName = "SearchHit"
+local SearchDragPixels = 12
+local SearchScrollPixels = 6
+
+local SearchResults = Elements.Template:Clone()
+SearchResults.Name = "SearchResults"
+SearchResults.Visible = false
+SearchResults.ZIndex = Elements.ZIndex
+SearchResults.BackgroundTransparency = 1
+for _, Child in ipairs(SearchResults:GetChildren()) do
+	if Child:IsA("Frame") then
+		Child:Destroy()
+	end
+end
+SearchResults.Size = Elements.Size
+SearchResults.Position = Elements.Position
+SearchResults.AnchorPoint = Elements.AnchorPoint
+SearchResults.Parent = Main
+
+-- Searchbar sits on the first row of the element column. A pad the same height
+-- keeps result rows from starting underneath it (and under its Global ZIndex).
+local SearchPad = Instance.new("Frame")
+SearchPad.Name = "SearchPad"
+SearchPad.BackgroundTransparency = 1
+SearchPad.BorderSizePixel = 0
+SearchPad.Size = UDim2.new(1, -10, 0, 0)
+SearchPad.LayoutOrder = -1
+SearchPad.ZIndex = SearchResults.ZIndex
+SearchPad.Parent = SearchResults
+local SearchPadAspect = Elements.Template.Button.UIAspectRatioConstraint:Clone()
+SearchPadAspect.Parent = SearchPad
+SearchPadAspect.AspectRatio = ElementRowAspect
+
+local function clearSearchResults()
+	for _, Child in ipairs(SearchResults:GetChildren()) do
+		if Child:IsA("Frame") and Child ~= SearchPad then
+			local hit = Child:FindFirstChild(SearchHitName)
+			if hit then
+				hit:Destroy()
+			end
+			Child:Destroy()
+		end
+	end
+	SearchResults.Visible = false
+end
+
+local function isSearchableElement(element)
+	return element:IsA("Frame")
+		and element.Name ~= "Placeholder"
+		and element.Name ~= "SectionSpacing"
+		and element.Name ~= "SectionTitle"
+		and not element:GetAttribute("SectionTitle")
+end
+
+local function forEachPageElement(fn)
+	for _, page in ipairs(Elements:GetChildren()) do
+		if page.Name ~= "Template" and page:IsA("ScrollingFrame") then
+			for _, element in ipairs(page:GetChildren()) do
+				fn(page, element)
+			end
+		end
+	end
+end
+
+local function silenceInteract(element)
+	for _, child in ipairs(element:GetDescendants()) do
+		if child:IsA("GuiButton") or child:IsA("TextBox") then
+			if child:GetAttribute("SearchPrevActive") == nil then
+				child:SetAttribute("SearchPrevActive", child.Active)
+			end
+			child.Active = false
+		end
+	end
+end
+
+local function restoreInteract(element)
+	for _, child in ipairs(element:GetDescendants()) do
+		if child:IsA("GuiButton") or child:IsA("TextBox") then
+			local prev = child:GetAttribute("SearchPrevActive")
+			if prev ~= nil then
+				child.Active = prev
+				child:SetAttribute("SearchPrevActive", nil)
+			end
+		end
+	end
+end
+
+local function searchReleaseIsClick(startPos, endPos, startCanvas, endCanvas)
+	return (endPos - startPos).Magnitude <= SearchDragPixels
+		and (endCanvas - startCanvas).Magnitude <= SearchScrollPixels
+end
+
+local function clearSearchHit(element)
+	local hit = element:FindFirstChild(SearchHitName)
+	if searchArmed and searchArmed.element == element then
+		searchArmed = nil
+	end
+	if hit then
+		hit:Destroy()
+	end
+	restoreInteract(element)
+end
+
+local function restoreSearchVisibility()
+	searchArmed = nil
+	clearSearchResults()
+	Elements.Visible = true
+	forEachPageElement(function(_, element)
+		if element:IsA("Frame") and element.Name ~= "Placeholder" and element.Name ~= "SectionSpacing" then
+			element.Visible = true
+		end
+		if isSearchableElement(element) then
+			clearSearchHit(element)
+		end
+	end)
+end
+
+local function goToSearchElement(page, element)
+	if not page or not element or not element.Parent then
+		return
+	end
+	local tabName = element:GetAttribute("SearchTab") or page.Name
+	local elementName = element:GetAttribute("SearchElement") or element.Name
+	SearchHided = true
+	restoreSearchVisibility()
+	task.spawn(CloseSearch)
+	task.spawn(function()
+		task.wait()
+		if searchNavigate then
+			searchNavigate(tabName, elementName)
+		end
+	end)
+end
+
+local function setSearchHit(page, element, enabled)
+	local hit = element:FindFirstChild(SearchHitName)
+	if not enabled then
+		clearSearchHit(element)
+		return
+	end
+	if hit then
+		return
+	end
+	silenceInteract(element)
+	hit = Instance.new("TextButton")
+	hit.Name = SearchHitName
+	hit.BackgroundTransparency = 1
+	hit.Text = ""
+	hit.AutoButtonColor = false
+	hit.Selectable = false
+	hit.BorderSizePixel = 0
+	hit.Size = UDim2.fromScale(1, 1)
+	hit.Position = UDim2.fromScale(0, 0)
+	hit.ZIndex = element.ZIndex + 1
+	hit.Parent = element
+	hit.InputBegan:Connect(function(input)
+		if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
+			return
+		end
+		searchArmed = {
+			page = page,
+			element = element,
+			pos = Vector2.new(input.Position.X, input.Position.Y),
+			canvas = page.CanvasPosition,
+		}
+	end)
+end
+
+local function applySearchFilter()
+	local InputText = string.upper(SearchInput.Text)
+	local searching = not SearchHided and InputText ~= ""
+	clearSearchResults()
+	if not searching then
+		Elements.Visible = true
+		forEachPageElement(function(_, element)
+			if element:IsA("Frame") and element.Name ~= "Placeholder" and element.Name ~= "SectionSpacing" then
+				element.Visible = true
+			end
+			if isSearchableElement(element) then
+				clearSearchHit(element)
+			end
+		end)
+		return
+	end
+	Elements.Visible = false
+	SearchResults.Visible = true
+	SearchResults.ZIndex = Elements.ZIndex
+	SearchResults.BackgroundTransparency = 1
+	forEachPageElement(function(page, element)
+		if not isSearchableElement(element) then
+			return
+		end
+		if custom_match(string.upper(element.Name), InputText) == nil then
+			return
+		end
+		local row = Elements.Template.Button:Clone()
+		row.Name = page.Name.." :: "..element.Name
+		row.Title.Text = element.Name
+		row:SetAttribute("SearchTab", page.Name)
+		row:SetAttribute("SearchElement", element.Name)
+		row.Visible = true
+		row.BackgroundTransparency = 0
+		row.UIStroke.Transparency = 0
+		row.Title.TextTransparency = 0
+		row.ZIndex = Elements.ZIndex + 1
+		row.Title.ZIndex = row.ZIndex
+		row.BackgroundColor3 = SelectedTheme.ElementBackground
+		row.UIStroke.Color = SelectedTheme.ElementStroke
+		local Interact = row:FindFirstChild("Interact")
+		if Interact then
+			Interact:Destroy()
+		end
+		row.Parent = SearchResults
+		setSearchHit(SearchResults, row, true)
+	end)
+end
+
+local function finishSearchPress(endPos, endCanvas)
+	local armed = searchArmed
+	searchArmed = nil
+	if not armed or SearchHided or not armed.element or not armed.element.Parent then
+		return false
+	end
+	if not searchReleaseIsClick(armed.pos, endPos, armed.canvas, endCanvas or armed.page.CanvasPosition) then
+		return false
+	end
+	goToSearchElement(armed.page, armed.element)
+	return true
+end
+
+CloseSearch = function()
+	SearchHided = true
+	restoreSearchVisibility()
 	Debounce = true
-	TweenService:Create(SearchBar, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundTransparency = 1,Size = UDim2.new(0, 460,0, 35)}):Play()
+	TweenService:Create(SearchBar, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
 	TweenService:Create(SearchBar.Icon, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
 	TweenService:Create(SearchBar.Clear, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
 	TweenService:Create(SearchBar.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
 	TweenService:Create(SearchBar.Filter, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
-	TweenService:Create(SearchBar.Input, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
+	TweenService:Create(SearchInput, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
+	if SearchTitle then
+		TweenService:Create(SearchTitle, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
+	end
+	if SearchInputFrame then
+		TweenService:Create(SearchInputFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
+	end
 	delay(.3,function()
-		SearchBar.Input.Visible = false
+		SearchInput.Visible = false
 	end)
 	wait(0.5)
 	SearchBar.Visible = false
 	Debounce = false
 end
 
-function OpenSearch()
+OpenSearch = function()
+	if SearchInput.Text ~= "" then
+		SearchInput.Text = ""
+	end
+	SearchHided = false
 	Debounce = true
 	SearchBar.Visible = true
-	SearchBar.Input.Visible = true
-	TweenService:Create(SearchBar, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundTransparency = 0,Size = UDim2.new(0, 480,0, 40)}):Play()
+	SearchInput.Visible = true
+	SearchBar.BackgroundColor3 = SelectedTheme.ElementBackground
+	SearchBar.UIStroke.Color = SelectedTheme.ElementStroke
+	SearchInput.PlaceholderColor3 = SelectedTheme.PlaceholderColor
+	if SearchInputFrame then
+		SearchInputFrame.BackgroundColor3 = SelectedTheme.InputBackground
+		SearchInputFrame.BackgroundTransparency = 0
+		if SearchInputFrame:FindFirstChild("UIStroke") then
+			SearchInputFrame.UIStroke.Color = SelectedTheme.InputStroke
+		end
+	end
+	TweenService:Create(SearchBar, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 	TweenService:Create(SearchBar.Icon, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {ImageTransparency = 0.5}):Play()
 	TweenService:Create(SearchBar.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 	TweenService:Create(SearchBar.Clear, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {ImageTransparency = .8}):Play()
 	TweenService:Create(SearchBar.Filter, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {ImageTransparency = .8}):Play()
-	TweenService:Create(SearchBar.Input, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
+	TweenService:Create(SearchInput, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
+	if SearchTitle then
+		SearchTitle.TextColor3 = SelectedTheme.TextColor
+		TweenService:Create(SearchTitle, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
+	end
 	wait(0.5)
 	Debounce = false
 end
-SearchBar.Input:GetPropertyChangedSignal('Text'):Connect(function()
-	local InputText=string.upper(SearchBar.Input.Text)
-	for _,page in ipairs(Elements:GetChildren()) do
-		if page ~= 'Template' then
-			for _,Element in pairs(page:GetChildren())do
-				if Element:IsA("Frame") and Element.Name ~= 'Placeholder' and Element.Name ~= 'SectionSpacing' and not Element:GetAttribute('SectionTitle') then
-					if InputText==""or custom_match(string.upper(Element.Name),InputText)~=nil then
-						Element.Visible=true
-					else
-						Element.Visible=false
-					end
+SearchInput:GetPropertyChangedSignal('Text'):Connect(applySearchFilter)
+UserInputService.InputEnded:Connect(function(input)
+	if not searchArmed then
+		return
+	end
+	if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
+		return
+	end
+	local page = searchArmed.page
+	finishSearchPress(Vector2.new(input.Position.X, input.Position.Y), page.CanvasPosition)
+end)
+
+if BackgroundTest then
+	_G.RayfieldSearchDebug = {
+		applyFilter = applySearchFilter,
+		goTo = goToSearchElement,
+		goToNamed = function(tabName, elementName)
+			local page = Elements:FindFirstChild(tabName)
+			local element = page and page:FindFirstChild(elementName)
+			if not page or not element then
+				return false
+			end
+			goToSearchElement(page, element)
+			return true
+		end,
+		isClick = searchReleaseIsClick,
+		restore = restoreSearchVisibility,
+		isHidden = function()
+			return SearchHided
+		end,
+		query = function()
+			return SearchInput.Text 
+		end,
+		open = function()
+			OpenSearch()
+		end,
+		close = CloseSearch,
+		setSearching = function(on)
+			SearchHided = not on
+		end,
+		arm = function(tabName, elementName, pos, canvas)
+			local rowName = tabName.." :: "..elementName
+			local element = SearchResults:FindFirstChild(rowName)
+			local page = SearchResults
+			if not element then
+				page = Elements:FindFirstChild(tabName)
+				element = page and page:FindFirstChild(elementName)
+			end
+			if not page or not element then
+				return false
+			end
+			searchArmed = {
+				page = page,
+				element = element,
+				pos = pos or Vector2.zero,
+				canvas = canvas or page.CanvasPosition,
+			}
+			return true
+		end,
+		release = function(endPos, endCanvas)
+			return finishSearchPress(endPos or Vector2.zero, endCanvas)
+		end,
+		results = function()
+			local names = {}
+			for _, child in ipairs(SearchResults:GetChildren()) do
+				if child:IsA("Frame") then
+					table.insert(names, child.Name)
 				end
 			end
-		end
-	end
-end)
+			local first = SearchResults:FindFirstChildOfClass("Frame")
+			local interactActive = nil
+			if first then
+				local interact = first:FindFirstChild("Interact")
+				interactActive = interact and interact.Active
+			end
+			return {
+				visible = SearchResults.Visible,
+				n = #names,
+				names = names,
+				elementsVisible = Elements.Visible,
+				query = SearchInput.Text,
+				hidden = SearchHided,
+				interactActive = interactActive,
+				hasHit = first ~= nil and first:FindFirstChild(SearchHitName) ~= nil,
+			}
+		end,
+	}
+end
 SearchBar.Clear.MouseButton1Down:Connect(function()
-	Filler.Position = UDim2.new(0.957,0,.5,0)
-	Filler.Size = UDim2.new(0,1,0,1)
-	Filler.BackgroundTransparency = .9
-
-	local goal = {}
-	goal.Size = UDim2.new(0,1000,0,500)
-	goal.BackgroundTransparency = 1
-
-	TweenService:Create(Filler, TweenInfo.new(1,Enum.EasingStyle.Sine,Enum.EasingDirection.Out), goal):Play()
-	SearchBar.Input.Text = ''
+	if SearchInput.Text ~= "" then
+		SearchInput.Text = ''
+		return
+	end
+	if Debounce or Minimised then return end
+	SearchHided = true
+	CloseSearch()
 end)
 
-function Maximise()
+local function Maximise()
 	Debounce = true
 	Topbar.ChangeSize.Image = "rbxassetid://"..10137941941
 
@@ -1747,7 +2220,7 @@ function Maximise()
 	Debounce = false
 end
 
-function Minimise()
+local function Minimise()
 	Debounce = true
 	Topbar.ChangeSize.Image = "rbxassetid://"..11036884234
 
@@ -2107,6 +2580,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	Notifications.Template.Visible = false
 	Notifications.Visible = true
 	Rayfield.Enabled = true
+	if BackgroundTest then
+		Main.Position = UDim2.fromScale(3, 0)
+	end
 	Main.UIStroke.Transparency = 1
 	if not fastLoad then
 		wait(0.45)
@@ -2247,6 +2723,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 				task.wait(0.35)
 			end
 		end)
+	end
+	searchNavigate = function(TabName, ElementName)
+		Window:SelectTab(TabName, ElementName)
 	end
 
     local addedUiGradientStrokes = {}
@@ -4158,6 +4637,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	Topbar.Theme.ImageTransparency = 1
 	Topbar.ChangeSize.ImageTransparency = 1
 	Topbar.Hide.ImageTransparency = 1
+	Topbar.Search.ImageTransparency = 1
 
 	-- graident smooth
 
@@ -4174,6 +4654,9 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	TweenService:Create(gradient.Parent, TweenInfo.new(4, Enum.EasingStyle.Cubic), {Thickness = 3}):Play()
 	TweenService:Create(numval, TweenInfo.new(6, Enum.EasingStyle.Quint), {Value = 1}):Play()
 	task.delay(6, function()
+		if not gradient.Parent then
+			return
+		end
 		gradient.Parent.Transparency = 1
 		gradient.Enabled = false
 		-- What the border settles to once the intro sweep is done. Mixing the theme's glow
@@ -4200,9 +4683,8 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 	TweenService:Create(Topbar.Divider, IntroStep(1, 0.4), {Size = UDim2.new(1, 0, 0, 1), BackgroundColor3 = SelectedTheme.Divider, BackgroundTransparency = DividerTransparency}):Play()
 	TweenService:Create(TabListBack.Divider, IntroStep(1.6, 0.5), {Size = UDim2.new(0, 1, 1, 0), BackgroundColor3 = SelectedTheme.Divider, BackgroundTransparency = DividerTransparency}):Play()
 	TweenService:Create(TabList.Placeholder.Title, IntroStep(0.35, 0.5), {TextTransparency = 0}):Play()
-	TweenService:Create(Topbar.Theme, IntroStep(0.6, 0.5), {ImageTransparency = 0.8}):Play()
-	TweenService:Create(Topbar.ChangeSize, IntroStep(0.6, 0.58), {ImageTransparency = 0.8}):Play()
 	TweenService:Create(Topbar.Hide, IntroStep(0.6, 0.66), {ImageTransparency = 0.1}):Play()
+	TweenService:Create(Topbar.Search, IntroStep(0.6, 0.58), {ImageTransparency = 0.8}):Play()
 
 	-- Held until the cascade is done so the hub's own load does not stutter the opening.
 	if not fastLoad then
@@ -4293,6 +4775,7 @@ end
 
 function RayfieldLibrary:Destroy()
 	Rayfield:Destroy()
+	restorePreservedInterfaces()
 end
 
 Topbar.ChangeSize.MouseButton1Click:Connect(function()
@@ -4341,7 +4824,7 @@ table.insert(RayfieldConnections, UserInputService.InputBegan:Connect(function(i
 			Hidden = false
 			Unhide()
 		else
-			if not SearchHided then spawn(CloseSearch) end
+			if not SearchHided then SearchHided = true spawn(CloseSearch) end
 			Hidden = true
 			Hide()
 		end
@@ -4545,7 +5028,7 @@ local TopbarPressShrink = 0.94
 local XIconHover = Color3.fromRGB(228, 88, 76)
 
 for _, TopbarButton in ipairs(Topbar:GetChildren()) do
-	if TopbarButton.ClassName == "ImageButton" then
+	if TopbarButton.ClassName == "ImageButton" and TopbarButton.Visible then
 		local Rest = TopbarButtonRest[TopbarButton]
 		local IsHide = TopbarButton == Topbar.Hide
 		local Info = TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
