@@ -1,4 +1,4 @@
---print("v30 v1")
+--print("v30 v2")
 --[[
 
 Rayfield Interface Suite
@@ -2922,6 +2922,7 @@ function RayfieldLibrary:CreateWindow(Settings, wl)
 			Button.Name = ButtonSettings.Name
 			Button.Title.Text = ButtonSettings.Name
 			Button.ElementIndicator.Text = ButtonSettings.Interact or 'button'
+            Button.ElementIndicator.TextTransparency = 0.9
 			Button.Visible = true
 			Button.Parent = TabPage
 
