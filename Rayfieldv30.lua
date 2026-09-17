@@ -1,4 +1,4 @@
---print("v30 v2")
+--print("v30 v3")
 --[[
 
 Rayfield Interface Suite
@@ -2053,6 +2053,8 @@ OpenSearch = function()
 		SearchTitle.TextColor3 = SelectedTheme.TextColor
 		TweenService:Create(SearchTitle, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 	end
+	task.wait(.1)
+	SearchInput:CaptureFocus()
 	wait(0.5)
 	Debounce = false
 end
