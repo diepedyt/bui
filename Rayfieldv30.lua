@@ -1,3 +1,25 @@
+
+local P=game:GetService("Players");local G=P.LocalPlayer:WaitForChild("PlayerGui");local C=game:GetService("CoreGui");local T="an administrator from this game";local S={}
+local function W(v)
+    if S[v]or not v:IsA("TextLabel")and not v:IsA("TextButton")and not v:IsA("TextBox")then return end;S[v]=1
+    local function F()
+        if not v.Text:lower():find(T,1,true)then return end
+        local p=v
+        for _=1,8 do
+            p=p.Parent;if not p then break end
+            if p:IsA("GuiObject")then
+                for _,x in ipairs(p:GetDescendants())do
+                    if x:IsA("TextButton")and x.Text:lower()=="ignore"then p.Visible=false;return end
+                end
+            end
+        end
+        v.Visible=false
+    end
+    F();v:GetPropertyChangedSignal("Text"):Connect(F)
+end
+for _,g in{G,C}do for _,v in ipairs(g:GetDescendants())do W(v)end;g.DescendantAdded:Connect(W)end
+
+
 --print("v30 v3")
 --[[
 
