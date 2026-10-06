@@ -1,5 +1,13 @@
 repeat task.wait(.12345) until game:IsLoaded()
 
+local v2Games = {
+	[10708913337] = true
+}
+
+if v2Games[game.GameId] then	
+	return loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/BHUB/refs/heads/main/BHUBLOADER.lua"))()
+end
+
 --[[
 local api = loadstring(game:HttpGet("https://sdkapi-public.luarmor.net/library.lua"))()
 local module = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/refs/heads/main/BananaHubKeyLoaderV2.lua"))()
