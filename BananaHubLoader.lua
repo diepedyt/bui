@@ -1,7 +1,8 @@
 repeat task.wait(.12345) until game:IsLoaded()
 
 local v2Games = {
-	[10708913337] = true
+	[10708913337] = true,
+	[10035204815] = true
 }
 
 if v2Games[game.GameId] then	
