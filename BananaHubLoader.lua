@@ -7,7 +7,7 @@ repeat task.wait(.12345) until game:IsLoaded()
 --}
 
 --if v2Games[game.GameId] then	
-	return loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/BHUB/refs/heads/main/BHUB_PIPEV2.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/BHUB/refs/heads/main/BHUB_PIPEV2.lua"))()
 	--return loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/BHUB/refs/heads/main/BHUBLOADER.lua"))()
 --end
 
