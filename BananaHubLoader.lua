@@ -1,15 +1,15 @@
 repeat task.wait(.12345) until game:IsLoaded()
 
-local v2Games = {
-	[10708913337] = true,
-	[10035204815] = true,
-	[10502841145] = true
-}
+--local v2Games = {
+	--[10708913337] = true,
+	--[10035204815] = true,
+	--[10502841145] = true
+--}
 
-if v2Games[game.GameId] then	
+--if v2Games[game.GameId] then	
 	return loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/BHUB/refs/heads/main/BHUB_PIPEV2.lua"))()
 	--return loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/BHUB/refs/heads/main/BHUBLOADER.lua"))()
-end
+--end
 
 --[[
 local api = loadstring(game:HttpGet("https://sdkapi-public.luarmor.net/library.lua"))()
