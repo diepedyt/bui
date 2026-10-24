@@ -38,7 +38,7 @@ loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc24
 ]]
 
 
-
+--[[
 local simpleLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/refs/heads/main/SimpleUILibV2.lua"))()
 simpleLib.CreateBHUBPAID()
 
@@ -62,6 +62,6 @@ task.spawn(function()
         task.wait(600)
     end
 end)
-
+]]
 
 --loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/180154ec7abc246752b60603a7adc12d.lua"))()
